@@ -699,7 +699,9 @@ export default function App() {
   const publicFamilyUrl = `https://evaculacion-clu-bs.vercel.app/?token=${jugadorSeleccionado?.tokenPublico || 'sec_8f9a2b1c4e7d'}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(publicFamilyUrl)}`;
 
-  // VISTA PÚBLICA FAMILIAS (QR)
+  // ==========================================
+  // VISTA PÚBLICA PARA FAMILIAS (QR)
+  // ==========================================
   if (publicToken) {
     let jugadorPublico: Player | undefined;
     let equipoPublico: Team | undefined;
@@ -818,90 +820,190 @@ export default function App() {
     );
   }
 
-  // VISTA: LOGIN
+  // ==========================================
+  // VISTA: PORTADA / LOGIN PROFESIONAL
+  // ==========================================
   if (!sessionUser) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full space-y-6">
-          <div className="text-center space-y-2">
-            <div className="w-12 h-12 bg-emerald-600 rounded-xl mx-auto flex items-center justify-center text-white font-bold text-xl shadow-md">
-              ⚡
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans relative overflow-hidden">
+        {/* Luces ambientales de fondo */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl relative z-10">
+          
+          {/* Columna Izquierda: Branding, Metodología y Autoridad */}
+          <div className="lg:col-span-7 p-8 sm:p-12 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950">
+            <div>
+              <div className="inline-flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-emerald-400 text-xs font-semibold tracking-wide uppercase mb-6">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Gestión Metodológica de Cantera</span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight mb-4">
+                El estándar digital en evaluación técnica y seguimiento deportivo.
+              </h1>
+              
+              <p className="text-slate-400 text-sm leading-relaxed mb-8">
+                Plataforma unificada para Directores Técnicos, Cuerpos Técnicos y Familias. Diseñada para profesionalizar canteras, automatizar asistencias y emitir informes con rigor formativo.
+              </p>
+
+              {/* Módulos Destacados */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl">
+                  <div className="text-emerald-400 font-bold mb-1 flex items-center space-x-1.5">
+                    <span>📊</span>
+                    <span>Rúbricas FEB / ACB</span>
+                  </div>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">
+                    Evaluación en 4 ejes con gráfico de radar de rendimiento motriz, técnico y táctico.
+                  </p>
+                </div>
+
+                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl">
+                  <div className="text-blue-400 font-bold mb-1 flex items-center space-x-1.5">
+                    <span>📋</span>
+                    <span>Asistencia en Pista</span>
+                  </div>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">
+                    Pase de lista en 10 segundos con cálculo de porcentaje real y exportación a Excel.
+                  </p>
+                </div>
+
+                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl">
+                  <div className="text-purple-400 font-bold mb-1 flex items-center space-x-1.5">
+                    <span>📱</span>
+                    <span>Acceso QR para Familias</span>
+                  </div>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">
+                    Consulta en tiempo real para padres con token encriptado y seguro según RGPD.
+                  </p>
+                </div>
+
+                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl">
+                  <div className="text-amber-400 font-bold mb-1 flex items-center space-x-1.5">
+                    <span>🖨️</span>
+                    <span>Dossier Oficial A4</span>
+                  </div>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">
+                    Informes calibrados al milímetro para impresión en una sola hoja con el escudo del club.
+                  </p>
+                </div>
+              </div>
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Portal de Evaluación Deportiva</h2>
-            <p className="text-xs text-slate-500">Plataforma Multiclub • Gestión Técnica y Metodológica</p>
+
+            <div className="pt-8 mt-8 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
+              <span>Tecnología Multi-Club &bull; Cloud 2026</span>
+              <span className="text-emerald-500 font-medium flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Servidores Activos
+              </span>
+            </div>
           </div>
 
-          {authError && (
-            <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs p-3 rounded-lg">
-              {authError}
-            </div>
-          )}
+          {/* Columna Derecha: Tarjeta de Acceso y Demostración */}
+          <div className="lg:col-span-5 p-8 sm:p-10 flex flex-col justify-center bg-slate-900/40">
+            <div className="max-w-sm mx-auto w-full space-y-6">
+              
+              <div>
+                <h2 className="text-xl font-bold text-white tracking-tight">Acceso a la Plataforma</h2>
+                <p className="text-xs text-slate-400 mt-1">Introduce tus credenciales autorizadas</p>
+              </div>
 
-          <form onSubmit={handleLogin} className="space-y-4 text-xs">
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Correo Electrónico</label>
-              <input
-                type="email"
-                required
-                placeholder="ejemplo@club.com"
-                value={authEmail}
-                onChange={(e) => setAuthEmail(e.target.value)}
-                className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Contraseña</label>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={authPass}
-                onChange={(e) => setAuthPass(e.target.value)}
-                className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-lg shadow transition"
-            >
-              Iniciar Sesión
-            </button>
-          </form>
+              {authError && (
+                <div className="bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs p-3 rounded-xl">
+                  {authError}
+                </div>
+              )}
 
-          <div className="pt-4 border-t border-slate-200 space-y-2">
-            <p className="text-[11px] font-bold uppercase text-slate-400 text-center tracking-wider">Demostración Rápida (1 Clic)</p>
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('SUPER_ADMIN')}
-                className="w-full bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 text-xs py-2 rounded-lg font-semibold flex items-center justify-between px-3 transition"
-              >
-                <span>👑 Super Administrador (Tú)</span>
-                <span className="text-[10px] text-purple-600 font-normal">Crear clubes y accesos →</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('DIRECTOR')}
-                className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-xs py-2 rounded-lg font-semibold flex items-center justify-between px-3 transition"
-              >
-                <span>🏢 Director Técnico (Doguen)</span>
-                <span className="text-[10px] text-emerald-600 font-normal">Equipos y entrenadores →</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('ENTRENADOR')}
-                className="w-full bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-xs py-2 rounded-lg font-semibold flex items-center justify-between px-3 transition"
-              >
-                <span>📋 Entrenador (Carlos Santana)</span>
-                <span className="text-[10px] text-blue-600 font-normal">Pase de lista y notas →</span>
-              </button>
+              <form onSubmit={handleLogin} className="space-y-4 text-xs">
+                <div>
+                  <label className="block text-slate-300 font-medium mb-1.5">Correo Corporativo</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="direccion@club.com"
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-medium mb-1.5">Contraseña</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="••••••••"
+                    value={authPass}
+                    onChange={(e) => setAuthPass(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl shadow-lg shadow-emerald-900/30 transition text-xs"
+                >
+                  Entrar al Portal
+                </button>
+              </form>
+
+              {/* Acceso Rápido para Demostraciones a Clubes */}
+              <div className="pt-6 border-t border-slate-800 space-y-2.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">
+                  Demostración en Directo (1 Clic)
+                </p>
+
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => handleDemoLogin('SUPER_ADMIN')}
+                    className="w-full bg-purple-950/40 hover:bg-purple-900/50 border border-purple-800/40 text-purple-200 text-xs py-2.5 px-3 rounded-xl font-medium flex items-center justify-between transition group"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>👑</span>
+                      <span className="font-semibold text-purple-100">Super Administrador</span>
+                    </span>
+                    <span className="text-[10px] text-purple-400 group-hover:text-purple-300">Gestión global &rarr;</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDemoLogin('DIRECTOR')}
+                    className="w-full bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-800/40 text-emerald-200 text-xs py-2.5 px-3 rounded-xl font-medium flex items-center justify-between transition group"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>🏢</span>
+                      <span className="font-semibold text-emerald-100">Director Deportivo</span>
+                    </span>
+                    <span className="text-[10px] text-emerald-400 group-hover:text-emerald-300">Club Doguen &rarr;</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDemoLogin('ENTRENADOR')}
+                    className="w-full bg-blue-950/40 hover:bg-blue-900/50 border border-blue-800/40 text-blue-200 text-xs py-2.5 px-3 rounded-xl font-medium flex items-center justify-between transition group"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>📋</span>
+                      <span className="font-semibold text-blue-100">Entrenador en Pista</span>
+                    </span>
+                    <span className="text-[10px] text-blue-400 group-hover:text-blue-300">Carlos Santana &rarr;</span>
+                  </button>
+                </div>
+              </div>
+
             </div>
           </div>
+
         </div>
       </div>
     );
   }
 
+  // ==========================================
+  // VISTA: APLICACIÓN PRINCIPAL
+  // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0 print:min-h-0">
       <style>{`
