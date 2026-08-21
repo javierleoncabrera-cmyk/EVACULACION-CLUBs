@@ -101,20 +101,21 @@ interface RubricCategory {
   items: string[];
 }
 
+// Escala con colores diferenciados y semánticos
 const NIVELES_JUGADORES: LevelOption[] = [
-  { key: 'EXCELENTE', label: 'Excelente', desc: 'Dominio sobresaliente y constante.', color: '#16A34A', weight: 4 },
-  { key: 'CONSOLIDADO', label: 'Consolidado', desc: 'Adquirido y ejecutado con autonomía.', color: '#22C55E', weight: 3 },
-  { key: 'EN_DESARROLLO', label: 'En desarrollo', desc: 'En proceso de aprendizaje motriz.', color: '#F59E0B', weight: 2 },
-  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Dificultad evidente en la ejecución.', color: '#EF4444', weight: 1 },
-  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'Sin datos suficientes de valoración.', color: '#CBD5E1', weight: 0 },
+  { key: 'EXCELENTE', label: 'Excelente', desc: 'Dominio sobresaliente y constante de la habilidad.', color: '#059669', weight: 4 },      // Esmeralda oscuro
+  { key: 'CONSOLIDADO', label: 'Consolidado', desc: 'Adquirido y ejecutado de forma autónoma en situaciones reales.', color: '#0EA5E9', weight: 3 }, // Azul cielo
+  { key: 'EN_DESARROLLO', label: 'En desarrollo', desc: 'En proceso de aprendizaje; requiere práctica guiada.', color: '#F59E0B', weight: 2 }, // Ámbar / Naranja
+  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Dificultad evidente; requiere intervención directa.', color: '#EF4444', weight: 1 }, // Rojo
+  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'Sin datos suficientes de valoración en este periodo.', color: '#94A3B8', weight: 0 }, // Gris pizarra
 ];
 
 const NIVELES_ENTRENADORES: LevelOption[] = [
-  { key: 'EXCELENTE', label: 'Excelente', desc: 'Metodología sobresaliente y liderazgo positivo.', color: '#16A34A', weight: 4 },
-  { key: 'BUENO', label: 'Bueno', desc: 'Cumple con los estándares formativos del club.', color: '#22C55E', weight: 3 },
-  { key: 'MEJORABLE', label: 'Mejorable', desc: 'Aspectos técnicos a optimizar con supervisión.', color: '#F59E0B', weight: 2 },
-  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Requiere pautas metodológicas directas.', color: '#EF4444', weight: 1 },
-  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado en este ciclo.', color: '#CBD5E1', weight: 0 },
+  { key: 'EXCELENTE', label: 'Excelente', desc: 'Metodología sobresaliente y liderazgo muy positivo.', color: '#059669', weight: 4 },
+  { key: 'BUENO', label: 'Bueno', desc: 'Cumple con los estándares formativos establecidos por el club.', color: '#0EA5E9', weight: 3 },
+  { key: 'MEJORABLE', label: 'Mejorable', desc: 'Aspectos metodológicos a optimizar con supervisión.', color: '#F59E0B', weight: 2 },
+  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Requiere pautas directas de la dirección técnica.', color: '#EF4444', weight: 1 },
+  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado en este ciclo.', color: '#94A3B8', weight: 0 },
 ];
 
 const RUBRICA_JUGADORES_DEF: RubricCategory[] = [
@@ -515,7 +516,7 @@ export default function App() {
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(publicFamilyUrl)}`;
 
   const badgeStatus = (status: string) => (
-    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${status === 'COMPLETADA' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'}`}>
+    <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${status === 'COMPLETADA' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'}`}>
       {status}
     </span>
   );
@@ -573,7 +574,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA: PORTADA PROFESIONAL (LOGIN LIMPIO SIN SUBRAYADOS)
+  // VISTA: PORTADA PROFESIONAL (LOGIN)
   // ==========================================
   if (!sessionUser) {
     return (
@@ -585,12 +586,11 @@ export default function App() {
           
           <div className="lg:col-span-7 p-8 sm:p-12 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950">
             <div>
-              <div className="inline-flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-full text-emerald-400 text-xs font-semibold tracking-wide uppercase mb-6 shadow-sm">
+              <div className="inline-flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-full text-emerald-400 text-xs font-medium tracking-wide uppercase mb-6 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>Software Exclusivo para Canteras y Clubes</span>
               </div>
 
-              {/* Titular limpio sin subrayados, con la elegancia equilibrada */}
               <h1 className="text-3xl sm:text-4xl lg:text-[2.6rem] font-extrabold text-white tracking-tight leading-[1.2] mb-6">
                 El control absoluto de la <span className="text-emerald-400">EVOLUCIÓN</span> técnica y el <span className="text-emerald-400">RENDIMIENTO</span> deportivo.
               </h1>
@@ -601,7 +601,7 @@ export default function App() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl hover:border-emerald-500/50 transition">
-                  <div className="text-emerald-400 font-bold mb-1 flex items-center space-x-1.5 text-sm">
+                  <div className="text-emerald-400 font-semibold mb-1 flex items-center space-x-1.5 text-sm">
                     <span>🏀</span>
                     <span>Evaluación Técnica 360°</span>
                   </div>
@@ -611,7 +611,7 @@ export default function App() {
                 </div>
 
                 <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl hover:border-blue-500/50 transition">
-                  <div className="text-blue-400 font-bold mb-1 flex items-center space-x-1.5 text-sm">
+                  <div className="text-blue-400 font-semibold mb-1 flex items-center space-x-1.5 text-sm">
                     <span>📋</span>
                     <span>Control de Asistencia</span>
                   </div>
@@ -621,7 +621,7 @@ export default function App() {
                 </div>
 
                 <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl hover:border-purple-500/50 transition">
-                  <div className="text-purple-400 font-bold mb-1 flex items-center space-x-1.5 text-sm">
+                  <div className="text-purple-400 font-semibold mb-1 flex items-center space-x-1.5 text-sm">
                     <span>📱</span>
                     <span>Portal QR Familias</span>
                   </div>
@@ -631,7 +631,7 @@ export default function App() {
                 </div>
 
                 <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl hover:border-amber-500/50 transition">
-                  <div className="text-amber-400 font-bold mb-1 flex items-center space-x-1.5 text-sm">
+                  <div className="text-amber-400 font-semibold mb-1 flex items-center space-x-1.5 text-sm">
                     <span>🖨️</span>
                     <span>Dossier A4 Profesional</span>
                   </div>
@@ -726,7 +726,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL)
+  // VISTA INTERNA (APP PRINCIPAL - DISEÑO LIMPIO)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
@@ -817,8 +817,8 @@ export default function App() {
                   <button onClick={() => { setGenero('MASCULINO'); setPantalla(tipoEvaluacion === 'JUGADORES' ? 'EQUIPOS' : 'LISTA_ENTRENADORES'); }} className={`px-3 py-1 rounded ${genero === 'MASCULINO' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}>Masculino</button>
                 </div>
                 <div className="flex bg-slate-800 p-1 rounded-lg border text-xs">
-                  <button onClick={() => { setTipoEvaluacion('JUGADORES'); setPantalla('EQUIPOS'); }} className={`px-3 py-1 rounded ${tipoEvaluacion === 'JUGADORES' ? 'bg-slate-600 text-white font-bold' : 'text-slate-400'}`}>Jugador@s</button>
-                  <button onClick={() => { setTipoEvaluacion('ENTRENADORES'); setPantalla('LISTA_ENTRENADORES'); }} className={`px-3 py-1 rounded ${tipoEvaluacion === 'ENTRENADORES' ? 'bg-slate-600 text-white font-bold' : 'text-slate-400'}`}>Entrenador@s</button>
+                  <button onClick={() => { setTipoEvaluacion('JUGADORES'); setPantalla('EQUIPOS'); }} className={`px-3 py-1 rounded ${tipoEvaluacion === 'JUGADORES' ? 'bg-slate-600 text-white font-medium' : 'text-slate-400'}`}>Jugador@s</button>
+                  <button onClick={() => { setTipoEvaluacion('ENTRENADORES'); setPantalla('LISTA_ENTRENADORES'); }} className={`px-3 py-1 rounded ${tipoEvaluacion === 'ENTRENADORES' ? 'bg-slate-600 text-white font-medium' : 'text-slate-400'}`}>Entrenador@s</button>
                 </div>
               </>
             )}
@@ -838,7 +838,7 @@ export default function App() {
         {pantalla === 'MODAL_QR' && (
           <div className="bg-white rounded-2xl shadow-xl border p-6 max-w-sm mx-auto text-center space-y-4">
             <div>
-              <span className="text-[10px] uppercase font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border">Acceso Público Familias</span>
+              <span className="text-[10px] uppercase font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border">Acceso Público Familias</span>
               <h2 className="text-lg font-bold mt-2">{jugadorSeleccionado.nombre}</h2>
             </div>
             <div className="p-3 bg-white border rounded-xl inline-block mx-auto"><img src={qrCodeUrl} alt="QR" className="w-48 h-48 mx-auto" /></div>
@@ -854,19 +854,19 @@ export default function App() {
                 <button onClick={() => setPantalla('EQUIPOS')} className="text-xs text-blue-600 font-semibold mb-1 hover:underline">← Volver a equipos</button>
                 <h2 className="text-xl font-bold">Editor de Rúbricas Técnicas</h2>
               </div>
-              <div className="flex bg-slate-100 p-1 rounded-lg text-xs font-semibold">
+              <div className="flex bg-slate-100 p-1 rounded-lg text-xs font-medium">
                 <button onClick={() => setPestanaRubrica('JUGADORES')} className={`px-3 py-1.5 rounded ${pestanaRubrica === 'JUGADORES' ? 'bg-blue-600 text-white' : ''}`}>Jugador@s</button>
                 <button onClick={() => setPestanaRubrica('ENTRENADORES')} className={`px-3 py-1.5 rounded ${pestanaRubrica === 'ENTRENADORES' ? 'bg-blue-600 text-white' : ''}`}>Entrenadores</button>
               </div>
             </div>
             <form onSubmit={handleAddCategory} className="flex gap-2 text-xs">
               <input type="text" required placeholder="Nueva categoría..." value={nuevaCatNombre} onChange={(e) => setNuevaCatNombre(e.target.value)} className="flex-1 border rounded-lg p-2.5" />
-              <button type="submit" className="bg-blue-600 text-white font-semibold px-4 rounded-lg">+ Añadir</button>
+              <button type="submit" className="bg-blue-600 text-white font-medium px-4 rounded-lg">+ Añadir</button>
             </form>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {(pestanaRubrica === 'JUGADORES' ? rubricasJugadores : rubricasEntrenadores).map(cat => (
                 <div key={cat.id} className="bg-slate-50 border rounded-xl p-4 space-y-3">
-                  <h3 className="font-bold text-sm uppercase border-b pb-2">{cat.nombre}</h3>
+                  <h3 className="font-semibold text-sm border-b pb-2">{cat.nombre}</h3>
                   <div className="space-y-1">
                     {cat.items.map((item, idx) => <div key={idx} className="bg-white p-2 rounded border text-xs">{item}</div>)}
                   </div>
@@ -884,23 +884,23 @@ export default function App() {
           <div className="space-y-6">
             <div className="bg-purple-900 text-white p-6 rounded-2xl shadow flex justify-between items-center">
               <div>
-                <h2 className="text-2xl font-bold">Panel Maestro de Control</h2>
+                <h2 className="text-xl font-bold">Panel Maestro de Control</h2>
                 <p className="text-xs text-purple-200 mt-1">Gestión integral de accesos y clubes.</p>
               </div>
-              <button onClick={() => setPantalla('EQUIPOS')} className="bg-white text-purple-900 font-bold text-xs px-4 py-2 rounded-lg">Ver App como Club →</button>
+              <button onClick={() => setPantalla('EQUIPOS')} className="bg-white text-purple-900 font-semibold text-xs px-4 py-2 rounded-lg">Ver App como Club →</button>
             </div>
 
             <div className="bg-white p-6 rounded-xl shadow border">
-              <h3 className="font-bold text-sm mb-4">1. Dar de Alta Nuevo Club</h3>
+              <h3 className="font-semibold text-sm mb-4">1. Dar de Alta Nuevo Club</h3>
               <form onSubmit={handleCrearClub} className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                 <input type="text" required placeholder="Nombre del Club" value={nuevoClubNombre} onChange={(e) => setNuevoClubNombre(e.target.value)} className="border rounded-lg p-2.5" />
                 <input type="text" placeholder="Temporada (2026/27)" value={nuevoClubTemporada} onChange={(e) => setNuevoClubTemporada(e.target.value)} className="border rounded-lg p-2.5" />
-                <button type="submit" className="bg-purple-700 text-white font-semibold rounded-lg p-2.5">+ Crear Club</button>
+                <button type="submit" className="bg-purple-700 text-white font-medium rounded-lg p-2.5">+ Crear Club</button>
               </form>
             </div>
 
             <div className="bg-white p-6 rounded-xl shadow border">
-              <h3 className="font-bold text-sm mb-4">2. Crear Usuario y Asignar Credenciales</h3>
+              <h3 className="font-semibold text-sm mb-4">2. Crear Usuario y Asignar Credenciales</h3>
               <form onSubmit={handleCrearUsuario} className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
                 <input type="text" required placeholder="Nombre" value={nuevoUserNombre} onChange={(e) => setNuevoUserNombre(e.target.value)} className="border rounded-lg p-2.5" />
                 <input type="email" required placeholder="Correo" value={nuevoUserEmail} onChange={(e) => setNuevoUserEmail(e.target.value)} className="border rounded-lg p-2.5" />
@@ -913,23 +913,23 @@ export default function App() {
                   {clubs.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                 </select>
                 <div className="md:col-span-5 flex justify-end">
-                  <button type="submit" className="bg-emerald-600 text-white font-semibold px-6 py-2 rounded-lg">Crear Acceso</button>
+                  <button type="submit" className="bg-emerald-600 text-white font-medium px-6 py-2 rounded-lg">Crear Acceso</button>
                 </div>
               </form>
             </div>
 
             <div className="bg-white p-6 rounded-xl shadow border">
-              <h3 className="font-bold text-sm mb-4">3. Usuarios Activos</h3>
+              <h3 className="font-semibold text-sm mb-4">3. Usuarios Activos</h3>
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b text-slate-500 uppercase font-semibold"><th className="pb-2">Nombre</th><th className="pb-2">Correo</th><th className="pb-2">Rol</th><th className="pb-2 text-right">Acciones</th></tr>
+                  <tr className="border-b text-slate-400 font-medium"><th className="pb-2">Nombre</th><th className="pb-2">Correo</th><th className="pb-2">Rol</th><th className="pb-2 text-right">Acciones</th></tr>
                 </thead>
                 <tbody className="divide-y">
                   {usuarios.map(u => (
                     <tr key={u.id} className="hover:bg-slate-50">
-                      <td className="py-2.5 font-bold">{u.name}</td>
+                      <td className="py-2.5 font-medium">{u.name}</td>
                       <td className="py-2.5 text-slate-600">{u.email}</td>
-                      <td className="py-2.5"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">{u.role}</span></td>
+                      <td className="py-2.5"><span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-800">{u.role}</span></td>
                       <td className="py-2.5 text-right space-x-1">
                         <button onClick={() => setModalConfirmacion({ tipo: 'EDITAR_PASSWORD', user: u, tempPass: u.pass })} className="bg-slate-100 px-2.5 py-1 rounded border">🔑 Clave</button>
                         {u.role !== 'SUPER_ADMIN' && <button onClick={() => setModalConfirmacion({ tipo: 'ELIMINAR_USUARIO', user: u })} className="text-rose-600 bg-rose-50 px-2 py-1 rounded border border-rose-200">🗑️</button>}
@@ -946,20 +946,20 @@ export default function App() {
           <div className="bg-white rounded-xl shadow border p-6">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h2 className="text-xl font-bold">{clubActivo.nombre} — Sección {genero === 'FEMENINO' ? 'Femenina' : 'Masculina'}</h2>
+                <h2 className="text-lg font-bold">{clubActivo.nombre} — Sección {genero === 'FEMENINO' ? 'Femenina' : 'Masculina'}</h2>
                 <p className="text-xs text-slate-500">Temporada {clubActivo.temporada}</p>
               </div>
-              {sessionUser.role !== 'ENTRENADOR' && <button onClick={() => setPantalla('MODAL_NUEVO_EQUIPO')} className="bg-emerald-600 text-white text-xs px-3.5 py-2 rounded-lg font-semibold">+ Nuevo Equipo</button>}
+              {sessionUser.role !== 'ENTRENADOR' && <button onClick={() => setPantalla('MODAL_NUEVO_EQUIPO')} className="bg-emerald-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium">+ Nuevo Equipo</button>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {equiposFiltrados.map(equipo => (
                 <div key={equipo.id} onClick={() => { setEquipoSeleccionado(equipo); setPantalla('PLANTILLA'); }} className="p-5 border rounded-xl hover:border-emerald-500 hover:shadow-md cursor-pointer bg-slate-50/50">
-                  <h3 className="font-bold text-base mb-1">{equipo.nombre}</h3>
+                  <h3 className="font-semibold text-base mb-1">{equipo.nombre}</h3>
                   <p className="text-xs text-slate-500 mb-3">{equipo.categoria} • {equipo.jugadores.length} jugadores</p>
                   <div className="text-xs text-slate-600 flex justify-between border-t pt-3">
-                    <span>Entrenador: <strong>{equipo.entrenador}</strong></span>
-                    <span className="text-emerald-600 font-semibold">Ver plantilla →</span>
+                    <span>Entrenador: <strong className="font-medium text-slate-800">{equipo.entrenador}</strong></span>
+                    <span className="text-emerald-600 font-medium">Ver plantilla →</span>
                   </div>
                 </div>
               ))}
@@ -971,40 +971,40 @@ export default function App() {
           <div className="bg-white rounded-xl shadow border p-6 space-y-6">
             <div className="flex justify-between items-center border-b pb-4">
               <div>
-                <button onClick={() => setPantalla('EQUIPOS')} className="text-xs text-emerald-700 font-semibold mb-1 hover:underline">← Volver a equipos</button>
-                <h2 className="text-xl font-bold">{equipoSeleccionado.nombre}</h2>
+                <button onClick={() => setPantalla('EQUIPOS')} className="text-xs text-emerald-700 font-medium mb-1 hover:underline">← Volver a equipos</button>
+                <h2 className="text-lg font-bold">{equipoSeleccionado.nombre}</h2>
               </div>
               <div className="space-x-2">
-                <button onClick={handleExportarExcel} className="bg-emerald-800 text-white text-xs px-3.5 py-1.5 rounded-lg font-semibold">📊 Excel</button>
-                <button onClick={handleAbrirPaseLista} className="bg-emerald-600 text-white text-xs px-3.5 py-1.5 rounded-lg font-semibold">📋 Pasar Lista</button>
-                <button onClick={() => setPantalla('INFORME_EQUIPO')} className="bg-slate-900 text-white text-xs px-3.5 py-1.5 rounded-lg font-semibold">🖨️ Imprimir Todo</button>
+                <button onClick={handleExportarExcel} className="bg-emerald-800 text-white text-xs px-3 py-1.5 rounded-lg font-medium">📊 Excel</button>
+                <button onClick={handleAbrirPaseLista} className="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium">📋 Pasar Lista</button>
+                <button onClick={() => setPantalla('INFORME_EQUIPO')} className="bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg font-medium">🖨️ Imprimir Todo</button>
               </div>
             </div>
 
             <form onSubmit={handleAddJugador} className="bg-slate-50 border rounded-lg p-3 text-xs flex items-end gap-3">
-              <div className="flex-1"><label className="block text-[11px] font-semibold mb-1">Nombre</label><input type="text" required placeholder="Nombre..." value={nuevoNombreJugador} onChange={(e) => setNuevoNombreJugador(e.target.value)} className="w-full border rounded px-2.5 py-1.5 bg-white" /></div>
-              <div className="w-16"><label className="block text-[11px] font-semibold mb-1">Dorsal</label><input type="number" placeholder="7" value={nuevoDorsal} onChange={(e) => setNuevoDorsal(e.target.value)} className="w-full border rounded px-2.5 py-1.5 bg-white" /></div>
-              <div className="w-20"><label className="block text-[11px] font-semibold mb-1">Año</label><input type="number" placeholder="2015" value={nuevoNacimiento} onChange={(e) => setNuevoNacimiento(e.target.value)} className="w-full border rounded px-2.5 py-1.5 bg-white" /></div>
-              <button type="submit" className="bg-emerald-600 text-white font-semibold px-4 py-1.5 rounded">+ Añadir</button>
+              <div className="flex-1"><label className="block text-[11px] font-medium mb-1 text-slate-600">Nombre</label><input type="text" required placeholder="Nombre..." value={nuevoNombreJugador} onChange={(e) => setNuevoNombreJugador(e.target.value)} className="w-full border rounded px-2.5 py-1.5 bg-white" /></div>
+              <div className="w-16"><label className="block text-[11px] font-medium mb-1 text-slate-600">Dorsal</label><input type="number" placeholder="7" value={nuevoDorsal} onChange={(e) => setNuevoDorsal(e.target.value)} className="w-full border rounded px-2.5 py-1.5 bg-white" /></div>
+              <div className="w-20"><label className="block text-[11px] font-medium mb-1 text-slate-600">Año</label><input type="number" placeholder="2015" value={nuevoNacimiento} onChange={(e) => setNuevoNacimiento(e.target.value)} className="w-full border rounded px-2.5 py-1.5 bg-white" /></div>
+              <button type="submit" className="bg-emerald-600 text-white font-medium px-4 py-1.5 rounded">+ Añadir</button>
             </form>
 
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b text-slate-500 uppercase"><th className="pb-3 px-2">Dorsal</th><th className="pb-3 px-2">Nombre</th><th className="pb-3 px-2 text-center">Asistencia</th><th className="pb-3 px-2 text-center">Ev. Inicial</th><th className="pb-3 px-2 text-right">Acciones</th></tr>
+                <tr className="border-b text-slate-400 font-medium"><th className="pb-3 px-2">Dorsal</th><th className="pb-3 px-2">Nombre</th><th className="pb-3 px-2 text-center">Asistencia</th><th className="pb-3 px-2 text-center">Ev. Inicial</th><th className="pb-3 px-2 text-right">Acciones</th></tr>
               </thead>
               <tbody className="divide-y">
                 {equipoSeleccionado.jugadores.map(jugador => {
                   const asist = calcularAsistenciaJugador(jugador.id, equipoSeleccionado);
                   return (
                     <tr key={jugador.id} className="hover:bg-slate-50">
-                      <td className="py-3 px-2 font-bold">#{jugador.dorsal}</td>
-                      <td className="py-3 px-2 font-medium">{jugador.nombre}</td>
-                      <td className="py-3 px-2 text-center"><span className="px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800">{asist.pct}%</span></td>
+                      <td className="py-3 px-2 font-medium text-slate-600">#{jugador.dorsal}</td>
+                      <td className="py-3 px-2 font-medium text-slate-900">{jugador.nombre}</td>
+                      <td className="py-3 px-2 text-center"><span className="px-2 py-0.5 rounded font-medium bg-emerald-100 text-emerald-800">{asist.pct}%</span></td>
                       <td className="py-3 px-2 text-center">{badgeStatus(jugador.inicial)}</td>
                       <td className="py-3 px-2 text-right space-x-1">
-                        <button onClick={() => { setJugadorSeleccionado(jugador); setPantalla('FORMULARIO'); }} className="bg-emerald-600 text-white px-2.5 py-1 rounded">Evaluar</button>
-                        <button onClick={() => { setJugadorSeleccionado(jugador); setPantalla('INFORME'); }} className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded border">Ficha</button>
-                        <button onClick={() => { setJugadorSeleccionado(jugador); setPantalla('MODAL_QR'); }} className="bg-purple-50 text-purple-700 px-2 py-1 rounded border">📱 QR</button>
+                        <button onClick={() => { setJugadorSeleccionado(jugador); setPantalla('FORMULARIO'); }} className="bg-emerald-600 text-white px-2.5 py-1 rounded font-medium">Evaluar</button>
+                        <button onClick={() => { setJugadorSeleccionado(jugador); setPantalla('INFORME'); }} className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded border font-medium">Ficha</button>
+                        <button onClick={() => { setJugadorSeleccionado(jugador); setPantalla('MODAL_QR'); }} className="bg-purple-50 text-purple-700 px-2 py-1 rounded border font-medium">📱 QR</button>
                       </td>
                     </tr>
                   );
@@ -1017,20 +1017,20 @@ export default function App() {
         {pantalla === 'PASAR_LISTA' && (
           <div className="bg-white rounded-xl shadow border p-6 max-w-2xl mx-auto space-y-6">
             <div className="flex justify-between items-center border-b pb-4">
-              <h2 className="text-xl font-bold">Pasar Lista</h2>
+              <h2 className="text-lg font-bold">Pasar Lista</h2>
               <button onClick={() => setPantalla('PLANTILLA')} className="text-xs text-slate-500">✕ Cancelar</button>
             </div>
             <form onSubmit={handleGuardarSesion} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg border">
-                <div><label className="block font-semibold mb-1">Fecha</label><input type="date" required value={sessionFecha} onChange={(e) => setSessionFecha(e.target.value)} className="w-full border rounded p-2 bg-white" /></div>
-                <div><label className="block font-semibold mb-1">Tipo</label><select value={sessionTipo} onChange={(e) => setSessionTipo(e.target.value as SessionType)} className="w-full border rounded p-2 bg-white"><option value="ENTRENAMIENTO">Entrenamiento</option><option value="PARTIDO">Partido</option></select></div>
+                <div><label className="block font-medium mb-1 text-slate-600">Fecha</label><input type="date" required value={sessionFecha} onChange={(e) => setSessionFecha(e.target.value)} className="w-full border rounded p-2 bg-white" /></div>
+                <div><label className="block font-medium mb-1 text-slate-600">Tipo</label><select value={sessionTipo} onChange={(e) => setSessionTipo(e.target.value as SessionType)} className="w-full border rounded p-2 bg-white"><option value="ENTRENAMIENTO">Entrenamiento</option><option value="PARTIDO">Partido</option></select></div>
               </div>
               <div className="divide-y border rounded-lg overflow-hidden">
                 {equipoSeleccionado.jugadores.map(jugador => {
                   const estado = sessionAsistencias[jugador.id] || 'PRESENTE';
                   return (
                     <div key={jugador.id} className="flex justify-between items-center p-3 bg-white">
-                      <span className="font-bold">#{jugador.dorsal} {jugador.nombre}</span>
+                      <span className="font-medium">#{jugador.dorsal} {jugador.nombre}</span>
                       <div className="space-x-1">
                         <button type="button" onClick={() => setSessionAsistencias({ ...sessionAsistencias, [jugador.id]: 'PRESENTE' })} className={`px-2 py-1 rounded text-xs ${estado === 'PRESENTE' ? 'bg-emerald-600 text-white' : 'bg-slate-100'}`}>✅</button>
                         <button type="button" onClick={() => setSessionAsistencias({ ...sessionAsistencias, [jugador.id]: 'FALTA' })} className={`px-2 py-1 rounded text-xs ${estado === 'FALTA' ? 'bg-rose-600 text-white' : 'bg-slate-100'}`}>❌</button>
@@ -1039,7 +1039,7 @@ export default function App() {
                   );
                 })}
               </div>
-              <div className="flex justify-end pt-4 border-t"><button type="submit" className="bg-emerald-600 text-white px-6 py-2 rounded-lg font-semibold">Guardar Sesión</button></div>
+              <div className="flex justify-end pt-4 border-t"><button type="submit" className="bg-emerald-600 text-white px-6 py-2 rounded-lg font-medium">Guardar Sesión</button></div>
             </form>
           </div>
         )}
@@ -1051,23 +1051,23 @@ export default function App() {
               <input type="text" required placeholder="Nombre del equipo" value={nuevoNombreEquipo} onChange={(e) => setNuevoNombreEquipo(e.target.value)} className="w-full border rounded-lg p-2.5" />
               <input type="text" placeholder="Categoría" value={nuevaCatEquipo} onChange={(e) => setNuevaCatEquipo(e.target.value)} className="w-full border rounded-lg p-2.5" />
               <input type="text" placeholder="Entrenador/a" value={nuevoEntrenador} onChange={(e) => setNuevoEntrenador(e.target.value)} className="w-full border rounded-lg p-2.5" />
-              <div className="flex justify-end space-x-2 pt-4 border-t"><button type="button" onClick={() => setPantalla('EQUIPOS')} className="bg-slate-100 px-4 py-2 rounded">Cancelar</button><button type="submit" className="bg-emerald-600 text-white px-5 py-2 rounded">Guardar</button></div>
+              <div className="flex justify-end space-x-2 pt-4 border-t"><button type="button" onClick={() => setPantalla('EQUIPOS')} className="bg-slate-100 px-4 py-2 rounded">Cancelar</button><button type="submit" className="bg-emerald-600 text-white px-5 py-2 rounded font-medium">Guardar</button></div>
             </form>
           </div>
         )}
 
         {pantalla === 'LISTA_ENTRENADORES' && (
           <div className="bg-white rounded-xl shadow border p-6">
-            <h2 className="text-xl font-bold mb-4">Cuerpo Técnico — {clubActivo.nombre}</h2>
+            <h2 className="text-lg font-bold mb-4">Cuerpo Técnico — {clubActivo.nombre}</h2>
             <table className="w-full text-left text-xs">
-              <thead><tr className="border-b uppercase"><th className="pb-3 px-2">Entrenador/a</th><th className="pb-3 px-2">Equipo</th><th className="pb-3 px-2 text-right">Acción</th></tr></thead>
+              <thead><tr className="border-b text-slate-400 font-medium"><th className="pb-3 px-2">Entrenador/a</th><th className="pb-3 px-2">Equipo</th><th className="pb-3 px-2 text-right">Acción</th></tr></thead>
               <tbody className="divide-y">
                 {entrenadoresFiltrados.map(coach => (
                   <tr key={coach.id} className="hover:bg-slate-50">
-                    <td className="py-3.5 px-2 font-bold">{coach.nombre}</td>
+                    <td className="py-3.5 px-2 font-medium">{coach.nombre}</td>
                     <td className="py-3.5 px-2 text-slate-600">{coach.equipoNombre}</td>
                     <td className="py-3.5 px-2 text-right">
-                      <button onClick={() => { setCoachSeleccionado(coach); setPantalla('FORMULARIO'); }} className="bg-emerald-600 text-white px-3 py-1 rounded">Evaluar</button>
+                      <button onClick={() => { setCoachSeleccionado(coach); setPantalla('FORMULARIO'); }} className="bg-emerald-600 text-white px-3 py-1 rounded font-medium">Evaluar</button>
                     </td>
                   </tr>
                 ))}
@@ -1080,31 +1080,65 @@ export default function App() {
           <div className="bg-white rounded-xl shadow border p-6 space-y-6">
             <div className="flex justify-between items-center border-b pb-4">
               <div>
-                <button onClick={() => setPantalla(tipoEvaluacion === 'JUGADORES' ? 'PLANTILLA' : 'LISTA_ENTRENADORES')} className="text-xs text-emerald-700 font-semibold mb-1 hover:underline">← Volver</button>
-                <h2 className="text-xl font-bold">{tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}</h2>
+                <button onClick={() => setPantalla(tipoEvaluacion === 'JUGADORES' ? 'PLANTILLA' : 'LISTA_ENTRENADORES')} className="text-xs text-emerald-700 font-medium mb-1 hover:underline">← Volver</button>
+                <h2 className="text-lg font-bold">{tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}</h2>
               </div>
-              <button onClick={() => setPantalla('INFORME')} className="bg-slate-900 text-white text-xs px-3 py-1.5 rounded">Ver Ficha</button>
+              <button onClick={() => setPantalla('INFORME')} className="bg-slate-900 text-white text-xs px-3 py-1.5 rounded font-medium">Ver Ficha</button>
             </div>
+
+            {/* Guía visual de colores diferenciados para los niveles */}
+            <div className="bg-slate-50 border p-3 rounded-lg flex flex-wrap gap-4 text-xs text-slate-700">
+              {nivelesActuales.map(n => (
+                <div key={n.key} className="flex items-center space-x-1.5">
+                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: n.color }} />
+                  <span className="font-medium">{n.label}</span>
+                </div>
+              ))}
+            </div>
+
             <div className="space-y-6">
               {rubricasActivas.map(cat => (
-                <div key={cat.id}>
-                  <h3 className="text-sm font-bold uppercase tracking-wider mb-3 border-b pb-1">{cat.nombre}</h3>
+                <div key={cat.id} className="space-y-3">
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500 border-b pb-1">{cat.nombre}</h3>
                   <div className="divide-y">
-                    {cat.items.map(item => (
-                      <div key={item} className="py-3 flex justify-between items-center">
-                        <span className="font-medium text-sm">{item}</span>
-                        <div className="flex space-x-2">
-                          {nivelesActuales.map(lvl => (
-                            <button key={lvl.key} type="button" onClick={() => handleScore(item, lvl.key)} className={`w-6 h-6 rounded-full border-2 ${respuestas[item]?.nivel === lvl.key ? 'scale-110 shadow' : 'bg-white'}`} style={{ backgroundColor: respuestas[item]?.nivel === lvl.key ? lvl.color : '#fff', borderColor: lvl.color }} title={lvl.label} />
-                          ))}
+                    {cat.items.map(item => {
+                      const selKey = respuestas[item]?.nivel;
+                      const activeLvl = nivelesActuales.find(l => l.key === selKey);
+                      return (
+                        <div key={item} className="py-3.5 space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium text-sm text-slate-800">{item}</span>
+                            <div className="flex space-x-2">
+                              {nivelesActuales.map(lvl => (
+                                <button 
+                                  key={lvl.key} 
+                                  type="button" 
+                                  onClick={() => handleScore(item, lvl.key)} 
+                                  className={`w-7 h-7 rounded-full border-2 transition-all flex items-center justify-center text-[10px] font-bold ${respuestas[item]?.nivel === lvl.key ? 'scale-110 shadow-sm ring-2 ring-offset-1 ring-slate-400' : 'bg-white opacity-80'}`} 
+                                  style={{ backgroundColor: respuestas[item]?.nivel === lvl.key ? lvl.color : '#fff', borderColor: lvl.color, color: respuestas[item]?.nivel === lvl.key ? '#fff' : 'transparent' }} 
+                                  title={lvl.label}
+                                >
+                                  {respuestas[item]?.nivel === lvl.key ? '✓' : ''}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Caja de descripción del nivel seleccionado para aportar claridad pedagógica */}
+                          {activeLvl && activeLvl.key !== 'NO_OBSERVADO' && (
+                            <div className="bg-slate-50 border border-slate-200/80 rounded px-3 py-1.5 text-xs text-slate-600 flex items-center gap-2">
+                              <span className="font-semibold" style={{ color: activeLvl.color }}>{activeLvl.label}:</span>
+                              <span>{activeLvl.desc}</span>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}
             </div>
-            <div className="pt-4 border-t flex justify-end"><button onClick={() => setPantalla('INFORME')} className="bg-emerald-600 text-white px-6 py-2 rounded text-xs font-semibold">Ver Informe Oficial</button></div>
+            <div className="pt-4 border-t flex justify-end"><button onClick={() => setPantalla('INFORME')} className="bg-emerald-600 text-white px-6 py-2 rounded text-xs font-medium">Ver Informe Oficial</button></div>
           </div>
         )}
 
@@ -1112,22 +1146,22 @@ export default function App() {
           <div className="print-full-page bg-white rounded-xl shadow border p-8">
             <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3">
               <div>
-                <h2 className="text-2xl font-bold">{tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}</h2>
-                <p className="text-xs text-slate-600">{clubActivo.nombre} • Evaluacion 360°</p>
+                <h2 className="text-xl font-bold">{tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}</h2>
+                <p className="text-xs text-slate-600">{clubActivo.nombre} • Evaluación 360°</p>
               </div>
               <span className="text-xs font-bold bg-slate-100 px-3 py-1 rounded">Asistencia: {asistActual.pct}%</span>
             </div>
             <div className="grid grid-cols-2 gap-8 my-6 text-xs">
               {rubricasActivas.map(cat => (
                 <div key={cat.id} className="space-y-2">
-                  <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase">{cat.nombre}</div>
+                  <div className="bg-slate-900 text-white font-semibold px-3 py-1 rounded text-[11px] uppercase">{cat.nombre}</div>
                   {cat.items.map(item => <div key={item} className="flex justify-between py-1 px-1 bg-slate-50 rounded"><span>{item}</span><span className="font-semibold text-emerald-700">Consolidado</span></div>)}
                 </div>
               ))}
             </div>
             <div className="pt-4 border-t flex justify-between items-center print:hidden">
-              <button onClick={() => setPantalla('FORMULARIO')} className="text-xs text-slate-600 font-semibold">← Volver</button>
-              <button onClick={() => window.print()} className="bg-slate-900 text-white text-xs px-5 py-2 rounded">Imprimir PDF</button>
+              <button onClick={() => setPantalla('FORMULARIO')} className="text-xs text-slate-600 font-medium">← Volver</button>
+              <button onClick={() => window.print()} className="bg-slate-900 text-white text-xs px-5 py-2 rounded font-medium">Imprimir PDF</button>
             </div>
           </div>
         )}
@@ -1138,12 +1172,12 @@ export default function App() {
               <h3 className="font-bold">Dossier Completo de {equipoSeleccionado.nombre}</h3>
               <div className="space-x-2">
                 <button onClick={() => setPantalla('PLANTILLA')} className="text-xs px-3 py-2 rounded">← Volver</button>
-                <button onClick={() => window.print()} className="bg-slate-900 text-white text-xs px-5 py-2 rounded">Imprimir Todo</button>
+                <button onClick={() => window.print()} className="bg-slate-900 text-white text-xs px-5 py-2 rounded font-medium">Imprimir Todo</button>
               </div>
             </div>
             {equipoSeleccionado.jugadores.map(jugador => (
               <div key={jugador.id} className="print-full-page bg-white rounded-xl shadow border p-8 page-break">
-                <h2 className="text-2xl font-bold mb-2">{jugador.nombre}</h2>
+                <h2 className="text-xl font-bold mb-2">{jugador.nombre}</h2>
                 <p className="text-xs text-slate-600">Dorsal #{jugador.dorsal} • {clubActivo.nombre}</p>
               </div>
             ))}
