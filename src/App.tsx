@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabase';
 
 type UserRole = 'SUPER_ADMIN' | 'DIRECTOR' | 'ENTRENADOR';
 type Gender = 'FEMENINO' | 'MASCULINO';
@@ -11,7 +10,6 @@ type Screen =
   | 'EQUIPOS' 
   | 'PLANTILLA' 
   | 'PASAR_LISTA' 
-  | 'HISTORIAL_JUGADOR' 
   | 'LISTA_ENTRENADORES' 
   | 'PANEL_SUPERADMIN'
   | 'EDITOR_RUBRICAS'
@@ -29,16 +27,6 @@ interface LevelOption {
   weight: number;
 }
 
-interface EvaluationRecord {
-  periodo: Period;
-  temporada: string;
-  categoria: string;
-  fecha: string;
-  promedioNivel: string;
-  fortalezas: string;
-  objetivos: string;
-}
-
 interface Player {
   id: string;
   nombre: string;
@@ -48,7 +36,6 @@ interface Player {
   inicial: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
   media: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
   final: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
-  historial?: EvaluationRecord[];
 }
 
 interface Session {
@@ -104,19 +91,19 @@ interface RubricCategory {
 }
 
 const NIVELES_JUGADORES: LevelOption[] = [
-  { key: 'EXCELENTE', label: 'Excelente', desc: 'Dominio sobresaliente y constante en competición y entrenamiento.', color: '#16A34A', weight: 4 },
-  { key: 'CONSOLIDADO', label: 'Consolidado', desc: 'Adquirido y ejecutado con regularidad y autonomía.', color: '#22C55E', weight: 3 },
-  { key: 'EN_DESARROLLO', label: 'En desarrollo', desc: 'En proceso de aprendizaje; requiere pautas o repetición.', color: '#F59E0B', weight: 2 },
-  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Dificultad evidente en la comprensión o ejecución técnica.', color: '#EF4444', weight: 1 },
-  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'Sin datos suficientes de valoración en este periodo.', color: '#CBD5E1', weight: 0 },
+  { key: 'EXCELENTE', label: 'Excelente', desc: 'Dominio sobresaliente y constante.', color: '#16A34A', weight: 4 },
+  { key: 'CONSOLIDADO', label: 'Consolidado', desc: 'Adquirido y ejecutado con autonomía.', color: '#22C55E', weight: 3 },
+  { key: 'EN_DESARROLLO', label: 'En desarrollo', desc: 'En proceso de aprendizaje motriz.', color: '#F59E0B', weight: 2 },
+  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Dificultad evidente en la ejecución.', color: '#EF4444', weight: 1 },
+  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'Sin datos suficientes de valoración.', color: '#CBD5E1', weight: 0 },
 ];
 
 const NIVELES_ENTRENADORES: LevelOption[] = [
-  { key: 'EXCELENTE', label: 'Excelente', desc: 'Metodología sobresaliente, liderazgo positivo y ejemplaridad total.', color: '#16A34A', weight: 4 },
-  { key: 'BUENO', label: 'Bueno', desc: 'Cumple con los estándares metodológicos y pedagógicos del club.', color: '#22C55E', weight: 3 },
-  { key: 'MEJORABLE', label: 'Mejorable', desc: 'Aspectos técnicos o actitudinales a corregir mediante supervisión.', color: '#F59E0B', weight: 2 },
-  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Carencias formativas o metodológicas que requieren intervención directa.', color: '#EF4444', weight: 1 },
-  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado en este ciclo de observación.', color: '#CBD5E1', weight: 0 },
+  { key: 'EXCELENTE', label: 'Excelente', desc: 'Metodología sobresaliente y liderazgo positivo.', color: '#16A34A', weight: 4 },
+  { key: 'BUENO', label: 'Bueno', desc: 'Cumple con los estándares formativos del club.', color: '#22C55E', weight: 3 },
+  { key: 'MEJORABLE', label: 'Mejorable', desc: 'Aspectos técnicos a optimizar con supervisión.', color: '#F59E0B', weight: 2 },
+  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Requiere pautas metodológicas directas.', color: '#EF4444', weight: 1 },
+  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado en este ciclo.', color: '#CBD5E1', weight: 0 },
 ];
 
 const RUBRICA_JUGADORES_DEF: RubricCategory[] = [
@@ -179,20 +166,8 @@ const EQUIPOS_INICIALES: Team[] = [
     gender: 'MASCULINO',
     entrenador: 'Carlos Santana',
     jugadores: [
-      { 
-        id: 'j1', 
-        nombre: 'Mateo Álvarez', 
-        dorsal: 5, 
-        nacimiento: 2015, 
-        tokenPublico: 'sec_8f9a2b1c4e7d',
-        inicial: 'COMPLETADA', 
-        media: 'PENDIENTE', 
-        final: 'PENDIENTE',
-        historial: [
-          { temporada: '2025/26', categoria: 'Benjamín', periodo: 'Final', fecha: '28/05/2026', promedioNivel: 'Consolidado', fortalezas: 'Mucha velocidad y actitud.', objetivos: 'Aprender tiro en suspensión.' }
-        ]
-      },
-      { id: 'j2', nombre: 'Leo Batista', dorsal: 55, nacimiento: 2014, tokenPublico: 'sec_3c4d5e6f7a8b', inicial: 'COMPLETADA', media: 'PENDIENTE', final: 'PENDIENTE', historial: [] }
+      { id: 'j1', nombre: 'Mateo Álvarez', dorsal: 5, nacimiento: 2015, tokenPublico: 'sec_8f9a2b1c4e7d', inicial: 'COMPLETADA', media: 'PENDIENTE', final: 'PENDIENTE' },
+      { id: 'j2', nombre: 'Leo Batista', dorsal: 55, nacimiento: 2014, tokenPublico: 'sec_3c4d5e6f7a8b', inicial: 'COMPLETADA', media: 'PENDIENTE', final: 'PENDIENTE' }
     ],
     sesiones: [
       { id: 's1', fecha: '12/08/2026', tipo: 'ENTRENAMIENTO', asistencias: { 'j1': 'PRESENTE', 'j2': 'PRESENTE' } },
@@ -243,6 +218,8 @@ export default function App() {
   });
 
   const [pestanaRubrica, setPestanaRubrica] = useState<TargetType>('JUGADORES');
+  const [nuevaCatNombre, setNuevaCatNombre] = useState('');
+  const [nuevoItemTexto, setNuevoItemTexto] = useState<Record<string, string>>({});
 
   const [clubActivoId, setClubActivoId] = useState<string>(() => {
     return localStorage.getItem('app_active_club_id') || CLUBS_INICIALES[0].id;
@@ -259,7 +236,6 @@ export default function App() {
   const [periodo, setPeriodo] = useState<Period>('Inicial');
   const [pantalla, setPantalla] = useState<Screen>('EQUIPOS');
 
-  // Modales de Confirmación
   const [modalConfirmacion, setModalConfirmacion] = useState<{
     tipo: 'ELIMINAR_USUARIO' | 'EDITAR_PASSWORD';
     user: AppUser;
@@ -291,20 +267,17 @@ export default function App() {
   const [nuevoDorsal, setNuevoDorsal] = useState('');
   const [nuevoNacimiento, setNuevoNacimiento] = useState('');
 
-  const [nuevaCatNombre, setNuevaCatNombre] = useState('');
-  const [nuevoItemTexto, setNuevoItemTexto] = useState<Record<string, string>>({});
-
   const [obsAbiertas, setObsAbiertas] = useState<Record<string, boolean>>({});
 
   const [respuestas, setRespuestas] = useState<Record<string, { nivel: string; obs: string }>>({
     'Coordinación dinámica': { nivel: 'EN_DESARROLLO', obs: '' },
     'Dominio del bote': { nivel: 'NECESITA_APOYO', obs: '' },
-    'Claridad y brevedad en consignas': { nivel: 'EXCELENTE', obs: 'Excelente capacidad de síntesis.' },
+    'Claridad y brevedad en consignas': { nivel: 'EXCELENTE', obs: 'Consignas directas y claras.' },
     'Aprovechamiento del tiempo útil (sin filas)': { nivel: 'BUENO', obs: '' }
   });
 
-  const [fortalezas, setFortalezas] = useState('Excelente actitud, visión táctica y compromiso con el equipo.');
-  const [objetivos, setObjetivos] = useState('Mejora en la mano no dominante y control del ritmo de juego.');
+  const [fortalezas, setFortalezas] = useState('Excelente actitud, visión táctica y disciplina.');
+  const [objetivos, setObjetivos] = useState('Mejora en la mano no dominante y control de ritmo.');
   const [evaluadorNombre, setEvaluadorNombre] = useState('Dirección Técnica');
 
   const effectiveClubId = sessionUser?.role === 'DIRECTOR' || sessionUser?.role === 'ENTRENADOR'
@@ -420,10 +393,9 @@ export default function App() {
     setNuevoUserEmail('');
     setNuevoUserPass('');
     setNuevoUserNombre('');
-    alert(`Usuario ${nuevoU.name} creado con éxito.`);
+    alert(`Usuario ${nuevoU.name} creado.`);
   };
 
-  // Confirmar y Ejecutar Cambio de Contraseña
   const ejecutarCambioPassword = () => {
     if (!modalConfirmacion || !modalConfirmacion.tempPass) return;
     const { user, tempPass } = modalConfirmacion;
@@ -432,19 +404,18 @@ export default function App() {
       setSessionUser({ ...sessionUser, pass: tempPass.trim() });
     }
     setModalConfirmacion(null);
-    alert(`Contraseña de ${user.name} actualizada a: ${tempPass}`);
+    alert(`Contraseña de ${user.name} actualizada.`);
   };
 
-  // Confirmar y Ejecutar Eliminación de Usuario
   const ejecutarEliminacionUsuario = () => {
     if (!modalConfirmacion) return;
     const { user } = modalConfirmacion;
     setUsuarios(usuarios.filter(u => u.id !== user.id));
     setModalConfirmacion(null);
-    alert(`El usuario ${user.name} ha sido eliminado permanentemente.`);
+    alert(`Usuario ${user.name} eliminado.`);
   };
 
-  const handleCrearClub = async (e: React.FormEvent) => {
+  const handleCrearClub = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevoClubNombre) return;
 
@@ -475,6 +446,33 @@ export default function App() {
     setEquipoSeleccionado(equiposBase[0]);
     setNuevoClubNombre('');
     setPantalla('EQUIPOS');
+  };
+
+  const handleAddCategory = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevaCatNombre) return;
+    const nueva: RubricCategory = {
+      id: `cat_${Date.now()}`,
+      nombre: nuevaCatNombre,
+      items: []
+    };
+    if (pestanaRubrica === 'JUGADORES') {
+      setRubricasJugadores([...rubricasJugadores, nueva]);
+    } else {
+      setRubricasEntrenadores([...rubricasEntrenadores, nueva]);
+    }
+    setNuevaCatNombre('');
+  };
+
+  const handleAddItemToCategory = (catId: string) => {
+    const texto = nuevoItemTexto[catId];
+    if (!texto) return;
+    if (pestanaRubrica === 'JUGADORES') {
+      setRubricasJugadores(rubricasJugadores.map(cat => cat.id === catId ? { ...cat, items: [...cat.items, texto] } : cat));
+    } else {
+      setRubricasEntrenadores(rubricasEntrenadores.map(cat => cat.id === catId ? { ...cat, items: [...cat.items, texto] } : cat));
+    }
+    setNuevoItemTexto({ ...nuevoItemTexto, [catId]: '' });
   };
 
   const rubricasActivas = tipoEvaluacion === 'JUGADORES' ? rubricasJugadores : rubricasEntrenadores;
@@ -649,8 +647,7 @@ export default function App() {
       tokenPublico: secureToken,
       inicial: 'PENDIENTE',
       media: 'PENDIENTE',
-      final: 'PENDIENTE',
-      historial: []
+      final: 'PENDIENTE'
     };
 
     const actualizados = equipos.map(eq => {
@@ -702,9 +699,7 @@ export default function App() {
   const publicFamilyUrl = `https://evaculacion-clu-bs.vercel.app/?token=${jugadorSeleccionado?.tokenPublico || 'sec_8f9a2b1c4e7d'}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(publicFamilyUrl)}`;
 
-  // ==========================================
-  // VISTA PÚBLICA PARA FAMILIAS (QR)
-  // ==========================================
+  // VISTA PÚBLICA FAMILIAS (QR)
   if (publicToken) {
     let jugadorPublico: Player | undefined;
     let equipoPublico: Team | undefined;
@@ -823,9 +818,7 @@ export default function App() {
     );
   }
 
-  // ==========================================
   // VISTA: LOGIN
-  // ==========================================
   if (!sessionUser) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans">
@@ -945,13 +938,9 @@ export default function App() {
         }
       `}</style>
 
-      {/* ==========================================
-          MODAL FLOTANTE DE CONFIRMACIÓN DE ACCIONES
-          ========================================== */}
       {modalConfirmacion && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4">
             {modalConfirmacion.tipo === 'ELIMINAR_USUARIO' ? (
               <>
                 <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-xl mx-auto">
@@ -960,7 +949,7 @@ export default function App() {
                 <div className="text-center space-y-1">
                   <h3 className="text-lg font-bold text-slate-900">¿Eliminar este usuario?</h3>
                   <p className="text-xs text-slate-500">
-                    Estás a punto de revocar el acceso a <strong>{modalConfirmacion.user.name}</strong> ({modalConfirmacion.user.email}). Esta acción es permanente.
+                    Estás a punto de revocar el acceso a <strong>{modalConfirmacion.user.name}</strong> ({modalConfirmacion.user.email}).
                   </p>
                 </div>
                 <div className="flex space-x-2 pt-3">
@@ -986,14 +975,14 @@ export default function App() {
                 <div className="text-center space-y-2">
                   <h3 className="text-lg font-bold text-slate-900">Cambiar Contraseña</h3>
                   <p className="text-xs text-slate-500">
-                    Introduce la nueva contraseña para <strong>{modalConfirmacion.user.name}</strong>:
+                    Nueva contraseña para <strong>{modalConfirmacion.user.name}</strong>:
                   </p>
                   <input
                     type="text"
                     value={modalConfirmacion.tempPass || ''}
                     onChange={(e) => setModalConfirmacion({ ...modalConfirmacion, tempPass: e.target.value })}
                     className="w-full border border-slate-300 rounded-lg p-2.5 font-mono text-center text-sm focus:outline-none focus:border-emerald-500 bg-slate-50"
-                    placeholder="Nueva contraseña..."
+                    placeholder="Nueva clave..."
                   />
                 </div>
                 <div className="flex space-x-2 pt-3">
@@ -1012,7 +1001,6 @@ export default function App() {
                 </div>
               </>
             )}
-
           </div>
         </div>
       )}
@@ -1217,7 +1205,7 @@ export default function App() {
           </div>
         )}
 
-        {/* EDITOR DE RÚBRICAS (SUPER ADMIN) */}
+        {/* EDITOR DE RÚBRICAS */}
         {pantalla === 'EDITOR_RUBRICAS' && sessionUser.role === 'SUPER_ADMIN' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6 space-y-6">
             <div className="flex justify-between items-center pb-4 border-b border-slate-200">
@@ -1232,7 +1220,6 @@ export default function App() {
                 <p className="text-xs text-slate-500">Personaliza de forma separada los criterios para Jugadores y Entrenadores.</p>
               </div>
 
-              {/* Selector de Rúbrica Jugadores vs Entrenadores */}
               <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-semibold">
                 <button
                   onClick={() => setPestanaRubrica('JUGADORES')}
@@ -1249,6 +1236,23 @@ export default function App() {
               </div>
             </div>
 
+            <form onSubmit={handleAddCategory} className="flex gap-2 text-xs">
+              <input
+                type="text"
+                required
+                placeholder="Nombre de la nueva categoría..."
+                value={nuevaCatNombre}
+                onChange={(e) => setNuevaCatNombre(e.target.value)}
+                className="flex-1 border border-slate-300 rounded-lg p-2.5"
+              />
+              <button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 rounded-lg shadow"
+              >
+                + Añadir Categoría
+              </button>
+            </form>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {(pestanaRubrica === 'JUGADORES' ? rubricasJugadores : rubricasEntrenadores).map((cat) => (
                 <div key={cat.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
@@ -1262,6 +1266,23 @@ export default function App() {
                         <span className="font-medium text-slate-800">{item}</span>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="flex gap-1.5 pt-2">
+                    <input
+                      type="text"
+                      placeholder="Nuevo criterio..."
+                      value={nuevoItemTexto[cat.id] || ''}
+                      onChange={(e) => setNuevoItemTexto({ ...nuevoItemTexto, [cat.id]: e.target.value })}
+                      className="flex-1 text-xs border border-slate-300 rounded p-1.5 bg-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleAddItemToCategory(cat.id)}
+                      className="bg-slate-800 text-white text-xs px-3 rounded font-medium hover:bg-slate-700"
+                    >
+                      + Ítem
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1395,7 +1416,7 @@ export default function App() {
               </form>
             </div>
 
-            {/* 3. Listado de Usuarios con Modales de Confirmación */}
+            {/* 3. Listado de Usuarios */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">3. Gestión de Contraseñas y Usuarios Activos</h3>
               <div className="overflow-x-auto">
@@ -1428,7 +1449,7 @@ export default function App() {
                             <button
                               onClick={() => setModalConfirmacion({ tipo: 'EDITAR_PASSWORD', user: u, tempPass: u.pass })}
                               className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-2.5 py-1 rounded text-xs border border-slate-300"
-                              title="Cambiar contraseña con confirmación"
+                              title="Cambiar contraseña"
                             >
                               🔑 Cambiar Clave
                             </button>
@@ -1436,7 +1457,7 @@ export default function App() {
                               <button
                                 onClick={() => setModalConfirmacion({ tipo: 'ELIMINAR_USUARIO', user: u })}
                                 className="text-rose-600 hover:text-rose-800 font-semibold px-2 py-1 rounded hover:bg-rose-50 border border-rose-200 text-xs"
-                                title="Eliminar usuario con confirmación"
+                                title="Eliminar usuario"
                               >
                                 🗑️ Eliminar
                               </button>
@@ -1832,7 +1853,7 @@ export default function App() {
           </div>
         )}
 
-        {/* LISTA ENTRENADORES (DIRECTOR TÉCNICO) */}
+        {/* LISTA ENTRENADORES */}
         {pantalla === 'LISTA_ENTRENADORES' && sessionUser.role !== 'ENTRENADOR' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
             <div className="flex justify-between items-center mb-6">
@@ -1892,7 +1913,7 @@ export default function App() {
           </div>
         )}
 
-        {/* FORMULARIO DINÁMICO (JUGADOR VS ENTRENADOR) */}
+        {/* FORMULARIO */}
         {pantalla === 'FORMULARIO' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
             <div className="flex justify-between items-center pb-4 border-b border-slate-200 mb-6">
@@ -2031,7 +2052,7 @@ export default function App() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
-                    {tipoEvaluacion === 'JUGADORES' ? 'Objetivos de Mejora Técnica' : 'Plan de Acción y Objetivos de la Dirección Técnica'}
+                    {tipoEvaluacion === 'JUGADORES' ? 'Objetivos de Mejora Técnica' : 'Plan de Acción de Dirección Técnica'}
                   </label>
                   <textarea
                     value={objetivos}
@@ -2168,7 +2189,7 @@ export default function App() {
             <div className="grid grid-cols-12 gap-6 pt-3 border-t border-slate-200 items-center">
               <div className="col-span-4 flex flex-col items-center justify-center">
                 <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  {tipoEvaluacion === 'JUGADORES' ? 'Perfil de Rendimiento' : 'Balance de Competencias Técnicas'}
+                  {tipoEvaluacion === 'JUGADORES' ? 'Perfil de Rendimiento' : 'Balance Metodológico'}
                 </span>
                 <svg width="150" height="150" viewBox="0 0 150 150" className="overflow-visible">
                   <polygon points="75,25 125,75 75,125 25,75" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
@@ -2205,7 +2226,7 @@ export default function App() {
                 </div>
                 <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                   <h5 className="font-bold text-slate-900 mb-0.5 text-[10.5px] uppercase tracking-wider">
-                    {tipoEvaluacion === 'JUGADORES' ? 'Objetivos de Mejora' : 'Plan de Acción y Pautas de Dirección Técnica'}
+                    {tipoEvaluacion === 'JUGADORES' ? 'Objetivos de Mejora' : 'Plan de Acción y Pautas Técnicas'}
                   </h5>
                   <p className="text-slate-700 leading-relaxed text-[11px]">{objetivos || 'Sin objetivos registrados.'}</p>
                 </div>
