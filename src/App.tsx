@@ -236,6 +236,9 @@ export default function App() {
   const [periodo, setPeriodo] = useState<Period>('Inicial');
   const [pantalla, setPantalla] = useState<Screen>('EQUIPOS');
 
+  // Estado para desplegar los accesos de prueba en la portada
+  const [mostrarDemo, setMostrarDemo] = useState(false);
+
   const [modalConfirmacion, setModalConfirmacion] = useState<{
     tipo: 'ELIMINAR_USUARIO' | 'EDITAR_PASSWORD';
     user: AppUser;
@@ -329,7 +332,7 @@ export default function App() {
     const found = usuarios.find(u => u.email.toLowerCase() === authEmail.trim().toLowerCase());
     
     if (!found) {
-      setAuthError('El correo introducido no existe.');
+      setAuthError('El correo introducido no existe en el sistema.');
       return;
     }
 
@@ -821,31 +824,32 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA: PORTADA / LOGIN PROFESIONAL
+  // VISTA: PORTADA PROFESIONAL (LOGIN LIMPIO)
   // ==========================================
   if (!sessionUser) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans relative overflow-hidden">
-        {/* Luces ambientales de fondo */}
+        {/* Luces de fondo */}
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl relative z-10">
           
-          {/* Columna Izquierda: Branding, Metodología y Autoridad */}
+          {/* Columna Izquierda: Presentación y Metodología */}
           <div className="lg:col-span-7 p-8 sm:p-12 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950">
             <div>
               <div className="inline-flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-emerald-400 text-xs font-semibold tracking-wide uppercase mb-6">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Gestión Metodológica de Cantera</span>
+                <span>Dirección Técnica &amp; Metodología Deportiva</span>
               </div>
 
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight mb-4">
                 El estándar digital en evaluación técnica y seguimiento deportivo.
               </h1>
               
+              {/* Subtítulo Renovado */}
               <p className="text-slate-400 text-sm leading-relaxed mb-8">
-                Plataforma unificada para Directores Técnicos, Cuerpos Técnicos y Familias. Diseñada para profesionalizar canteras, automatizar asistencias y emitir informes con rigor formativo.
+                La plataforma integral para la dirección técnica y el desarrollo del deportista. Centraliza el control de sesiones, unifica criterios formativos y ofrece a las familias una visión transparente de su evolución.
               </p>
 
               {/* Módulos Destacados */}
@@ -893,14 +897,14 @@ export default function App() {
             </div>
 
             <div className="pt-8 mt-8 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
-              <span>Tecnología Multi-Club &bull; Cloud 2026</span>
+              <span>Tecnología Multi-Club &bull; 2026</span>
               <span className="text-emerald-500 font-medium flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Servidores Activos
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Servidores Seguros Activos
               </span>
             </div>
           </div>
 
-          {/* Columna Derecha: Tarjeta de Acceso y Demostración */}
+          {/* Columna Derecha: Login Corporativo Limpio */}
           <div className="lg:col-span-5 p-8 sm:p-10 flex flex-col justify-center bg-slate-900/40">
             <div className="max-w-sm mx-auto w-full space-y-6">
               
@@ -948,49 +952,57 @@ export default function App() {
                 </button>
               </form>
 
-              {/* Acceso Rápido para Demostraciones a Clubes */}
-              <div className="pt-6 border-t border-slate-800 space-y-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">
-                  Demostración en Directo (1 Clic)
-                </p>
-
-                <div className="space-y-2">
+              {/* Botón Discreto para Demostraciones en Vivo */}
+              <div className="pt-4 border-t border-slate-800 text-center">
+                {!mostrarDemo ? (
                   <button
                     type="button"
-                    onClick={() => handleDemoLogin('SUPER_ADMIN')}
-                    className="w-full bg-purple-950/40 hover:bg-purple-900/50 border border-purple-800/40 text-purple-200 text-xs py-2.5 px-3 rounded-xl font-medium flex items-center justify-between transition group"
+                    onClick={() => setMostrarDemo(true)}
+                    className="text-[11px] text-slate-500 hover:text-slate-400 transition"
                   >
-                    <span className="flex items-center gap-2">
-                      <span>👑</span>
-                      <span className="font-semibold text-purple-100">Super Administrador</span>
-                    </span>
-                    <span className="text-[10px] text-purple-400 group-hover:text-purple-300">Gestión global &rarr;</span>
+                    🛠️ Modo Demostración en Vivo
                   </button>
+                ) : (
+                  <div className="space-y-2 text-left animate-in fade-in duration-200">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[10px] font-bold uppercase text-slate-400">Accesos Rápidos Demo</span>
+                      <button
+                        type="button"
+                        onClick={() => setMostrarDemo(false)}
+                        className="text-[10px] text-slate-500 hover:text-slate-300"
+                      >
+                        ✕ Ocultar
+                      </button>
+                    </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleDemoLogin('DIRECTOR')}
-                    className="w-full bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-800/40 text-emerald-200 text-xs py-2.5 px-3 rounded-xl font-medium flex items-center justify-between transition group"
-                  >
-                    <span className="flex items-center gap-2">
-                      <span>🏢</span>
-                      <span className="font-semibold text-emerald-100">Director Deportivo</span>
-                    </span>
-                    <span className="text-[10px] text-emerald-400 group-hover:text-emerald-300">Club Doguen &rarr;</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDemoLogin('SUPER_ADMIN')}
+                      className="w-full bg-purple-950/40 hover:bg-purple-900/50 border border-purple-800/40 text-purple-200 text-xs py-2 px-3 rounded-xl font-medium flex items-center justify-between transition"
+                    >
+                      <span>👑 Super Administrador</span>
+                      <span className="text-[10px] text-purple-400">Global &rarr;</span>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() => handleDemoLogin('ENTRENADOR')}
-                    className="w-full bg-blue-950/40 hover:bg-blue-900/50 border border-blue-800/40 text-blue-200 text-xs py-2.5 px-3 rounded-xl font-medium flex items-center justify-between transition group"
-                  >
-                    <span className="flex items-center gap-2">
-                      <span>📋</span>
-                      <span className="font-semibold text-blue-100">Entrenador en Pista</span>
-                    </span>
-                    <span className="text-[10px] text-blue-400 group-hover:text-blue-300">Carlos Santana &rarr;</span>
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDemoLogin('DIRECTOR')}
+                      className="w-full bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-800/40 text-emerald-200 text-xs py-2 px-3 rounded-xl font-medium flex items-center justify-between transition"
+                    >
+                      <span>🏢 Director Deportivo</span>
+                      <span className="text-[10px] text-emerald-400">Club &rarr;</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDemoLogin('ENTRENADOR')}
+                      className="w-full bg-blue-950/40 hover:bg-blue-900/50 border border-blue-800/40 text-blue-200 text-xs py-2 px-3 rounded-xl font-medium flex items-center justify-between transition"
+                    >
+                      <span>📋 Entrenador en Pista</span>
+                      <span className="text-[10px] text-blue-400">Carlos &rarr;</span>
+                    </button>
+                  </div>
+                )}
               </div>
 
             </div>
