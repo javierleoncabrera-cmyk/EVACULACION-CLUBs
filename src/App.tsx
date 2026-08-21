@@ -573,7 +573,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA: PORTADA PROFESIONAL (LOGIN REESTRUCTURADO)
+  // VISTA: PORTADA PROFESIONAL (LOGIN LIMPIO SIN SUBRAYADOS)
   // ==========================================
   if (!sessionUser) {
     return (
@@ -581,27 +581,24 @@ export default function App() {
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl relative z-10">
+        <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl relative z-10">
           
-          {/* Columna Izquierda: Autoridad y Beneficios */}
           <div className="lg:col-span-7 p-8 sm:p-12 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950">
             <div>
-              {/* Etiqueta de confianza superior optimizada */}
               <div className="inline-flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-full text-emerald-400 text-xs font-semibold tracking-wide uppercase mb-6 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>Software Exclusivo para Canteras y Clubes</span>
               </div>
 
-              {/* Titular con doble énfasis en EVOLUCIÓN y RENDIMIENTO */}
-              <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold text-white tracking-tight leading-[1.15] mb-6">
-                El control absoluto de la <span className="text-emerald-400 underline decoration-emerald-500/30 decoration-wavy">EVOLUCIÓN</span> técnica y el <span className="text-emerald-400">RENDIMIENTO</span> deportivo.
+              {/* Titular limpio sin subrayados, con la elegancia equilibrada */}
+              <h1 className="text-3xl sm:text-4xl lg:text-[2.6rem] font-extrabold text-white tracking-tight leading-[1.2] mb-6">
+                El control absoluto de la <span className="text-emerald-400">EVOLUCIÓN</span> técnica y el <span className="text-emerald-400">RENDIMIENTO</span> deportivo.
               </h1>
               
               <p className="text-slate-400 text-sm leading-relaxed mb-8 max-w-xl">
                 La plataforma integral para la dirección técnica y el desarrollo del deportista. Centraliza el control de sesiones, unifica criterios formativos y ofrece a las familias una visión transparente de su evolución.
               </p>
 
-              {/* Módulos Destacados con beneficios comerciales claros */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl hover:border-emerald-500/50 transition">
                   <div className="text-emerald-400 font-bold mb-1 flex items-center space-x-1.5 text-sm">
@@ -653,10 +650,8 @@ export default function App() {
             </div>
           </div>
 
-          {/* Columna Derecha: Tarjeta de Acceso Optimizada (Con mejor peso visual) */}
           <div className="lg:col-span-5 p-8 sm:p-10 flex flex-col justify-center bg-slate-900/60">
             <div className="max-w-sm mx-auto w-full bg-slate-950/60 border border-slate-800/80 p-6 sm:p-8 rounded-2xl shadow-xl space-y-6">
-              
               <div>
                 <h2 className="text-lg font-bold text-white tracking-tight">Acceso a la Plataforma</h2>
                 <p className="text-xs text-slate-400 mt-1">Introduce tus credenciales autorizadas</p>
@@ -722,7 +717,6 @@ export default function App() {
                   </div>
                 )}
               </div>
-
             </div>
           </div>
 
