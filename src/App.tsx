@@ -162,7 +162,7 @@ const USUARIOS_INICIALES: AppUser[] = [
 ];
 
 export default function App() {
-  const [publicToken] = useState<string | null>(() => {
+  const [publicToken, setPublicToken] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       return params.get('token');
@@ -565,7 +565,7 @@ export default function App() {
 
           <div className="border-t pt-4 flex justify-between text-xs">
             <span>Evaluación {periodo}</span>
-            <button onClick={() => { window.history.pushState({}, '', window.location.pathname); setPublicToken(null); }} className="text-emerald-700 font-bold">← Acceso Entrenadores</button>
+            <button onClick={() => setPublicToken(null)} className="text-emerald-700 font-bold">← Acceso Entrenadores</button>
           </div>
         </div>
       </div>
@@ -587,15 +587,15 @@ export default function App() {
             <div>
               <div className="inline-flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-emerald-400 text-xs font-semibold tracking-wide uppercase mb-6">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Gestión Técnica &amp; Cantera</span>
+                <span>Dirección Técnica &amp; Metodología Deportiva</span>
               </div>
 
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight mb-4">
-                Plataforma Integral de Evaluación y Control Deportivo.
+                El estándar digital en evaluación técnica y seguimiento deportivo.
               </h1>
               
               <p className="text-slate-400 text-sm leading-relaxed mb-8">
-                Optimiza la gestión técnica de tu club. Controla la asistencia en pista, unifica criterios de evaluación y conecta directamente con las familias mediante accesos seguros.
+                La plataforma integral para la dirección técnica y el desarrollo del deportista. Centraliza el control de sesiones, unifica criterios formativos y ofrece a las familias una visión transparente de su evolución.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
