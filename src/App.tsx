@@ -104,52 +104,64 @@ interface RubricCategory {
 }
 
 const NIVELES_JUGADORES: LevelOption[] = [
-  { key: 'EXCELENTE', label: 'Excelente', desc: 'Dominio sobresaliente y constante.', color: '#16A34A', weight: 4 },
-  { key: 'CONSOLIDADO', label: 'Consolidado', desc: 'Adquirido y ejecutado con autonomía.', color: '#22C55E', weight: 3 },
-  { key: 'EN_DESARROLLO', label: 'En desarrollo', desc: 'En proceso de aprendizaje motriz.', color: '#F59E0B', weight: 2 },
-  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Dificultad evidente en la ejecución.', color: '#EF4444', weight: 1 },
-  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'Sin datos suficientes de valoración.', color: '#CBD5E1', weight: 0 },
+  { key: 'EXCELENTE', label: 'Excelente', desc: 'Dominio sobresaliente y constante en competición y entrenamiento.', color: '#16A34A', weight: 4 },
+  { key: 'CONSOLIDADO', label: 'Consolidado', desc: 'Adquirido y ejecutado con regularidad y autonomía.', color: '#22C55E', weight: 3 },
+  { key: 'EN_DESARROLLO', label: 'En desarrollo', desc: 'En proceso de aprendizaje; requiere pautas o repetición.', color: '#F59E0B', weight: 2 },
+  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Dificultad evidente en la comprensión o ejecución técnica.', color: '#EF4444', weight: 1 },
+  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'Sin datos suficientes de valoración en este periodo.', color: '#CBD5E1', weight: 0 },
 ];
 
 const NIVELES_ENTRENADORES: LevelOption[] = [
-  { key: 'EXCELENTE', label: 'Excelente', desc: 'Siempre claro, metódico y estructurado.', color: '#16A34A', weight: 4 },
-  { key: 'BUENO', label: 'Bueno', desc: 'Generalmente adecuado y consistente.', color: '#22C55E', weight: 3 },
-  { key: 'MEJORABLE', label: 'Mejorable', desc: 'Ocasionalmente con margen de optimización.', color: '#F59E0B', weight: 2 },
-  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Frecuentemente con carencias pedagógicas.', color: '#EF4444', weight: 1 },
-  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado en este ciclo.', color: '#CBD5E1', weight: 0 },
+  { key: 'EXCELENTE', label: 'Excelente', desc: 'Metodología sobresaliente, liderazgo positivo y ejemplaridad total.', color: '#16A34A', weight: 4 },
+  { key: 'BUENO', label: 'Bueno', desc: 'Cumple con los estándares metodológicos y pedagógicos del club.', color: '#22C55E', weight: 3 },
+  { key: 'MEJORABLE', label: 'Mejorable', desc: 'Aspectos técnicos o actitudinales a corregir mediante supervisión.', color: '#F59E0B', weight: 2 },
+  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Carencias formativas o metodológicas que requieren intervención directa.', color: '#EF4444', weight: 1 },
+  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado en este ciclo de observación.', color: '#CBD5E1', weight: 0 },
 ];
 
-const RUBRICA_INICIAL: RubricCategory[] = [
+const RUBRICA_JUGADORES_DEF: RubricCategory[] = [
   {
     id: 'cat_motor',
     nombre: 'Desarrollo motor',
-    items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto']
+    items: ['Coordinación dinámica', 'Equilibrio y apoyos', 'Velocidad gestual', 'Cambios de dirección', 'Frecuencia de salto']
   },
   {
     id: 'cat_tecnica',
     nombre: 'Técnica individual',
-    items: ['Bote', 'Pase', 'Recepción', 'Tiro', 'Entrada', 'Paradas', 'Pivotes', 'Mano no dominante']
+    items: ['Dominio del bote', 'Precisión en el pase', 'Recepción en movimiento', 'Mecánica de tiro', 'Finalizaciones/Entradas', 'Mano no dominante']
   },
   {
     id: 'cat_tactica',
     nombre: 'Comprensión del juego',
-    items: ['Ocupación de espacios', 'Juego sin balón', '1c1', 'Toma de decisiones', 'Lectura del juego', 'Juego colectivo']
+    items: ['Ocupación de espacios', 'Juego sin balón', 'Toma de decisiones en 1c1', 'Lectura de ventajas', 'Generosidad colectiva']
   },
   {
     id: 'cat_defensa',
-    nombre: 'Defensa',
-    items: ['Actitud defensiva', 'Colocación', '1c1 defensivo', 'Ayudas', 'Balance defensivo']
+    nombre: 'Defensa y Actitud',
+    items: ['Actitud e intensidad', '1c1 al hombre con balón', 'Colocación en lado de ayuda', 'Cierre de rebote', 'Balance defensivo']
   }
 ];
 
-const RUBRICA_ENTRENADORES = [
+const RUBRICA_ENTRENADORES_DEF: RubricCategory[] = [
   {
-    nombre: 'Comunicación y metodología',
-    items: [
-      { nombre: 'Claridad en las explicaciones y consignas', descs: { EXCELENTE: 'Siempre claro y directo.', BUENO: 'Adecuado y comprensible.', MEJORABLE: 'A veces genera dudas.', NECESITA_APOYO: 'Confuso.' } },
-      { nombre: 'Feedback constructivo e individualizado', descs: { EXCELENTE: 'Constante y motivador.', BUENO: 'Adecuado.', MEJORABLE: 'Poco frecuente.', NECESITA_APOYO: 'Inexistente.' } },
-      { nombre: 'Gestión del tiempo y ritmo en pista', descs: { EXCELENTE: 'Máxima intensidad motriz.', BUENO: 'Buen ritmo.', MEJORABLE: 'Paradas largas.', NECESITA_APOYO: 'Pérdida de tiempo.' } }
-    ]
+    id: 'cat_coach_comunicacion',
+    nombre: 'Comunicación y Clima de Equipo',
+    items: ['Claridad y brevedad en consignas', 'Feedback pedagógico y refuerzo positivo', 'Tono de voz y energía en pista', 'Gestión de la frustración del grupo']
+  },
+  {
+    id: 'cat_coach_metodologia',
+    nombre: 'Metodología y Dinámica de Sesión',
+    items: ['Aprovechamiento del tiempo útil (sin filas)', 'Diseño de tareas acorde a la edad', 'Capacidad de corrección sobre la marcha', 'Ritmo e intensidad de entrenamiento']
+  },
+  {
+    id: 'cat_coach_direccion',
+    nombre: 'Dirección de Partido y Competición',
+    items: ['Gestión equitativa de minutos/rotaciones', 'Serenidad y control emocional en el banco', 'Instrucciones claras en tiempos muertos', 'Respeto al estamento arbitral y rivales']
+  },
+  {
+    id: 'cat_coach_compromiso',
+    nombre: 'Compromiso y Valores de Club',
+    items: ['Puntualidad y preparación de material', 'Alineación con la Dirección Técnica', 'Trato profesional con las familias', 'Cuidado y recogida de instalaciones']
   }
 ];
 
@@ -220,10 +232,17 @@ export default function App() {
     return saved ? JSON.parse(saved) : USUARIOS_INICIALES;
   });
 
-  const [rubricas, setRubricas] = useState<RubricCategory[]>(() => {
+  const [rubricasJugadores, setRubricasJugadores] = useState<RubricCategory[]>(() => {
     const saved = localStorage.getItem('app_rubricas_jugadores');
-    return saved ? JSON.parse(saved) : RUBRICA_INICIAL;
+    return saved ? JSON.parse(saved) : RUBRICA_JUGADORES_DEF;
   });
+
+  const [rubricasEntrenadores, setRubricasEntrenadores] = useState<RubricCategory[]>(() => {
+    const saved = localStorage.getItem('app_rubricas_entrenadores');
+    return saved ? JSON.parse(saved) : RUBRICA_ENTRENADORES_DEF;
+  });
+
+  const [pestanaRubrica, setPestanaRubrica] = useState<TargetType>('JUGADORES');
 
   const [clubActivoId, setClubActivoId] = useState<string>(() => {
     return localStorage.getItem('app_active_club_id') || CLUBS_INICIALES[0].id;
@@ -239,6 +258,13 @@ export default function App() {
   const [tipoEvaluacion, setTipoEvaluacion] = useState<TargetType>('JUGADORES');
   const [periodo, setPeriodo] = useState<Period>('Inicial');
   const [pantalla, setPantalla] = useState<Screen>('EQUIPOS');
+
+  // Modales de Confirmación
+  const [modalConfirmacion, setModalConfirmacion] = useState<{
+    tipo: 'ELIMINAR_USUARIO' | 'EDITAR_PASSWORD';
+    user: AppUser;
+    tempPass?: string;
+  } | null>(null);
 
   const [authEmail, setAuthEmail] = useState('');
   const [authPass, setAuthPass] = useState('');
@@ -268,17 +294,17 @@ export default function App() {
   const [nuevaCatNombre, setNuevaCatNombre] = useState('');
   const [nuevoItemTexto, setNuevoItemTexto] = useState<Record<string, string>>({});
 
-  const [obsAbiertas, setObsAbiertas] = useState<Record<string, boolean>>({ 'Pase': true });
+  const [obsAbiertas, setObsAbiertas] = useState<Record<string, boolean>>({});
 
   const [respuestas, setRespuestas] = useState<Record<string, { nivel: string; obs: string }>>({
-    'Coordinación': { nivel: 'EN_DESARROLLO', obs: '' },
-    'Bote': { nivel: 'NECESITA_APOYO', obs: '' },
-    'Pase': { nivel: 'EXCELENTE', obs: 'Gran visión espacial' },
-    'Claridad en las explicaciones y consignas': { nivel: 'EXCELENTE', obs: '' }
+    'Coordinación dinámica': { nivel: 'EN_DESARROLLO', obs: '' },
+    'Dominio del bote': { nivel: 'NECESITA_APOYO', obs: '' },
+    'Claridad y brevedad en consignas': { nivel: 'EXCELENTE', obs: 'Excelente capacidad de síntesis.' },
+    'Aprovechamiento del tiempo útil (sin filas)': { nivel: 'BUENO', obs: '' }
   });
 
-  const [fortalezas, setFortalezas] = useState('Excelente actitud defensiva, visión espacial y disciplina.');
-  const [objetivos, setObjetivos] = useState('Manejo de mano no dominante y templanza bajo presión.');
+  const [fortalezas, setFortalezas] = useState('Excelente actitud, visión táctica y compromiso con el equipo.');
+  const [objetivos, setObjetivos] = useState('Mejora en la mano no dominante y control del ritmo de juego.');
   const [evaluadorNombre, setEvaluadorNombre] = useState('Dirección Técnica');
 
   const effectiveClubId = sessionUser?.role === 'DIRECTOR' || sessionUser?.role === 'ENTRENADOR'
@@ -301,37 +327,18 @@ export default function App() {
   const [coachSeleccionado, setCoachSeleccionado] = useState<Coach | null>(null);
 
   useEffect(() => {
-    const cargarDatosNube = async () => {
-      try {
-        const { data: cData } = await supabase.from('clubs').select('*');
-        if (cData && cData.length > 0) {
-          const cloudClubs: Club[] = cData.map(c => ({
-            id: c.id,
-            nombre: c.nombre,
-            temporada: c.temporada,
-            logoUrl: c.logo_url
-          }));
-          setClubs(cloudClubs);
-        }
-      } catch (err) {
-        console.log('Modo local activo');
-      }
-    };
-    cargarDatosNube();
-  }, []);
-
-  useEffect(() => {
     localStorage.setItem('app_multi_clubs', JSON.stringify(clubs));
     localStorage.setItem('app_multi_teams', JSON.stringify(equipos));
     localStorage.setItem('app_users_list', JSON.stringify(usuarios));
-    localStorage.setItem('app_rubricas_jugadores', JSON.stringify(rubricas));
+    localStorage.setItem('app_rubricas_jugadores', JSON.stringify(rubricasJugadores));
+    localStorage.setItem('app_rubricas_entrenadores', JSON.stringify(rubricasEntrenadores));
     localStorage.setItem('app_active_club_id', clubActivoId);
     if (sessionUser) {
       localStorage.setItem('app_auth_user', JSON.stringify(sessionUser));
     } else {
       localStorage.removeItem('app_auth_user');
     }
-  }, [clubs, equipos, usuarios, rubricas, clubActivoId, sessionUser]);
+  }, [clubs, equipos, usuarios, rubricasJugadores, rubricasEntrenadores, clubActivoId, sessionUser]);
 
   useEffect(() => {
     const teams = equipos.filter(e => e.clubId === effectiveClubId);
@@ -393,7 +400,6 @@ export default function App() {
     setPantalla('EQUIPOS');
   };
 
-  // Crear Usuario
   const handleCrearUsuario = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevoUserEmail || !nuevoUserNombre || !nuevoUserPass) {
@@ -414,24 +420,28 @@ export default function App() {
     setNuevoUserEmail('');
     setNuevoUserPass('');
     setNuevoUserNombre('');
-    alert(`Usuario creado:\nEmail: ${nuevoU.email}\nClave: ${nuevoU.pass}`);
+    alert(`Usuario ${nuevoU.name} creado con éxito.`);
   };
 
-  // Actualizar Contraseña de cualquier usuario
-  const handleActualizarPassword = (userId: string, nuevaClave: string) => {
-    if (!nuevaClave.trim()) return;
-    setUsuarios(usuarios.map(u => u.id === userId ? { ...u, pass: nuevaClave.trim() } : u));
-    if (sessionUser && sessionUser.id === userId) {
-      setSessionUser({ ...sessionUser, pass: nuevaClave.trim() });
+  // Confirmar y Ejecutar Cambio de Contraseña
+  const ejecutarCambioPassword = () => {
+    if (!modalConfirmacion || !modalConfirmacion.tempPass) return;
+    const { user, tempPass } = modalConfirmacion;
+    setUsuarios(usuarios.map(u => u.id === user.id ? { ...u, pass: tempPass.trim() } : u));
+    if (sessionUser && sessionUser.id === user.id) {
+      setSessionUser({ ...sessionUser, pass: tempPass.trim() });
     }
+    setModalConfirmacion(null);
+    alert(`Contraseña de ${user.name} actualizada a: ${tempPass}`);
   };
 
-  // Eliminar Usuario
-  const handleEliminarUsuario = (userId: string, nombre: string) => {
-    if (confirm(`¿Estás seguro de eliminar el acceso de "${nombre}" permanentemente?`)) {
-      setUsuarios(usuarios.filter(u => u.id !== userId));
-      alert(`Usuario ${nombre} eliminado.`);
-    }
+  // Confirmar y Ejecutar Eliminación de Usuario
+  const ejecutarEliminacionUsuario = () => {
+    if (!modalConfirmacion) return;
+    const { user } = modalConfirmacion;
+    setUsuarios(usuarios.filter(u => u.id !== user.id));
+    setModalConfirmacion(null);
+    alert(`El usuario ${user.name} ha sido eliminado permanentemente.`);
   };
 
   const handleCrearClub = async (e: React.FormEvent) => {
@@ -465,55 +475,9 @@ export default function App() {
     setEquipoSeleccionado(equiposBase[0]);
     setNuevoClubNombre('');
     setPantalla('EQUIPOS');
-
-    try {
-      await supabase.from('clubs').insert([{ id: newClubId, nombre: nuevoClub.nombre, temporada: nuevoClub.temporada }]);
-    } catch (e) {
-      console.log('Guardado localmente');
-    }
   };
 
-  const handleAddCategory = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!nuevaCatNombre) return;
-    const nueva: RubricCategory = {
-      id: `cat_${Date.now()}`,
-      nombre: nuevaCatNombre,
-      items: []
-    };
-    setRubricas([...rubricas, nueva]);
-    setNuevaCatNombre('');
-  };
-
-  const handleAddItemToCategory = (catId: string) => {
-    const texto = nuevoItemTexto[catId];
-    if (!texto) return;
-    setRubricas(rubricas.map(cat => {
-      if (cat.id === catId) {
-        return { ...cat, items: [...cat.items, texto] };
-      }
-      return cat;
-    }));
-    setNuevoItemTexto({ ...nuevoItemTexto, [catId]: '' });
-  };
-
-  const handleRemoveItem = (catId: string, itemIdx: number) => {
-    setRubricas(rubricas.map(cat => {
-      if (cat.id === catId) {
-        const items = [...cat.items];
-        items.splice(itemIdx, 1);
-        return { ...cat, items };
-      }
-      return cat;
-    }));
-  };
-
-  const handleRemoveCategory = (catId: string) => {
-    if (confirm('¿Eliminar esta categoría?')) {
-      setRubricas(rubricas.filter(c => c.id !== catId));
-    }
-  };
-
+  const rubricasActivas = tipoEvaluacion === 'JUGADORES' ? rubricasJugadores : rubricasEntrenadores;
   const nivelesActuales = tipoEvaluacion === 'JUGADORES' ? NIVELES_JUGADORES : NIVELES_ENTRENADORES;
 
   const entrenadoresFiltrados: Coach[] = equiposFiltrados.map(eq => ({
@@ -575,33 +539,33 @@ export default function App() {
     document.body.removeChild(link);
   };
 
-  const calcularPromedioCategoria = (categoriaNombre: string) => {
-    const cat = rubricas.find(c => c.nombre.toLowerCase().includes(categoriaNombre.toLowerCase()));
-    if (!cat || cat.items.length === 0) return 0.6;
+  const calcularPromedioCategoria = (categoriaIdx: number) => {
+    const cat = rubricasActivas[categoriaIdx];
+    if (!cat || cat.items.length === 0) return 0.7;
     let suma = 0;
     let total = 0;
     cat.items.forEach(item => {
       const lvlKey = respuestas[item]?.nivel;
-      const lvl = NIVELES_JUGADORES.find(n => n.key === lvlKey);
+      const lvl = nivelesActuales.find(n => n.key === lvlKey);
       if (lvl && lvl.weight > 0) {
         suma += lvl.weight;
         total++;
       }
     });
-    return total > 0 ? (suma / (total * 4)) : 0.6;
+    return total > 0 ? (suma / (total * 4)) : 0.7;
   };
 
-  const motorVal = calcularPromedioCategoria('motor');
-  const tecnicaVal = calcularPromedioCategoria('técnica');
-  const tacticaVal = calcularPromedioCategoria('juego');
-  const defensaVal = calcularPromedioCategoria('defensa');
+  const c1Val = calcularPromedioCategoria(0);
+  const c2Val = calcularPromedioCategoria(1);
+  const c3Val = calcularPromedioCategoria(2);
+  const c4Val = calcularPromedioCategoria(3);
 
   const cx = 75, cy = 75, r = 50;
-  const pMotor = `${cx},${cy - r * motorVal}`;
-  const pTecnica = `${cx + r * tecnicaVal},${cy}`;
-  const pTactica = `${cx},${cy + r * tacticaVal}`;
-  const pDefensa = `${cx - r * defensaVal},${cy}`;
-  const radarPoints = `${pMotor} ${pTecnica} ${pTactica} ${pDefensa}`;
+  const p1 = `${cx},${cy - r * c1Val}`;
+  const p2 = `${cx + r * c2Val},${cy}`;
+  const p3 = `${cx},${cy + r * c3Val}`;
+  const p4 = `${cx - r * c4Val},${cy}`;
+  const radarPoints = `${p1} ${p2} ${p3} ${p4}`;
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -738,7 +702,9 @@ export default function App() {
   const publicFamilyUrl = `https://evaculacion-clu-bs.vercel.app/?token=${jugadorSeleccionado?.tokenPublico || 'sec_8f9a2b1c4e7d'}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(publicFamilyUrl)}`;
 
-  // VISTA PÚBLICA FAMILIAS (QR)
+  // ==========================================
+  // VISTA PÚBLICA PARA FAMILIAS (QR)
+  // ==========================================
   if (publicToken) {
     let jugadorPublico: Player | undefined;
     let equipoPublico: Team | undefined;
@@ -800,7 +766,7 @@ export default function App() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-            {rubricas.map(cat => (
+            {rubricasJugadores.map(cat => (
               <div key={cat.id} className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
                 <h3 className="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b border-slate-200 pb-1">
                   {cat.nombre}
@@ -849,7 +815,7 @@ export default function App() {
               }}
               className="text-emerald-700 font-semibold hover:underline"
             >
-              Acceso Entrenadores →
+              Acceso Privado Entrenadores →
             </button>
           </div>
         </div>
@@ -857,7 +823,9 @@ export default function App() {
     );
   }
 
+  // ==========================================
   // VISTA: LOGIN
+  // ==========================================
   if (!sessionUser) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans">
@@ -867,7 +835,7 @@ export default function App() {
               ⚡
             </div>
             <h2 className="text-2xl font-bold text-slate-900">Portal de Evaluación Deportiva</h2>
-            <p className="text-xs text-slate-500">Plataforma Multiclub • Gestión y Seguimiento Técnico</p>
+            <p className="text-xs text-slate-500">Plataforma Multiclub • Gestión Técnica y Metodológica</p>
           </div>
 
           {authError && (
@@ -976,6 +944,78 @@ export default function App() {
           }
         }
       `}</style>
+
+      {/* ==========================================
+          MODAL FLOTANTE DE CONFIRMACIÓN DE ACCIONES
+          ========================================== */}
+      {modalConfirmacion && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            
+            {modalConfirmacion.tipo === 'ELIMINAR_USUARIO' ? (
+              <>
+                <div className="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-xl mx-auto">
+                  🗑️
+                </div>
+                <div className="text-center space-y-1">
+                  <h3 className="text-lg font-bold text-slate-900">¿Eliminar este usuario?</h3>
+                  <p className="text-xs text-slate-500">
+                    Estás a punto de revocar el acceso a <strong>{modalConfirmacion.user.name}</strong> ({modalConfirmacion.user.email}). Esta acción es permanente.
+                  </p>
+                </div>
+                <div className="flex space-x-2 pt-3">
+                  <button
+                    onClick={() => setModalConfirmacion(null)}
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-lg text-xs"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={ejecutarEliminacionUsuario}
+                    className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2.5 rounded-lg text-xs shadow"
+                  >
+                    Sí, Eliminar
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xl mx-auto">
+                  🔑
+                </div>
+                <div className="text-center space-y-2">
+                  <h3 className="text-lg font-bold text-slate-900">Cambiar Contraseña</h3>
+                  <p className="text-xs text-slate-500">
+                    Introduce la nueva contraseña para <strong>{modalConfirmacion.user.name}</strong>:
+                  </p>
+                  <input
+                    type="text"
+                    value={modalConfirmacion.tempPass || ''}
+                    onChange={(e) => setModalConfirmacion({ ...modalConfirmacion, tempPass: e.target.value })}
+                    className="w-full border border-slate-300 rounded-lg p-2.5 font-mono text-center text-sm focus:outline-none focus:border-emerald-500 bg-slate-50"
+                    placeholder="Nueva contraseña..."
+                  />
+                </div>
+                <div className="flex space-x-2 pt-3">
+                  <button
+                    onClick={() => setModalConfirmacion(null)}
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-lg text-xs"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={ejecutarCambioPassword}
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg text-xs shadow"
+                  >
+                    Guardar Nueva Clave
+                  </button>
+                </div>
+              </>
+            )}
+
+          </div>
+        </div>
+      )}
 
       {/* Cabecera Principal */}
       <header className="bg-slate-900 text-white px-6 py-3 shadow-md print:hidden">
@@ -1098,7 +1138,7 @@ export default function App() {
                   <button
                     onClick={() => { setTipoEvaluacion('JUGADORES'); setPantalla('EQUIPOS'); }}
                     className={`px-3 py-1 rounded font-semibold transition ${
-                      tipoEvaluacion === 'JUGADORES' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'
+                      tipoEvaluacion === 'JUGADORES' ? 'bg-slate-600 text-white font-bold' : 'text-slate-400 hover:text-white'
                     }`}
                   >
                     Jugador@s
@@ -1106,7 +1146,7 @@ export default function App() {
                   <button
                     onClick={() => { setTipoEvaluacion('ENTRENADORES'); setPantalla('LISTA_ENTRENADORES'); }}
                     className={`px-3 py-1 rounded font-semibold transition ${
-                      tipoEvaluacion === 'ENTRENADORES' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'
+                      tipoEvaluacion === 'ENTRENADORES' ? 'bg-slate-600 text-white font-bold' : 'text-slate-400 hover:text-white'
                     }`}
                   >
                     Entrenador@s
@@ -1177,7 +1217,7 @@ export default function App() {
           </div>
         )}
 
-        {/* EDITOR DE RÚBRICAS */}
+        {/* EDITOR DE RÚBRICAS (SUPER ADMIN) */}
         {pantalla === 'EDITOR_RUBRICAS' && sessionUser.role === 'SUPER_ADMIN' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6 space-y-6">
             <div className="flex justify-between items-center pb-4 border-b border-slate-200">
@@ -1189,69 +1229,39 @@ export default function App() {
                   ← Volver a equipos
                 </button>
                 <h2 className="text-xl font-bold text-slate-900">Editor Maestro de Rúbricas Técnicas</h2>
-                <p className="text-xs text-slate-500">Solo visible para Super Administrador. Define los criterios evaluativos para todos los clubes.</p>
+                <p className="text-xs text-slate-500">Personaliza de forma separada los criterios para Jugadores y Entrenadores.</p>
+              </div>
+
+              {/* Selector de Rúbrica Jugadores vs Entrenadores */}
+              <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-semibold">
+                <button
+                  onClick={() => setPestanaRubrica('JUGADORES')}
+                  className={`px-3 py-1.5 rounded-md transition ${pestanaRubrica === 'JUGADORES' ? 'bg-blue-600 text-white shadow' : 'text-slate-600'}`}
+                >
+                  Rúbrica Jugador@s
+                </button>
+                <button
+                  onClick={() => setPestanaRubrica('ENTRENADORES')}
+                  className={`px-3 py-1.5 rounded-md transition ${pestanaRubrica === 'ENTRENADORES' ? 'bg-blue-600 text-white shadow' : 'text-slate-600'}`}
+                >
+                  Rúbrica Entrenador@s
+                </button>
               </div>
             </div>
 
-            <form onSubmit={handleAddCategory} className="flex gap-2 text-xs">
-              <input
-                type="text"
-                required
-                placeholder="Nombre de la nueva categoría (ej: Preparación Física)"
-                value={nuevaCatNombre}
-                onChange={(e) => setNuevaCatNombre(e.target.value)}
-                className="flex-1 border border-slate-300 rounded-lg p-2.5"
-              />
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 rounded-lg shadow"
-              >
-                + Añadir Categoría
-              </button>
-            </form>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {rubricas.map((cat) => (
+              {(pestanaRubrica === 'JUGADORES' ? rubricasJugadores : rubricasEntrenadores).map((cat) => (
                 <div key={cat.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
                   <div className="flex justify-between items-center border-b border-slate-200 pb-2">
                     <h3 className="font-bold text-slate-900 text-sm uppercase">{cat.nombre}</h3>
-                    <button
-                      onClick={() => handleRemoveCategory(cat.id)}
-                      className="text-rose-600 hover:text-rose-800 text-xs font-semibold"
-                    >
-                      Eliminar
-                    </button>
                   </div>
 
                   <div className="space-y-1.5">
                     {cat.items.map((item, idx) => (
                       <div key={idx} className="flex justify-between items-center bg-white p-2 rounded border border-slate-200 text-xs">
                         <span className="font-medium text-slate-800">{item}</span>
-                        <button
-                          onClick={() => handleRemoveItem(cat.id, idx)}
-                          className="text-slate-400 hover:text-rose-600 font-bold px-1"
-                        >
-                          ✕
-                        </button>
                       </div>
                     ))}
-                  </div>
-
-                  <div className="flex gap-1.5 pt-2">
-                    <input
-                      type="text"
-                      placeholder="Nuevo criterio..."
-                      value={nuevoItemTexto[cat.id] || ''}
-                      onChange={(e) => setNuevoItemTexto({ ...nuevoItemTexto, [cat.id]: e.target.value })}
-                      className="flex-1 text-xs border border-slate-300 rounded p-1.5 bg-white"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleAddItemToCategory(cat.id)}
-                      className="bg-slate-800 text-white text-xs px-3 rounded font-medium hover:bg-slate-700"
-                    >
-                      + Ítem
-                    </button>
                   </div>
                 </div>
               ))}
@@ -1266,7 +1276,7 @@ export default function App() {
               <div>
                 <span className="text-xs uppercase tracking-wider font-bold text-purple-300">Panel Maestro de la Plataforma</span>
                 <h2 className="text-2xl font-bold">Gestión de Clubes, Accesos y Contraseñas</h2>
-                <p className="text-xs text-purple-200 mt-1">Modifica credenciales, da de alta o elimina usuarios con acceso.</p>
+                <p className="text-xs text-purple-200 mt-1">Modifica credenciales, da de alta o elimina usuarios con confirmación de seguridad.</p>
               </div>
               <button
                 onClick={() => setPantalla('EQUIPOS')}
@@ -1329,7 +1339,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* 2. Crear Usuario con Contraseña */}
+            {/* 2. Crear Usuario */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">2. Crear Usuario y Asignar Contraseña</h3>
               <form onSubmit={handleCrearUsuario} className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
@@ -1385,7 +1395,7 @@ export default function App() {
               </form>
             </div>
 
-            {/* 3. Listado de Usuarios con Edición de Contraseña y Borrado */}
+            {/* 3. Listado de Usuarios con Modales de Confirmación */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">3. Gestión de Contraseñas y Usuarios Activos</h3>
               <div className="overflow-x-auto">
@@ -1394,10 +1404,9 @@ export default function App() {
                     <tr className="border-b border-slate-200 text-slate-500 uppercase font-semibold">
                       <th className="pb-2">Nombre</th>
                       <th className="pb-2">Correo</th>
-                      <th className="pb-2">Contraseña (Editable)</th>
                       <th className="pb-2">Rol</th>
                       <th className="pb-2">Club</th>
-                      <th className="pb-2 text-right">Acción</th>
+                      <th className="pb-2 text-right">Acciones de Cuenta</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -1408,15 +1417,6 @@ export default function App() {
                           <td className="py-2.5 font-bold text-slate-900">{u.name}</td>
                           <td className="py-2.5 text-slate-600">{u.email}</td>
                           <td className="py-2.5">
-                            <input
-                              type="text"
-                              value={u.pass}
-                              onChange={(e) => handleActualizarPassword(u.id, e.target.value)}
-                              className="bg-slate-100 border border-slate-300 rounded px-2 py-1 font-mono text-slate-800 text-xs w-28 focus:outline-none focus:border-emerald-500"
-                              title="Modifica aquí la contraseña directamente"
-                            />
-                          </td>
-                          <td className="py-2.5">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                               u.role === 'SUPER_ADMIN' ? 'bg-purple-100 text-purple-800' : u.role === 'DIRECTOR' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'
                             }`}>
@@ -1424,12 +1424,19 @@ export default function App() {
                             </span>
                           </td>
                           <td className="py-2.5 text-slate-700">{userClub ? userClub.nombre : 'Global'}</td>
-                          <td className="py-2.5 text-right">
+                          <td className="py-2.5 text-right space-x-1.5">
+                            <button
+                              onClick={() => setModalConfirmacion({ tipo: 'EDITAR_PASSWORD', user: u, tempPass: u.pass })}
+                              className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-2.5 py-1 rounded text-xs border border-slate-300"
+                              title="Cambiar contraseña con confirmación"
+                            >
+                              🔑 Cambiar Clave
+                            </button>
                             {u.role !== 'SUPER_ADMIN' && (
                               <button
-                                onClick={() => handleEliminarUsuario(u.id, u.name)}
-                                className="text-rose-600 hover:text-rose-800 font-semibold px-2 py-1 rounded hover:bg-rose-50 border border-rose-200"
-                                title="Eliminar usuario"
+                                onClick={() => setModalConfirmacion({ tipo: 'ELIMINAR_USUARIO', user: u })}
+                                className="text-rose-600 hover:text-rose-800 font-semibold px-2 py-1 rounded hover:bg-rose-50 border border-rose-200 text-xs"
+                                title="Eliminar usuario con confirmación"
                               >
                                 🗑️ Eliminar
                               </button>
@@ -1825,7 +1832,7 @@ export default function App() {
           </div>
         )}
 
-        {/* LISTA ENTRENADORES */}
+        {/* LISTA ENTRENADORES (DIRECTOR TÉCNICO) */}
         {pantalla === 'LISTA_ENTRENADORES' && sessionUser.role !== 'ENTRENADOR' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
             <div className="flex justify-between items-center mb-6">
@@ -1833,7 +1840,7 @@ export default function App() {
                 <h2 className="text-xl font-bold text-slate-900">
                   Cuerpo Técnico — {clubActivo.nombre}
                 </h2>
-                <p className="text-xs text-slate-500">Evaluación metodológica de entrenadores</p>
+                <p className="text-xs text-slate-500">Evaluación metodológica, pedagógica y de gestión de grupo</p>
               </div>
             </div>
 
@@ -1885,7 +1892,7 @@ export default function App() {
           </div>
         )}
 
-        {/* FORMULARIO */}
+        {/* FORMULARIO DINÁMICO (JUGADOR VS ENTRENADOR) */}
         {pantalla === 'FORMULARIO' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
             <div className="flex justify-between items-center pb-4 border-b border-slate-200 mb-6">
@@ -1902,18 +1909,18 @@ export default function App() {
                 <p className="text-xs text-slate-500">
                   {tipoEvaluacion === 'JUGADORES' 
                     ? `${clubActivo.nombre} • ${equipoSeleccionado.nombre} • dorsal ${jugadorSeleccionado.dorsal}` 
-                    : `${clubActivo.nombre} • ${coachSeleccionado?.equipoNombre} • Entrenador/a`}
+                    : `${clubActivo.nombre} • ${coachSeleccionado?.equipoNombre} • Entrenador/a Principal`}
                 </p>
               </div>
               <div className="flex items-center space-x-2">
                 <span className="text-xs bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full font-semibold border border-emerald-200">
-                  Evaluación {periodo}
+                  Evaluación {periodo} ({tipoEvaluacion === 'JUGADORES' ? 'Técnica Jugador' : 'Metodología Coach'})
                 </span>
                 <button
                   onClick={() => setPantalla('INFORME')}
                   className="bg-slate-900 text-white text-xs px-3 py-1.5 rounded font-medium hover:bg-slate-800"
                 >
-                  Ver Ficha
+                  Ver Ficha Oficial
                 </button>
               </div>
             </div>
@@ -1930,200 +1937,120 @@ export default function App() {
               ))}
             </div>
 
-            {tipoEvaluacion === 'JUGADORES' ? (
-              <div className="space-y-8">
-                {rubricas.map((cat) => (
-                  <div key={cat.id}>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 mb-4 border-b-2 border-slate-900 pb-1">
-                      {cat.nombre}
-                    </h3>
-                    <div className="divide-y divide-slate-100">
-                      {cat.items.map((item) => {
-                        const sel = respuestas[item]?.nivel;
-                        const obs = respuestas[item]?.obs || '';
-                        const activeLevel = nivelesActuales.find((l) => l.key === sel);
-                        const isObsOpen = obsAbiertas[item] || obs.length > 0;
+            <div className="space-y-8">
+              {rubricasActivas.map((cat) => (
+                <div key={cat.id}>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 mb-4 border-b-2 border-slate-900 pb-1">
+                    {cat.nombre}
+                  </h3>
+                  <div className="divide-y divide-slate-100">
+                    {cat.items.map((item) => {
+                      const sel = respuestas[item]?.nivel;
+                      const obs = respuestas[item]?.obs || '';
+                      const activeLevel = nivelesActuales.find((l) => l.key === sel);
+                      const isObsOpen = obsAbiertas[item] || obs.length > 0;
 
-                        return (
-                          <div key={item} className="py-3.5">
-                            <div className="flex items-center justify-between gap-4">
-                              <div className="flex items-center space-x-2">
-                                <span className="font-medium text-slate-800 text-sm">{item}</span>
-                                {!isObsOpen && (
-                                  <button
-                                    type="button"
-                                    onClick={() => toggleObs(item)}
-                                    className="text-[11px] text-slate-400 hover:text-emerald-700 underline"
-                                  >
-                                    + nota
-                                  </button>
-                                )}
-                              </div>
-
-                              <div className="flex items-center space-x-2.5">
-                                {nivelesActuales.map((lvl) => (
-                                  <button
-                                    key={lvl.key}
-                                    type="button"
-                                    onClick={() => handleScore(item, lvl.key)}
-                                    className={`w-6 h-6 rounded-full border-2 transition-all ${
-                                      sel === lvl.key ? 'scale-110 shadow-sm' : 'border-slate-300 bg-white hover:border-slate-400'
-                                    }`}
-                                    style={{
-                                      backgroundColor: sel === lvl.key ? lvl.color : '#ffffff',
-                                      borderColor: sel === lvl.key ? lvl.color : '#cbd5e1'
-                                    }}
-                                    title={lvl.label}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-
-                            {activeLevel && activeLevel.key !== 'NO_OBSERVADO' && (
-                              <div className="bg-slate-50 border border-slate-200 rounded-md p-2.5 my-2 text-xs text-slate-700">
-                                <strong className="font-semibold">{activeLevel.label}: </strong>
-                                {activeLevel.desc}
-                              </div>
-                            )}
-
-                            {isObsOpen && (
-                              <div className="mt-2 flex items-center gap-2">
-                                <input
-                                  type="text"
-                                  placeholder="Observación cualitativa..."
-                                  value={obs}
-                                  onChange={(e) => handleObs(item, e.target.value)}
-                                  className="w-full text-xs border border-slate-200 rounded px-3 py-1.5 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
-                                />
+                      return (
+                        <div key={item} className="py-3.5">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-medium text-slate-800 text-sm">{item}</span>
+                              {!isObsOpen && (
                                 <button
                                   type="button"
                                   onClick={() => toggleObs(item)}
-                                  className="text-slate-400 hover:text-slate-600 text-xs px-1"
+                                  className="text-[11px] text-slate-400 hover:text-emerald-700 underline"
                                 >
-                                  ✕
+                                  + nota
                                 </button>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-
-                <div className="pt-6 border-t border-slate-200 space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Fortalezas</label>
-                    <textarea
-                      value={fortalezas}
-                      onChange={(e) => setFortalezas(e.target.value)}
-                      rows={2}
-                      className="w-full text-xs border border-slate-200 rounded-md p-2.5 focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Objetivos de mejora</label>
-                    <textarea
-                      value={objetivos}
-                      onChange={(e) => setObjetivos(e.target.value)}
-                      rows={2}
-                      className="w-full text-xs border border-slate-200 rounded-md p-2.5 focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Nombre del Evaluador/a</label>
-                    <input
-                      type="text"
-                      value={evaluadorNombre}
-                      onChange={(e) => setEvaluadorNombre(e.target.value)}
-                      className="w-full text-xs border border-slate-200 rounded-md p-2 focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-8">
-                {RUBRICA_ENTRENADORES.map((cat) => (
-                  <div key={cat.nombre}>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 mb-4 border-b-2 border-slate-900 pb-1">
-                      {cat.nombre}
-                    </h3>
-                    <div className="divide-y divide-slate-100">
-                      {cat.items.map((item) => {
-                        const sel = respuestas[item.nombre]?.nivel;
-                        const obs = respuestas[item.nombre]?.obs || '';
-                        const activeLevel = nivelesActuales.find((l) => l.key === sel);
-                        const dynamicDesc = (item.descs as Record<string, string>)[sel || ''] || activeLevel?.desc;
-                        const isObsOpen = obsAbiertas[item.nombre] || obs.length > 0;
-
-                        return (
-                          <div key={item.nombre} className="py-3.5">
-                            <div className="flex items-center justify-between gap-4">
-                              <div className="flex items-center space-x-2">
-                                <span className="font-medium text-slate-800 text-sm">{item.nombre}</span>
-                                {!isObsOpen && (
-                                  <button
-                                    type="button"
-                                    onClick={() => toggleObs(item.nombre)}
-                                    className="text-[11px] text-slate-400 hover:text-emerald-700 underline"
-                                  >
-                                    + nota
-                                  </button>
-                                )}
-                              </div>
-
-                              <div className="flex items-center space-x-2.5">
-                                {nivelesActuales.map((lvl) => (
-                                  <button
-                                    key={lvl.key}
-                                    type="button"
-                                    onClick={() => handleScore(item.nombre, lvl.key)}
-                                    className={`w-6 h-6 rounded-full border-2 transition-all ${
-                                      sel === lvl.key ? 'scale-110 shadow-sm' : 'border-slate-300 bg-white hover:border-slate-400'
-                                    }`}
-                                    style={{
-                                      backgroundColor: sel === lvl.key ? lvl.color : '#ffffff',
-                                      borderColor: sel === lvl.key ? lvl.color : '#cbd5e1'
-                                    }}
-                                    title={lvl.label}
-                                  />
-                                ))}
-                              </div>
+                              )}
                             </div>
 
-                            {activeLevel && activeLevel.key !== 'NO_OBSERVADO' && (
-                              <div className="bg-slate-50 border border-slate-200 rounded-md p-2.5 my-2 text-xs text-slate-700">
-                                <strong className="font-semibold">{activeLevel.label}: </strong>
-                                {dynamicDesc}
-                              </div>
-                            )}
-
-                            {isObsOpen && (
-                              <div className="mt-2 flex items-center gap-2">
-                                <input
-                                  type="text"
-                                  placeholder="Observación cualitativa..."
-                                  value={obs}
-                                  onChange={(e) => handleObs(item.nombre, e.target.value)}
-                                  className="w-full text-xs border border-slate-200 rounded px-3 py-1.5 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
-                                />
+                            <div className="flex items-center space-x-2.5">
+                              {nivelesActuales.map((lvl) => (
                                 <button
+                                  key={lvl.key}
                                   type="button"
-                                  onClick={() => toggleObs(item.nombre)}
-                                  className="text-slate-400 hover:text-slate-600 text-xs px-1"
-                                >
-                                  ✕
-                                </button>
-                              </div>
-                            )}
+                                  onClick={() => handleScore(item, lvl.key)}
+                                  className={`w-6 h-6 rounded-full border-2 transition-all ${
+                                    sel === lvl.key ? 'scale-110 shadow-sm' : 'border-slate-300 bg-white hover:border-slate-400'
+                                  }`}
+                                  style={{
+                                    backgroundColor: sel === lvl.key ? lvl.color : '#ffffff',
+                                    borderColor: sel === lvl.key ? lvl.color : '#cbd5e1'
+                                  }}
+                                  title={lvl.label}
+                                />
+                              ))}
+                            </div>
                           </div>
-                        );
-                      })}
-                    </div>
+
+                          {activeLevel && activeLevel.key !== 'NO_OBSERVADO' && (
+                            <div className="bg-slate-50 border border-slate-200 rounded-md p-2.5 my-2 text-xs text-slate-700">
+                              <strong className="font-semibold">{activeLevel.label}: </strong>
+                              {activeLevel.desc}
+                            </div>
+                          )}
+
+                          {isObsOpen && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <input
+                                type="text"
+                                placeholder="Observación técnica o metodológica..."
+                                value={obs}
+                                onChange={(e) => handleObs(item, e.target.value)}
+                                className="w-full text-xs border border-slate-200 rounded px-3 py-1.5 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => toggleObs(item)}
+                                className="text-slate-400 hover:text-slate-600 text-xs px-1"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
+                </div>
+              ))}
+
+              <div className="pt-6 border-t border-slate-200 space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
+                    {tipoEvaluacion === 'JUGADORES' ? 'Fortalezas Destacadas' : 'Aspectos Metodológicos Sobresalientes'}
+                  </label>
+                  <textarea
+                    value={fortalezas}
+                    onChange={(e) => setFortalezas(e.target.value)}
+                    rows={2}
+                    className="w-full text-xs border border-slate-200 rounded-md p-2.5 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
+                    {tipoEvaluacion === 'JUGADORES' ? 'Objetivos de Mejora Técnica' : 'Plan de Acción y Objetivos de la Dirección Técnica'}
+                  </label>
+                  <textarea
+                    value={objetivos}
+                    onChange={(e) => setObjetivos(e.target.value)}
+                    rows={2}
+                    className="w-full text-xs border border-slate-200 rounded-md p-2.5 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Evaluador/a Responsable</label>
+                  <input
+                    type="text"
+                    value={evaluadorNombre}
+                    onChange={(e) => setEvaluadorNombre(e.target.value)}
+                    className="w-full text-xs border border-slate-200 rounded-md p-2 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
               </div>
-            )}
+            </div>
 
             <div className="mt-8 flex justify-between items-center border-t border-slate-200 pt-4">
               <button
@@ -2161,7 +2088,7 @@ export default function App() {
                   </h2>
                   <p className="text-xs text-slate-600 font-medium">
                     {clubActivo.nombre} • {tipoEvaluacion === 'JUGADORES' ? equipoSeleccionado.nombre : coachSeleccionado?.equipoNombre}
-                    {tipoEvaluacion === 'JUGADORES' ? ` • Dorsal ${jugadorSeleccionado.dorsal} • Nacimiento: ${jugadorSeleccionado.nacimiento}` : ' • Entrenador/a Principal'}
+                    {tipoEvaluacion === 'JUGADORES' ? ` • Dorsal ${jugadorSeleccionado.dorsal} • Nacimiento: ${jugadorSeleccionado.nacimiento}` : ' • Evaluación Metodológica de Cuerpo Técnico'}
                   </p>
                 </div>
               </div>
@@ -2178,7 +2105,7 @@ export default function App() {
 
             <div className="grid grid-cols-2 gap-8 my-4 text-xs">
               <div className="space-y-4">
-                {rubricas.slice(0, 2).map((cat) => (
+                {rubricasActivas.slice(0, 2).map((cat) => (
                   <div key={cat.id}>
                     <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
                       {cat.nombre}
@@ -2194,7 +2121,7 @@ export default function App() {
                               className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
                               style={{ 
                                 color: level?.color || '#64748B',
-                                backgroundColor: level?.key === 'EXCELENTE' ? '#F0FDF4' : level?.key === 'CONSOLIDADO' ? '#F0FDF4' : level?.key === 'EN_DESARROLLO' ? '#FFFBEB' : level?.key === 'NECESITA_APOYO' ? '#FEF2F2' : '#F8FAFC'
+                                backgroundColor: level?.key === 'EXCELENTE' ? '#F0FDF4' : level?.key === 'CONSOLIDADO' || level?.key === 'BUENO' ? '#F0FDF4' : level?.key === 'EN_DESARROLLO' || level?.key === 'MEJORABLE' ? '#FFFBEB' : level?.key === 'NECESITA_APOYO' ? '#FEF2F2' : '#F8FAFC'
                               }}
                             >
                               {level ? level.label : 'Sin evaluar'}
@@ -2208,7 +2135,7 @@ export default function App() {
               </div>
 
               <div className="space-y-4">
-                {rubricas.slice(2, 4).map((cat) => (
+                {rubricasActivas.slice(2, 4).map((cat) => (
                   <div key={cat.id}>
                     <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
                       {cat.nombre}
@@ -2224,7 +2151,7 @@ export default function App() {
                               className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
                               style={{ 
                                 color: level?.color || '#64748B',
-                                backgroundColor: level?.key === 'EXCELENTE' ? '#F0FDF4' : level?.key === 'CONSOLIDADO' ? '#F0FDF4' : level?.key === 'EN_DESARROLLO' ? '#FFFBEB' : level?.key === 'NECESITA_APOYO' ? '#FEF2F2' : '#F8FAFC'
+                                backgroundColor: level?.key === 'EXCELENTE' ? '#F0FDF4' : level?.key === 'CONSOLIDADO' || level?.key === 'BUENO' ? '#F0FDF4' : level?.key === 'EN_DESARROLLO' || level?.key === 'MEJORABLE' ? '#FFFBEB' : level?.key === 'NECESITA_APOYO' ? '#FEF2F2' : '#F8FAFC'
                               }}
                             >
                               {level ? level.label : 'Sin evaluar'}
@@ -2240,7 +2167,9 @@ export default function App() {
 
             <div className="grid grid-cols-12 gap-6 pt-3 border-t border-slate-200 items-center">
               <div className="col-span-4 flex flex-col items-center justify-center">
-                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">Perfil de Rendimiento</span>
+                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  {tipoEvaluacion === 'JUGADORES' ? 'Perfil de Rendimiento' : 'Balance de Competencias Técnicas'}
+                </span>
                 <svg width="150" height="150" viewBox="0 0 150 150" className="overflow-visible">
                   <polygon points="75,25 125,75 75,125 25,75" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
                   <polygon points="75,50 100,75 75,100 50,75" fill="none" stroke="#E2E8F0" strokeWidth="1" />
@@ -2249,20 +2178,35 @@ export default function App() {
 
                   <polygon points={radarPoints} fill="rgba(22, 163, 74, 0.25)" stroke="#16A34A" strokeWidth="2.5" />
 
-                  <text x="75" y="17" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">MOTOR</text>
-                  <text x="132" y="78" textAnchor="start" className="text-[8px] font-bold fill-slate-700">TÉCNICA</text>
-                  <text x="75" y="137" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">TÁCTICA</text>
-                  <text x="18" y="78" textAnchor="end" className="text-[8px] font-bold fill-slate-700">DEFENSA</text>
+                  {tipoEvaluacion === 'JUGADORES' ? (
+                    <>
+                      <text x="75" y="17" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">MOTOR</text>
+                      <text x="132" y="78" textAnchor="start" className="text-[8px] font-bold fill-slate-700">TÉCNICA</text>
+                      <text x="75" y="137" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">TÁCTICA</text>
+                      <text x="18" y="78" textAnchor="end" className="text-[8px] font-bold fill-slate-700">DEFENSA</text>
+                    </>
+                  ) : (
+                    <>
+                      <text x="75" y="17" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">COMUNICACIÓN</text>
+                      <text x="132" y="78" textAnchor="start" className="text-[8px] font-bold fill-slate-700">MÉTODO</text>
+                      <text x="75" y="137" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">DIRECCIÓN</text>
+                      <text x="18" y="78" textAnchor="end" className="text-[8px] font-bold fill-slate-700">COMPROMISO</text>
+                    </>
+                  )}
                 </svg>
               </div>
 
               <div className="col-span-8 space-y-2.5 text-xs">
                 <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                  <h5 className="font-bold text-slate-900 mb-0.5 text-[10.5px] uppercase tracking-wider">Fortalezas Destacadas</h5>
+                  <h5 className="font-bold text-slate-900 mb-0.5 text-[10.5px] uppercase tracking-wider">
+                    {tipoEvaluacion === 'JUGADORES' ? 'Fortalezas Destacadas' : 'Aspectos Sobresalientes'}
+                  </h5>
                   <p className="text-slate-700 leading-relaxed text-[11px]">{fortalezas || 'Sin observaciones registradas.'}</p>
                 </div>
                 <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                  <h5 className="font-bold text-slate-900 mb-0.5 text-[10.5px] uppercase tracking-wider">Objetivos de Mejora</h5>
+                  <h5 className="font-bold text-slate-900 mb-0.5 text-[10.5px] uppercase tracking-wider">
+                    {tipoEvaluacion === 'JUGADORES' ? 'Objetivos de Mejora' : 'Plan de Acción y Pautas de Dirección Técnica'}
+                  </h5>
                   <p className="text-slate-700 leading-relaxed text-[11px]">{objetivos || 'Sin objetivos registrados.'}</p>
                 </div>
               </div>
@@ -2272,8 +2216,8 @@ export default function App() {
               <div className="flex items-center space-x-3">
                 <span className="font-bold text-slate-700 uppercase">Criterios:</span>
                 <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-emerald-600" /><span>Excelente</span></span>
-                <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-green-500" /><span>Consolidado</span></span>
-                <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-amber-500" /><span>En desarrollo</span></span>
+                <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-green-500" /><span>{tipoEvaluacion === 'JUGADORES' ? 'Consolidado' : 'Bueno'}</span></span>
+                <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-amber-500" /><span>{tipoEvaluacion === 'JUGADORES' ? 'En desarrollo' : 'Mejorable'}</span></span>
                 <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-rose-500" /><span>Necesita apoyo</span></span>
               </div>
               <div>
@@ -2352,7 +2296,7 @@ export default function App() {
 
                   <div className="grid grid-cols-2 gap-8 my-4 text-xs">
                     <div className="space-y-4">
-                      {rubricas.slice(0, 2).map((cat) => (
+                      {rubricasJugadores.slice(0, 2).map((cat) => (
                         <div key={cat.id}>
                           <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
                             {cat.nombre}
@@ -2370,7 +2314,7 @@ export default function App() {
                     </div>
 
                     <div className="space-y-4">
-                      {rubricas.slice(2, 4).map((cat) => (
+                      {rubricasJugadores.slice(2, 4).map((cat) => (
                         <div key={cat.id}>
                           <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
                             {cat.nombre}
