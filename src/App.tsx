@@ -247,6 +247,15 @@ const USUARIOS_INICIALES: AppUser[] = [
 ];
 
 export default function App() {
+  // Detector de Token Público de Familia
+  const [publicToken, setPublicToken] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('token');
+    }
+    return null;
+  });
+
   const [sessionUser, setSessionUser] = useState<AppUser | null>(() => {
     const saved = localStorage.getItem('app_auth_user');
     return saved ? JSON.parse(saved) : null;
@@ -714,10 +723,133 @@ export default function App() {
   };
 
   const asistActual = calcularAsistenciaJugador(jugadorSeleccionado?.id, equipoSeleccionado);
-  const publicFamilyUrl = `https://evaculacion-clu-bs.vercel.app/?token=${jugadorSeleccionado?.tokenPublico || 'alumno'}`;
+  const publicFamilyUrl = `https://evaculacion-clu-bs.vercel.app/?token=${jugadorSeleccionado?.tokenPublico || 'mat-alv-2015'}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(publicFamilyUrl)}`;
 
-  // VISTA: LOGIN
+  // ==========================================
+  // VISTA PÚBLICA PARA FAMILIAS (DESDE EL QR)
+  // ==========================================
+  if (publicToken) {
+    let jugadorPublico: Player | undefined;
+    let equipoPublico: Team | undefined;
+    let clubPublico: Club | undefined;
+
+    for (const eq of equipos) {
+      const j = eq.jugadores.find(p => p.tokenPublico === publicToken || p.id === publicToken);
+      if (j) {
+        jugadorPublico = j;
+        equipoPublico = eq;
+        clubPublico = clubs.find(c => c.id === eq.clubId);
+        break;
+      }
+    }
+
+    if (!jugadorPublico) {
+      jugadorPublico = equipos[0]?.jugadores[0] || EQUIPOS_INICIALES[0].jugadores[0];
+      equipoPublico = equipos[0] || EQUIPOS_INICIALES[0];
+      clubPublico = clubs[0] || CLUBS_INICIALES[0];
+    }
+
+    const asistPublico = calcularAsistenciaJugador(jugadorPublico.id, equipoPublico);
+    const siglasPublico = (clubPublico?.nombre || 'CB')
+      .split(' ')
+      .filter(w => w.length > 0)
+      .map(w => w[0].toUpperCase())
+      .slice(0, 3)
+      .join('');
+
+    return (
+      <div className="min-h-screen bg-slate-100 text-slate-900 p-4 sm:p-6 font-sans">
+        <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-200 p-6 sm:p-8 space-y-6">
+          
+          <div className="flex justify-between items-center border-b pb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center p-1 font-bold text-slate-800 text-base overflow-hidden">
+                {clubPublico?.logoUrl ? (
+                  <img src={clubPublico.logoUrl} alt="Escudo" className="w-full h-full object-contain" />
+                ) : (
+                  <span className="text-emerald-600 font-bold">{siglasPublico}</span>
+                )}
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded uppercase tracking-wider border border-emerald-200">
+                  Portal de Seguimiento Deportivo
+                </span>
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900">{jugadorPublico.nombre}</h1>
+                <p className="text-xs text-slate-500">
+                  {clubPublico?.nombre} • {equipoPublico?.nombre} • Dorsal #{jugadorPublico.dorsal} ({jugadorPublico.nacimiento})
+                </p>
+              </div>
+            </div>
+
+            <div className="text-right">
+              <span className="text-xs font-bold bg-slate-100 text-slate-800 px-3 py-1 rounded-lg border border-slate-200">
+                Asistencia: {asistPublico.pct}%
+              </span>
+              <p className="text-[11px] text-slate-400 mt-1">{asistPublico.presentes} de {asistPublico.totalSesiones} sesiones</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+            {rubricas.map(cat => (
+              <div key={cat.id} className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                <h3 className="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b border-slate-200 pb-1">
+                  {cat.nombre}
+                </h3>
+                <div className="space-y-1.5 pt-1">
+                  {cat.items.map(item => {
+                    const sel = respuestas[item]?.nivel || 'CONSOLIDADO';
+                    const lvl = NIVELES_JUGADORES.find(l => l.key === sel);
+                    return (
+                      <div key={item} className="flex justify-between items-center bg-white p-2 rounded border border-slate-200/80">
+                        <span className="font-medium text-slate-800">{item}</span>
+                        <span 
+                          className="font-bold text-[10px] px-2 py-0.5 rounded"
+                          style={{ 
+                            color: lvl?.color || '#16A34A',
+                            backgroundColor: lvl?.key === 'EXCELENTE' ? '#F0FDF4' : lvl?.key === 'CONSOLIDADO' ? '#F0FDF4' : lvl?.key === 'EN_DESARROLLO' ? '#FFFBEB' : '#FEF2F2'
+                          }}
+                        >
+                          {lvl ? lvl.label : 'Consolidado'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div className="bg-emerald-50/60 border border-emerald-200 p-4 rounded-xl">
+              <h4 className="font-bold text-emerald-950 uppercase text-[11px] mb-1">Fortalezas</h4>
+              <p className="text-emerald-900 leading-relaxed">{fortalezas}</p>
+            </div>
+            <div className="bg-amber-50/60 border border-amber-200 p-4 rounded-xl">
+              <h4 className="font-bold text-amber-950 uppercase text-[11px] mb-1">Objetivos de Mejora</h4>
+              <p className="text-amber-900 leading-relaxed">{objetivos}</p>
+            </div>
+          </div>
+
+          <div className="border-t pt-4 flex justify-between items-center text-xs text-slate-400">
+            <span>Evaluación {periodo} • {clubPublico?.temporada}</span>
+            <button
+              onClick={() => {
+                window.history.pushState({}, '', window.location.pathname);
+                setPublicToken(null);
+              }}
+              className="text-emerald-700 font-semibold hover:underline"
+            >
+              Acceso Entrenadores →
+            </button>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
+  // VISTA: LOGIN DE GESTIÓN
   if (!sessionUser) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans">
@@ -1136,7 +1268,6 @@ export default function App() {
               </button>
             </div>
 
-            {/* 1. Alta de Club */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">1. Dar de Alta Nuevo Club / Colegio</h3>
               <form onSubmit={handleCrearClub} className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -1164,7 +1295,6 @@ export default function App() {
               </form>
             </div>
 
-            {/* Gestión / Edición de Clubs Registrados */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">Clubes Activos (Modificar Nombre o Escudo)</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1189,7 +1319,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* 2. Crear Usuario con Contraseña */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">2. Crear Usuario y Asignar Contraseña</h3>
               <form onSubmit={handleCrearUsuario} className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
@@ -1245,7 +1374,6 @@ export default function App() {
               </form>
             </div>
 
-            {/* 3. Listado de Usuarios Activos */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">3. Usuarios, Contraseñas y Permisos Activos</h3>
               <table className="w-full text-left text-xs">
