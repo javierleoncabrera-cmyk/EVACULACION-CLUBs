@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from './supabase';
 
 type UserRole = 'SUPER_ADMIN' | 'DIRECTOR' | 'ENTRENADOR';
 type Gender = 'FEMENINO' | 'MASCULINO';
@@ -162,7 +163,7 @@ const USUARIOS_INICIALES: AppUser[] = [
 ];
 
 export default function App() {
-  const [publicToken, setPublicToken] = useState<string | null>(() => {
+  const [publicToken] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       return params.get('token');
@@ -251,10 +252,6 @@ export default function App() {
     'Dominio del bote': { nivel: 'NECESITA_APOYO', obs: '' },
     'Claridad y brevedad en consignas': { nivel: 'EXCELENTE', obs: 'Consignas directas.' }
   });
-
-  const [fortalezas] = useState('Excelente actitud, visión táctica y disciplina.');
-  const [objetivos] = useState('Mejora en la mano no dominante y control de ritmo.');
-  const [evaluadorNombre] = useState('Dirección Técnica');
 
   const effectiveClubId = sessionUser?.role === 'DIRECTOR' || sessionUser?.role === 'ENTRENADOR'
     ? (sessionUser.clubId || clubActivoId)
@@ -412,14 +409,6 @@ export default function App() {
     link.href = encodeURI('data:text/csv;charset=utf-8,' + csv);
     link.download = 'plantilla.csv';
     link.click();
-  };
-
-  const calcularPromedioCategoria = (categoriaIdx: number) => {
-    const cat = rubricasActivas[categoriaIdx];
-    if (!cat || cat.items.length === 0) return 0.7;
-    let suma = 0, total = 0;
-    cat.items.forEach(item => { const lvl = nivelesActuales.find(n => n.key === respuestas[item]?.nivel); if (lvl && lvl.weight > 0) { suma += lvl.weight; total++; } });
-    return total > 0 ? (suma / (total * 4)) : 0.7;
   };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
