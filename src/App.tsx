@@ -573,7 +573,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA: PORTADA PROFESIONAL (LOGIN)
+  // VISTA: PORTADA PROFESIONAL (LOGIN REESTRUCTURADO)
   // ==========================================
   if (!sessionUser) {
     return (
@@ -581,62 +581,65 @@ export default function App() {
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl relative z-10">
+        <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 bg-slate-900/90 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl relative z-10">
           
+          {/* Columna Izquierda: Autoridad y Beneficios */}
           <div className="lg:col-span-7 p-8 sm:p-12 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950">
             <div>
-              <div className="inline-flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-emerald-400 text-xs font-semibold tracking-wide uppercase mb-6">
+              {/* Etiqueta de confianza superior optimizada */}
+              <div className="inline-flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-full text-emerald-400 text-xs font-semibold tracking-wide uppercase mb-6 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Dirección Técnica &amp; Metodología Deportiva</span>
+                <span>Software Exclusivo para Canteras y Clubes</span>
               </div>
 
-              {/* Titular con doble énfasis en Mayúsculas */}
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight mb-4">
-                El control absoluto de la <span className="text-emerald-400">EVOLUCIÓN</span> técnica y el <span className="text-emerald-400">RENDIMIENTO</span> deportivo.
+              {/* Titular con doble énfasis en EVOLUCIÓN y RENDIMIENTO */}
+              <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold text-white tracking-tight leading-[1.15] mb-6">
+                El control absoluto de la <span className="text-emerald-400 underline decoration-emerald-500/30 decoration-wavy">EVOLUCIÓN</span> técnica y el <span className="text-emerald-400">RENDIMIENTO</span> deportivo.
               </h1>
               
-              <p className="text-slate-400 text-sm leading-relaxed mb-8">
+              <p className="text-slate-400 text-sm leading-relaxed mb-8 max-w-xl">
                 La plataforma integral para la dirección técnica y el desarrollo del deportista. Centraliza el control de sesiones, unifica criterios formativos y ofrece a las familias una visión transparente de su evolución.
               </p>
 
+              {/* Módulos Destacados con beneficios comerciales claros */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl">
-                  <div className="text-emerald-400 font-bold mb-1 flex items-center space-x-1.5">
+                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl hover:border-emerald-500/50 transition">
+                  <div className="text-emerald-400 font-bold mb-1 flex items-center space-x-1.5 text-sm">
                     <span>🏀</span>
                     <span>Evaluación Técnica 360°</span>
                   </div>
                   <p className="text-slate-400 text-[11px] leading-relaxed">
-                    Criterios claros y objetivos en desarrollo motriz, fundamentos técnicos, táctica y actitud.
+                    Criterios claros en desarrollo motriz, fundamentos técnicos, táctica y actitud competitiva.
                   </p>
                 </div>
 
-                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl">
-                  <div className="text-blue-400 font-bold mb-1 flex items-center space-x-1.5">
+                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl hover:border-blue-500/50 transition">
+                  <div className="text-blue-400 font-bold mb-1 flex items-center space-x-1.5 text-sm">
                     <span>📋</span>
-                    <span>Asistencia en Pista</span>
+                    <span>Control de Asistencia</span>
                   </div>
                   <p className="text-slate-400 text-[11px] leading-relaxed">
-                    Pase de lista en 10 segundos con cálculo de porcentaje real y exportación a Excel.
+                    Pase de lista en pista en 10 segundos, cálculo de porcentajes y exportación a Excel.
                   </p>
                 </div>
 
-                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl">
-                  <div className="text-purple-400 font-bold mb-1 flex items-center space-x-1.5">
+                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl hover:border-purple-500/50 transition">
+                  <div className="text-purple-400 font-bold mb-1 flex items-center space-x-1.5 text-sm">
                     <span>📱</span>
-                    <span>Acceso QR para Familias</span>
+                    <span>Portal QR Familias</span>
                   </div>
                   <p className="text-slate-400 text-[11px] leading-relaxed">
-                    Consulta en tiempo real para padres con enlace encriptado y seguro según RGPD.
+                    Fichas en tiempo real para padres con token seguro y estricto cumplimiento RGPD.
                   </p>
                 </div>
 
-                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl">
-                  <div className="text-amber-400 font-bold mb-1 flex items-center space-x-1.5">
+                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl hover:border-amber-500/50 transition">
+                  <div className="text-amber-400 font-bold mb-1 flex items-center space-x-1.5 text-sm">
                     <span>🖨️</span>
-                    <span>Dossier Oficial A4</span>
+                    <span>Dossier A4 Profesional</span>
                   </div>
                   <p className="text-slate-400 text-[11px] leading-relaxed">
-                    Informes calibrados al milímetro para impresión en una sola hoja con el escudo del club.
+                    Informes impecables calibrados para impresión directa en hoja única con escudo.
                   </p>
                 </div>
               </div>
@@ -650,10 +653,12 @@ export default function App() {
             </div>
           </div>
 
-          <div className="lg:col-span-5 p-8 sm:p-10 flex flex-col justify-center bg-slate-900/40">
-            <div className="max-w-sm mx-auto w-full space-y-6">
+          {/* Columna Derecha: Tarjeta de Acceso Optimizada (Con mejor peso visual) */}
+          <div className="lg:col-span-5 p-8 sm:p-10 flex flex-col justify-center bg-slate-900/60">
+            <div className="max-w-sm mx-auto w-full bg-slate-950/60 border border-slate-800/80 p-6 sm:p-8 rounded-2xl shadow-xl space-y-6">
+              
               <div>
-                <h2 className="text-xl font-bold text-white tracking-tight">Acceso a la Plataforma</h2>
+                <h2 className="text-lg font-bold text-white tracking-tight">Acceso a la Plataforma</h2>
                 <p className="text-xs text-slate-400 mt-1">Introduce tus credenciales autorizadas</p>
               </div>
 
@@ -672,7 +677,7 @@ export default function App() {
                     placeholder="direccion@club.com"
                     value={authEmail}
                     onChange={(e) => setAuthEmail(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
                   />
                 </div>
 
@@ -684,39 +689,40 @@ export default function App() {
                     placeholder="••••••••"
                     value={authPass}
                     onChange={(e) => setAuthPass(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl shadow-lg transition text-xs"
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-emerald-950 transition text-xs tracking-wide"
                 >
                   Entrar al Portal
                 </button>
               </form>
 
-              <div className="pt-4 border-t border-slate-800 text-center">
+              <div className="pt-4 border-t border-slate-800/80 text-center">
                 {!mostrarDemo ? (
                   <button
                     type="button"
                     onClick={() => setMostrarDemo(true)}
-                    className="text-[11px] text-slate-500 hover:text-slate-400 transition"
+                    className="text-[11px] text-slate-400 hover:text-emerald-400 font-medium transition inline-flex items-center gap-1.5 py-1"
                   >
-                    🛠️ Modo Demostración en Vivo
+                    <span>🛠️</span> Probar Demostración en Vivo
                   </button>
                 ) : (
-                  <div className="space-y-2 text-left animate-in fade-in duration-200">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-[10px] font-bold uppercase text-slate-400">Accesos Rápidos Demo</span>
-                      <button type="button" onClick={() => setMostrarDemo(false)} className="text-[10px] text-slate-500 hover:text-slate-300">✕ Ocultar</button>
+                  <div className="space-y-2 text-left animate-in fade-in duration-200 bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Accesos Rápidos Demo</span>
+                      <button type="button" onClick={() => setMostrarDemo(false)} className="text-[10px] text-slate-400 hover:text-white">✕ Ocultar</button>
                     </div>
-                    <button type="button" onClick={() => handleDemoLogin('SUPER_ADMIN')} className="w-full bg-purple-950/40 hover:bg-purple-950 text-purple-200 text-xs py-2 px-3 rounded-xl flex justify-between"><span>👑 Super Admin</span><span>Global →</span></button>
-                    <button type="button" onClick={() => handleDemoLogin('DIRECTOR')} className="w-full bg-emerald-950/40 hover:bg-emerald-950 text-emerald-200 text-xs py-2 px-3 rounded-xl flex justify-between"><span>🏢 Director Deportivo</span><span>Club →</span></button>
-                    <button type="button" onClick={() => handleDemoLogin('ENTRENADOR')} className="w-full bg-blue-950/40 hover:bg-blue-950 text-blue-200 text-xs py-2 px-3 rounded-xl flex justify-between"><span>📋 Entrenador en Pista</span><span>Carlos →</span></button>
+                    <button type="button" onClick={() => handleDemoLogin('SUPER_ADMIN')} className="w-full bg-purple-950/40 hover:bg-purple-900 text-purple-200 text-xs py-2 px-3 rounded-lg flex justify-between items-center transition"><span>👑 Super Admin</span><span className="text-[10px] text-purple-400">Global →</span></button>
+                    <button type="button" onClick={() => handleDemoLogin('DIRECTOR')} className="w-full bg-emerald-950/40 hover:bg-emerald-900 text-emerald-200 text-xs py-2 px-3 rounded-lg flex justify-between items-center transition"><span>🏢 Director Deportivo</span><span className="text-[10px] text-emerald-400">Club →</span></button>
+                    <button type="button" onClick={() => handleDemoLogin('ENTRENADOR')} className="w-full bg-blue-950/40 hover:bg-blue-900 text-blue-200 text-xs py-2 px-3 rounded-lg flex justify-between items-center transition"><span>📋 Entrenador en Pista</span><span className="text-[10px] text-blue-400">Carlos →</span></button>
                   </div>
                 )}
               </div>
+
             </div>
           </div>
 
