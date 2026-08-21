@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabase';
 
 type UserRole = 'SUPER_ADMIN' | 'DIRECTOR' | 'ENTRENADOR';
 type Gender = 'FEMENINO' | 'MASCULINO';
@@ -247,17 +246,15 @@ export default function App() {
   const [nuevoDorsal, setNuevoDorsal] = useState('');
   const [nuevoNacimiento, setNuevoNacimiento] = useState('');
 
-  const [obsAbiertas, setObsAbiertas] = useState<Record<string, boolean>>({});
-
   const [respuestas, setRespuestas] = useState<Record<string, { nivel: string; obs: string }>>({
     'Coordinación dinámica': { nivel: 'EN_DESARROLLO', obs: '' },
     'Dominio del bote': { nivel: 'NECESITA_APOYO', obs: '' },
     'Claridad y brevedad en consignas': { nivel: 'EXCELENTE', obs: 'Consignas directas.' }
   });
 
-  const [fortalezas, setFortalezas] = useState('Excelente actitud, visión táctica y disciplina.');
-  const [objetivos, setObjetivos] = useState('Mejora en la mano no dominante y control de ritmo.');
-  const [evaluadorNombre, setEvaluadorNombre] = useState('Dirección Técnica');
+  const [fortalezas] = useState('Excelente actitud, visión táctica y disciplina.');
+  const [objetivos] = useState('Mejora en la mano no dominante y control de ritmo.');
+  const [evaluadorNombre] = useState('Dirección Técnica');
 
   const effectiveClubId = sessionUser?.role === 'DIRECTOR' || sessionUser?.role === 'ENTRENADOR'
     ? (sessionUser.clubId || clubActivoId)
@@ -425,8 +422,6 @@ export default function App() {
     return total > 0 ? (suma / (total * 4)) : 0.7;
   };
 
-  const radarPoints = `${75},${75 - 50 * calcularPromedioCategoria(0)} ${75 + 50 * calcularPromedioCategoria(1)},${75} ${75},${75 + 50 * calcularPromedioCategoria(2)} ${75 - 50 * calcularPromedioCategoria(3)},${75}`;
-
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -487,6 +482,44 @@ export default function App() {
     setEquipoSeleccionado(nuevo);
     setNuevoNombreEquipo(''); setNuevaCatEquipo(''); setNuevoEntrenador('');
     setPantalla('EQUIPOS');
+  };
+
+  const handleAddJugador = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevoNombreJugador) return;
+    const randomHex = Math.random().toString(36).substring(2, 8) + Date.now().toString(36).substring(4);
+    const secureToken = `sec_${randomHex}`;
+    
+    const nuevoJ: Player = {
+      id: `j_${Date.now()}`,
+      nombre: nuevoNombreJugador,
+      dorsal: parseInt(nuevoDorsal) || 0,
+      nacimiento: parseInt(nuevoNacimiento) || 2015,
+      tokenPublico: secureToken,
+      inicial: 'PENDIENTE',
+      media: 'PENDIENTE',
+      final: 'PENDIENTE'
+    };
+
+    const actualizados = equipos.map(eq => {
+      if (eq.id === equipoSeleccionado.id) {
+        const nuevosJugs = [...eq.jugadores, nuevoJ];
+        const eqActualizado = { ...eq, jugadores: nuevosJugs };
+        setEquipoSeleccionado(eqActualizado);
+        return eqActualizado;
+      }
+      return eq;
+    });
+
+    setEquipos(actualizados);
+    setNuevoNombreJugador(''); setNuevoDorsal(''); setNuevoNacimiento('');
+  };
+
+  const handleScore = (indicador: string, levelKey: string) => {
+    setRespuestas(prev => ({
+      ...prev,
+      [indicador]: { ...prev[indicador], nivel: levelKey }
+    }));
   };
 
   const asistActual = calcularAsistenciaJugador(jugadorSeleccionado?.id, equipoSeleccionado);
@@ -577,7 +610,6 @@ export default function App() {
                 La plataforma integral para la dirección técnica y el desarrollo del deportista. Centraliza el control de sesiones, unifica criterios formativos y ofrece a las familias una visión transparente de su evolución.
               </p>
 
-              {/* Módulos Destacados Actualizados */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl">
                   <div className="text-emerald-400 font-bold mb-1 flex items-center space-x-1.5">
