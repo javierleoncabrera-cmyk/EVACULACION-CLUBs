@@ -1,0 +1,2593 @@
+import React, { useState, useEffect } from 'react';
+import { supabase } from './supabase';
+
+type Gender = 'FEMENINO' | 'MASCULINO';
+type TargetType = 'JUGADORES' | 'ENTRENADORES';
+type Period = 'Inicial' | 'Media' | 'Final';
+type AttendanceStatus = 'PRESENTE' | 'FALTA' | 'JUSTIFICADA' | 'LESIONADO';
+type SessionType = 'ENTRENAMIENTO' | 'PARTIDO';
+type Screen =
+  | 'EQUIPOS'
+  | 'PLANTILLA'
+  | 'PASAR_LISTA'
+  | 'HISTORIAL_JUGADOR'
+  | 'LISTA_ENTRENADORES'
+  | 'FORMULARIO'
+  | 'INFORME'
+  | 'INFORME_EQUIPO'
+  | 'MODAL_NUEVO_EQUIPO'
+  | 'MODAL_NUEVO_CLUB';
+
+interface LevelOption {
+  key: string;
+  label: string;
+  desc: string;
+  color: string;
+  weight: number;
+}
+
+interface EvaluationRecord {
+  periodo: Period;
+  temporada: string;
+  categoria: string;
+  fecha: string;
+  promedioNivel: string;
+  fortalezas: string;
+  objetivos: string;
+}
+
+interface Player {
+  id: string;
+  nombre: string;
+  dorsal: number;
+  nacimiento: number;
+  inicial: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
+  media: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
+  final: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
+  historial?: EvaluationRecord[];
+}
+
+interface Session {
+  id: string;
+  fecha: string;
+  tipo: SessionType;
+  asistencias: Record<string, AttendanceStatus>;
+}
+
+interface Coach {
+  id: string;
+  nombre: string;
+  cargo: string;
+  equipoNombre: string;
+  gender: Gender;
+  inicial: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
+  media: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
+  final: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
+}
+
+interface Team {
+  id: string;
+  clubId: string;
+  nombre: string;
+  categoria: string;
+  gender: Gender;
+  entrenador: string;
+  jugadores: Player[];
+  sesiones: Session[];
+}
+
+interface Club {
+  id: string;
+  nombre: string;
+  temporada: string;
+  logoUrl: string | null;
+}
+
+const NIVELES_JUGADORES: LevelOption[] = [
+  {
+    key: 'EXCELENTE',
+    label: 'Excelente',
+    desc: 'Dominio sobresaliente y constante en competición y entrenamiento.',
+    color: '#16A34A',
+    weight: 4,
+  },
+  {
+    key: 'CONSOLIDADO',
+    label: 'Consolidado',
+    desc: 'Adquirido y ejecutado con regularidad y autonomía.',
+    color: '#22C55E',
+    weight: 3,
+  },
+  {
+    key: 'EN_DESARROLLO',
+    label: 'En desarrollo',
+    desc: 'En proceso de aprendizaje; requiere pautas o repetición.',
+    color: '#F59E0B',
+    weight: 2,
+  },
+  {
+    key: 'NECESITA_APOYO',
+    label: 'Necesita apoyo',
+    desc: 'Dificultad evidente en la comprensión o ejecución técnica.',
+    color: '#EF4444',
+    weight: 1,
+  },
+  {
+    key: 'NO_OBSERVADO',
+    label: 'No observado',
+    desc: 'Sin datos suficientes de valoración en este periodo.',
+    color: '#CBD5E1',
+    weight: 0,
+  },
+];
+
+const NIVELES_ENTRENADORES: LevelOption[] = [
+  {
+    key: 'EXCELENTE',
+    label: 'Excelente',
+    desc: 'Siempre claro, metódico y adaptado al grupo.',
+    color: '#16A34A',
+    weight: 4,
+  },
+  {
+    key: 'BUENO',
+    label: 'Bueno',
+    desc: 'Generalmente adecuado y consistente en la dirección.',
+    color: '#22C55E',
+    weight: 3,
+  },
+  {
+    key: 'MEJORABLE',
+    label: 'Mejorable',
+    desc: 'Ocasionalmente inadecuado o con margen de optimización.',
+    color: '#F59E0B',
+    weight: 2,
+  },
+  {
+    key: 'NECESITA_APOYO',
+    label: 'Necesita apoyo',
+    desc: 'Frecuentemente confuso o con carencias metodológicas.',
+    color: '#EF4444',
+    weight: 1,
+  },
+  {
+    key: 'NO_OBSERVADO',
+    label: 'No observado',
+    desc: 'No evaluado durante las sesiones observadas.',
+    color: '#CBD5E1',
+    weight: 0,
+  },
+];
+
+const RUBRICA_JUGADORES = [
+  {
+    nombre: 'Desarrollo motor',
+    items: [
+      'Coordinación',
+      'Equilibrio',
+      'Carrera',
+      'Cambios de dirección',
+      'Salto',
+    ],
+  },
+  {
+    nombre: 'Técnica individual',
+    items: [
+      'Bote',
+      'Pase',
+      'Recepción',
+      'Tiro',
+      'Entrada',
+      'Paradas',
+      'Pivotes',
+      'Mano no dominante',
+    ],
+  },
+  {
+    nombre: 'Comprensión del juego',
+    items: [
+      'Ocupación de espacios',
+      'Juego sin balón',
+      '1c1',
+      'Toma de decisiones',
+      'Lectura del juego',
+      'Juego colectivo',
+    ],
+  },
+  {
+    nombre: 'Defensa',
+    items: [
+      'Actitud defensiva',
+      'Colocación',
+      '1c1 defensivo',
+      'Ayudas',
+      'Balance defensivo',
+    ],
+  },
+];
+
+const RUBRICA_ENTRENADORES = [
+  {
+    nombre: 'Comunicación y lenguaje',
+    items: [
+      {
+        nombre: 'Claridad en las instrucciones',
+        descs: {
+          EXCELENTE: 'Siempre claro y específico en sus explicaciones.',
+          BUENO: 'Generalmente claro en la transmisión de conceptos.',
+          MEJORABLE: 'Ocasionalmente ambiguo o extenso en las explicaciones.',
+          NECESITA_APOYO: 'Frecuentemente confuso y genera dudas en el grupo.',
+        },
+      },
+      {
+        nombre: 'Volumen de voz adecuado',
+        descs: {
+          EXCELENTE: 'Tono modulado, enérgico y audible en toda la pista.',
+          BUENO: 'Generalmente adecuado al entorno de trabajo.',
+          MEJORABLE: 'Ocasionalmente inadecuado (demasiado bajo o gritos).',
+          NECESITA_APOYO: 'Inadecuado, no capta la atención del equipo.',
+        },
+      },
+      {
+        nombre: 'Feedback positivo y constructivo',
+        descs: {
+          EXCELENTE:
+            'Refuerzo constante, inmediato y con corrección constructiva.',
+          BUENO: 'Buen equilibrio entre corrección y motivación.',
+          MEJORABLE:
+            'Centrado casi exclusivamente en el error sin aportar solución.',
+          NECESITA_APOYO: 'Ausencia de feedback o comentarios desmotivadores.',
+        },
+      },
+    ],
+  },
+  {
+    nombre: 'Metodología y dinámica',
+    items: [
+      {
+        nombre: 'Gestión del tiempo y ritmo de sesión',
+        descs: {
+          EXCELENTE: 'Transiciones rápidas y máximo tiempo de práctica motriz.',
+          BUENO: 'Buen aprovechamiento del tiempo de pista.',
+          MEJORABLE: 'Paradas excesivamente largas para dar explicaciones.',
+          NECESITA_APOYO:
+            'Sesión desestructurada y pérdida continuada de tiempo.',
+        },
+      },
+    ],
+  },
+];
+
+const CLUBS_INICIALES: Club[] = [
+  {
+    id: 'club_doguen',
+    nombre: 'Club Doguen',
+    temporada: '2026/27',
+    logoUrl: null,
+  },
+  {
+    id: 'club_canarias',
+    nombre: 'CB San Cristóbal',
+    temporada: '2026/27',
+    logoUrl: null,
+  },
+];
+
+const EQUIPOS_INICIALES: Team[] = [
+  {
+    id: 't_doguen_1',
+    clubId: 'club_doguen',
+    nombre: 'Doguen Nuevo Sentimiento',
+    categoria: 'Alevín (2014-2015)',
+    gender: 'MASCULINO',
+    entrenador: 'Carlos Santana',
+    jugadores: [
+      {
+        id: 'j1',
+        nombre: 'Mateo Álvarez',
+        dorsal: 5,
+        nacimiento: 2015,
+        inicial: 'COMPLETADA',
+        media: 'PENDIENTE',
+        final: 'PENDIENTE',
+        historial: [
+          {
+            temporada: '2025/26',
+            categoria: 'Benjamín',
+            periodo: 'Final',
+            fecha: '28/05/2026',
+            promedioNivel: 'Consolidado',
+            fortalezas: 'Mucha velocidad y actitud.',
+            objetivos: 'Aprender tiro en suspensión.',
+          },
+        ],
+      },
+      {
+        id: 'j2',
+        nombre: 'Leo Batista',
+        dorsal: 55,
+        nacimiento: 2014,
+        inicial: 'COMPLETADA',
+        media: 'PENDIENTE',
+        final: 'PENDIENTE',
+        historial: [],
+      },
+    ],
+    sesiones: [
+      {
+        id: 's1',
+        fecha: '12/08/2026',
+        tipo: 'ENTRENAMIENTO',
+        asistencias: { j1: 'PRESENTE', j2: 'PRESENTE' },
+      },
+      {
+        id: 's2',
+        fecha: '14/08/2026',
+        tipo: 'ENTRENAMIENTO',
+        asistencias: { j1: 'PRESENTE', j2: 'FALTA' },
+      },
+      {
+        id: 's3',
+        fecha: '17/08/2026',
+        tipo: 'PARTIDO',
+        asistencias: { j1: 'PRESENTE', j2: 'PRESENTE' },
+      },
+    ],
+  },
+  {
+    id: 't_doguen_2',
+    clubId: 'club_doguen',
+    nombre: 'Alevín Academia Femenino',
+    categoria: 'Alevín (2015-2016)',
+    gender: 'FEMENINO',
+    entrenador: 'Laura Sánchez',
+    jugadores: [
+      {
+        id: 'j3',
+        nombre: 'Lucía Fernández',
+        dorsal: 4,
+        nacimiento: 2015,
+        inicial: 'COMPLETADA',
+        media: 'PENDIENTE',
+        final: 'PENDIENTE',
+        historial: [],
+      },
+      {
+        id: 'j4',
+        nombre: 'Jugadora Dos',
+        dorsal: 2,
+        nacimiento: 2015,
+        inicial: 'COMPLETADA',
+        media: 'BORRADOR',
+        final: 'PENDIENTE',
+        historial: [],
+      },
+    ],
+    sesiones: [],
+  },
+  {
+    id: 't_canarias_1',
+    clubId: 'club_canarias',
+    nombre: 'Infantil Masculino Autonómico',
+    categoria: 'Infantil (2013-2014)',
+    gender: 'MASCULINO',
+    entrenador: 'Alejandro Ramos',
+    jugadores: [
+      {
+        id: 'j5',
+        nombre: 'Marcos Alonso',
+        dorsal: 12,
+        nacimiento: 2013,
+        inicial: 'COMPLETADA',
+        media: 'PENDIENTE',
+        final: 'PENDIENTE',
+        historial: [],
+      },
+      {
+        id: 'j6',
+        nombre: 'Pablo Suárez',
+        dorsal: 8,
+        nacimiento: 2013,
+        inicial: 'PENDIENTE',
+        media: 'PENDIENTE',
+        final: 'PENDIENTE',
+        historial: [],
+      },
+    ],
+    sesiones: [],
+  },
+];
+
+export default function App() {
+  const [clubs, setClubs] = useState<Club[]>(() => {
+    const saved = localStorage.getItem('app_multi_clubs');
+    return saved ? JSON.parse(saved) : CLUBS_INICIALES;
+  });
+
+  const [clubActivoId, setClubActivoId] = useState<string>(() => {
+    return localStorage.getItem('app_active_club_id') || CLUBS_INICIALES[0].id;
+  });
+
+  const clubActivo =
+    clubs.find((c) => c.id === clubActivoId) || clubs[0] || CLUBS_INICIALES[0];
+
+  const [equipos, setEquipos] = useState<Team[]>(() => {
+    const saved = localStorage.getItem('app_multi_teams');
+    return saved ? JSON.parse(saved) : EQUIPOS_INICIALES;
+  });
+
+  const [editandoClub, setEditandoClub] = useState(false);
+  const [genero, setGenero] = useState<Gender>('MASCULINO');
+  const [tipoEvaluacion, setTipoEvaluacion] = useState<TargetType>('JUGADORES');
+  const [periodo, setPeriodo] = useState<Period>('Inicial');
+  const [pantalla, setPantalla] = useState<Screen>('EQUIPOS');
+
+  // Filtrar equipos del club activo
+  const equiposDelClub = equipos.filter((e) => e.clubId === clubActivo.id);
+  const equiposFiltrados = equiposDelClub.filter((e) => e.gender === genero);
+
+  const [equipoSeleccionado, setEquipoSeleccionado] = useState<Team>(
+    equiposFiltrados[0] || equiposDelClub[0] || EQUIPOS_INICIALES[0]
+  );
+  const [jugadorSeleccionado, setJugadorSeleccionado] = useState<Player>(
+    equipoSeleccionado?.jugadores[0] || EQUIPOS_INICIALES[0].jugadores[0]
+  );
+  const [coachSeleccionado, setCoachSeleccionado] = useState<Coach | null>(
+    null
+  );
+
+  // Formulario nuevo club
+  const [nuevoClubNombre, setNuevoClubNombre] = useState('');
+  const [nuevoClubTemporada, setNuevoClubTemporada] = useState('2026/27');
+
+  // Formulario nueva sesión
+  const [sessionFecha, setSessionFecha] = useState<string>(
+    new Date().toISOString().split('T')[0]
+  );
+  const [sessionTipo, setSessionTipo] = useState<SessionType>('ENTRENAMIENTO');
+  const [sessionAsistencias, setSessionAsistencias] = useState<
+    Record<string, AttendanceStatus>
+  >({});
+
+  // Formulario nuevo equipo y jugador
+  const [nuevoNombreEquipo, setNuevoNombreEquipo] = useState('');
+  const [nuevaCatEquipo, setNuevaCatEquipo] = useState('');
+  const [nuevoEntrenador, setNuevoEntrenador] = useState('');
+
+  const [nuevoNombreJugador, setNuevoNombreJugador] = useState('');
+  const [nuevoDorsal, setNuevoDorsal] = useState('');
+  const [nuevoNacimiento, setNuevoNacimiento] = useState('');
+
+  const [obsAbiertas, setObsAbiertas] = useState<Record<string, boolean>>({
+    Pase: true,
+  });
+
+  const [respuestas, setRespuestas] = useState<
+    Record<string, { nivel: string; obs: string }>
+  >({
+    Coordinación: { nivel: 'EN_DESARROLLO', obs: '' },
+    Bote: { nivel: 'NECESITA_APOYO', obs: '' },
+    Pase: { nivel: 'EXCELENTE', obs: 'Gran visión espacial' },
+    'Claridad en las instrucciones': { nivel: 'EXCELENTE', obs: '' },
+    'Volumen de voz adecuado': { nivel: 'BUENO', obs: '' },
+  });
+
+  const [fortalezas, setFortalezas] = useState(
+    'Es líder, gran compromiso táctico y concentración defensiva.'
+  );
+  const [objetivos, setObjetivos] = useState(
+    'Manejo de balón con mano no dominante, mejorar templanza tras error.'
+  );
+  const [evaluadorNombre, setEvaluadorNombre] = useState('Dirección Técnica');
+
+  // Guardado persistente
+  useEffect(() => {
+    localStorage.setItem('app_multi_clubs', JSON.stringify(clubs));
+    localStorage.setItem('app_multi_teams', JSON.stringify(equipos));
+    localStorage.setItem('app_active_club_id', clubActivoId);
+  }, [clubs, equipos, clubActivoId]);
+
+  // Actualizar equipo seleccionado al cambiar de club
+  useEffect(() => {
+    const teams = equipos.filter((e) => e.clubId === clubActivoId);
+    if (teams.length > 0) {
+      setEquipoSeleccionado(teams[0]);
+      if (teams[0].jugadores.length > 0) {
+        setJugadorSeleccionado(teams[0].jugadores[0]);
+      }
+    }
+  }, [clubActivoId]);
+
+  const nivelesActuales =
+    tipoEvaluacion === 'JUGADORES' ? NIVELES_JUGADORES : NIVELES_ENTRENADORES;
+
+  const entrenadoresFiltrados: Coach[] = equiposFiltrados.map((eq) => ({
+    id: `c_${eq.id}`,
+    nombre: eq.entrenador,
+    cargo: 'Entrenador/a Principal',
+    equipoNombre: eq.nombre,
+    gender: eq.gender,
+    inicial: 'COMPLETADA',
+    media: 'PENDIENTE',
+    final: 'PENDIENTE',
+  }));
+
+  const siglasClub = clubActivo.nombre
+    .split(' ')
+    .filter((w) => w.length > 0)
+    .map((w) => w[0].toUpperCase())
+    .slice(0, 3)
+    .join('');
+
+  const calcularAsistenciaJugador = (playerId: string, team: Team) => {
+    const sesiones = team?.sesiones || [];
+    if (sesiones.length === 0)
+      return { pct: 100, presentes: 0, totalValidas: 0, totalSesiones: 0 };
+
+    let presentes = 0;
+    let justificadas = 0;
+    let evaluadas = 0;
+
+    sesiones.forEach((s) => {
+      const st = s.asistencias[playerId];
+      if (st) {
+        evaluadas++;
+        if (st === 'PRESENTE') presentes++;
+        if (st === 'JUSTIFICADA') justificadas++;
+      }
+    });
+
+    const totalValidas = evaluadas - justificadas;
+    const pct =
+      totalValidas > 0 ? Math.round((presentes / totalValidas) * 100) : 100;
+    return { pct, presentes, totalValidas, totalSesiones: sesiones.length };
+  };
+
+  const calcularPromedioCategoria = (categoriaNombre: string) => {
+    const cat = RUBRICA_JUGADORES.find((c) => c.nombre === categoriaNombre);
+    if (!cat) return 0.5;
+    let suma = 0;
+    let total = 0;
+    cat.items.forEach((item) => {
+      const lvlKey = respuestas[item]?.nivel;
+      const lvl = NIVELES_JUGADORES.find((n) => n.key === lvlKey);
+      if (lvl && lvl.weight > 0) {
+        suma += lvl.weight;
+        total++;
+      }
+    });
+    return total > 0 ? suma / (total * 4) : 0.6;
+  };
+
+  const motorVal = calcularPromedioCategoria('Desarrollo motor');
+  const tecnicaVal = calcularPromedioCategoria('Técnica individual');
+  const tacticaVal = calcularPromedioCategoria('Comprensión del juego');
+  const defensaVal = calcularPromedioCategoria('Defensa');
+
+  const cx = 75,
+    cy = 75,
+    r = 50;
+  const pMotor = `${cx},${cy - r * motorVal}`;
+  const pTecnica = `${cx + r * tecnicaVal},${cy}`;
+  const pTactica = `${cx},${cy + r * tacticaVal}`;
+  const pDefensa = `${cx - r * defensaVal},${cy}`;
+  const radarPoints = `${pMotor} ${pTecnica} ${pTactica} ${pDefensa}`;
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const url = reader.result as string;
+        setClubs(
+          clubs.map((c) =>
+            c.id === clubActivo.id ? { ...c, logoUrl: url } : c
+          )
+        );
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Crear nuevo club independiente
+  const handleCrearClub = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevoClubNombre) return;
+
+    const newClubId = `club_${Date.now()}`;
+    const nuevoClub: Club = {
+      id: newClubId,
+      nombre: nuevoClubNombre,
+      temporada: nuevoClubTemporada || '2026/27',
+      logoUrl: null,
+    };
+
+    // Plantilla inicial de equipos base para el nuevo club
+    const equiposBase: Team[] = [
+      {
+        id: `t_${Date.now()}_1`,
+        clubId: newClubId,
+        nombre: 'Alevín Promesas',
+        categoria: 'Alevín (2014-2015)',
+        gender: 'MASCULINO',
+        entrenador: 'Por asignar',
+        jugadores: [],
+        sesiones: [],
+      },
+      {
+        id: `t_${Date.now()}_2`,
+        clubId: newClubId,
+        nombre: 'Infantil Femenino',
+        categoria: 'Infantil (2012-2013)',
+        gender: 'FEMENINO',
+        entrenador: 'Por asignar',
+        jugadores: [],
+        sesiones: [],
+      },
+    ];
+
+    setClubs([...clubs, nuevoClub]);
+    setEquipos([...equipos, ...equiposBase]);
+    setClubActivoId(newClubId);
+    setEquipoSeleccionado(equiposBase[0]);
+    setNuevoClubNombre('');
+    setPantalla('EQUIPOS');
+
+    try {
+      await supabase.from('clubs').insert({
+        id: newClubId,
+        name: nuevoClubNombre,
+        season: nuevoClubTemporada,
+      });
+    } catch (_) {}
+  };
+
+  const handleAbrirPaseLista = () => {
+    const initStatus: Record<string, AttendanceStatus> = {};
+    equipoSeleccionado.jugadores.forEach((j) => {
+      initStatus[j.id] = 'PRESENTE';
+    });
+    setSessionAsistencias(initStatus);
+    setPantalla('PASAR_LISTA');
+  };
+
+  const handleGuardarSesion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const nuevaSesion: Session = {
+      id: Date.now().toString(),
+      fecha: sessionFecha,
+      tipo: sessionTipo,
+      asistencias: sessionAsistencias,
+    };
+
+    const actualizados = equipos.map((eq) => {
+      if (eq.id === equipoSeleccionado.id) {
+        const ses = [...(eq.sesiones || []), nuevaSesion];
+        const eqActualizado = { ...eq, sesiones: ses };
+        setEquipoSeleccionado(eqActualizado);
+        return eqActualizado;
+      }
+      return eq;
+    });
+
+    setEquipos(actualizados);
+    setPantalla('PLANTILLA');
+  };
+
+  const handleCrearEquipo = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevoNombreEquipo) return;
+    const nuevo: Team = {
+      id: `t_${Date.now()}`,
+      clubId: clubActivo.id,
+      nombre: nuevoNombreEquipo,
+      categoria: nuevaCatEquipo || 'General',
+      gender: genero,
+      entrenador: nuevoEntrenador || 'Por asignar',
+      jugadores: [],
+      sesiones: [],
+    };
+
+    setEquipos([...equipos, nuevo]);
+    setEquipoSeleccionado(nuevo);
+    setNuevoNombreEquipo('');
+    setNuevaCatEquipo('');
+    setNuevoEntrenador('');
+    setPantalla('EQUIPOS');
+  };
+
+  const handleAddJugador = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevoNombreJugador) return;
+    const nuevoJ: Player = {
+      id: `j_${Date.now()}`,
+      nombre: nuevoNombreJugador,
+      dorsal: parseInt(nuevoDorsal) || 0,
+      nacimiento: parseInt(nuevoNacimiento) || 2015,
+      inicial: 'PENDIENTE',
+      media: 'PENDIENTE',
+      final: 'PENDIENTE',
+      historial: [],
+    };
+
+    const actualizados = equipos.map((eq) => {
+      if (eq.id === equipoSeleccionado.id) {
+        const nuevosJugs = [...eq.jugadores, nuevoJ];
+        const eqActualizado = { ...eq, jugadores: nuevosJugs };
+        setEquipoSeleccionado(eqActualizado);
+        return eqActualizado;
+      }
+      return eq;
+    });
+
+    setEquipos(actualizados);
+    setNuevoNombreJugador('');
+    setNuevoDorsal('');
+    setNuevoNacimiento('');
+  };
+
+  const handleScore = (indicador: string, levelKey: string) => {
+    setRespuestas((prev) => ({
+      ...prev,
+      [indicador]: { ...prev[indicador], nivel: levelKey },
+    }));
+  };
+
+  const handleObs = (indicador: string, obs: string) => {
+    setRespuestas((prev) => ({
+      ...prev,
+      [indicador]: { ...prev[indicador], obs },
+    }));
+  };
+
+  const toggleObs = (itemKey: string) => {
+    setObsAbiertas((prev) => ({ ...prev, [itemKey]: !prev[itemKey] }));
+  };
+
+  const badgeStatus = (status: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE') => {
+    switch (status) {
+      case 'COMPLETADA':
+        return (
+          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+            Completada
+          </span>
+        );
+      case 'BORRADOR':
+        return (
+          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
+            Borrador
+          </span>
+        );
+      default:
+        return (
+          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500">
+            Pendiente
+          </span>
+        );
+    }
+  };
+
+  const asistActual = calcularAsistenciaJugador(
+    jugadorSeleccionado?.id,
+    equipoSeleccionado
+  );
+
+  return (
+    <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0 print:min-h-0">
+      <style>{`
+        @media print {
+          @page {
+            size: A4 portrait;
+            margin: 6mm;
+          }
+          html, body {
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background-color: #ffffff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .print-full-page {
+            height: 282mm !important;
+            max-height: 282mm !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            box-sizing: border-box !important;
+          }
+          .page-break {
+            page-break-after: always !important;
+            break-after: page !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      {/* Cabecera Multi-Club */}
+      <header className="bg-slate-900 text-white px-6 py-3 shadow-md print:hidden">
+        <div className="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-4">
+          <div className="flex items-center space-x-3">
+            <div
+              onClick={() =>
+                setPantalla(
+                  tipoEvaluacion === 'JUGADORES'
+                    ? 'EQUIPOS'
+                    : 'LISTA_ENTRENADORES'
+                )
+              }
+              className="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-white text-xs cursor-pointer overflow-hidden shadow-inner"
+              title="Click para ir a inicio"
+            >
+              {clubActivo.logoUrl ? (
+                <img
+                  src={clubActivo.logoUrl}
+                  alt="Logo Club"
+                  className="w-full h-full object-contain p-0.5"
+                />
+              ) : (
+                <span className="font-bold text-emerald-400">
+                  {siglasClub || 'CB'}
+                </span>
+              )}
+            </div>
+
+            <div>
+              {editandoClub ? (
+                <div className="flex items-center flex-wrap gap-2">
+                  <input
+                    type="text"
+                    value={clubActivo.nombre}
+                    onChange={(e) =>
+                      setClubs(
+                        clubs.map((c) =>
+                          c.id === clubActivo.id
+                            ? { ...c, nombre: e.target.value }
+                            : c
+                        )
+                      )
+                    }
+                    className="bg-slate-800 text-white text-xs px-2 py-1 rounded border border-slate-600 focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={clubActivo.temporada}
+                    onChange={(e) =>
+                      setClubs(
+                        clubs.map((c) =>
+                          c.id === clubActivo.id
+                            ? { ...c, temporada: e.target.value }
+                            : c
+                        )
+                      )
+                    }
+                    className="bg-slate-800 text-white text-xs px-2 py-1 w-20 rounded border border-slate-600 focus:outline-none"
+                  />
+                  <label className="bg-slate-700 hover:bg-slate-600 text-slate-200 text-[11px] px-2 py-1 rounded cursor-pointer font-medium border border-slate-600">
+                    Cambiar Escudo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      className="hidden"
+                    />
+                  </label>
+                  <button
+                    onClick={() => setEditandoClub(false)}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] px-2.5 py-1 rounded font-semibold"
+                  >
+                    Guardar
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  {/* Selector de Club Activo */}
+                  <select
+                    value={clubActivoId}
+                    onChange={(e) => setClubActivoId(e.target.value)}
+                    className="bg-slate-800 text-emerald-400 font-bold text-sm px-2.5 py-1 rounded-lg border border-slate-700 focus:outline-none cursor-pointer"
+                  >
+                    {clubs.map((c) => (
+                      <option
+                        key={c.id}
+                        value={c.id}
+                        className="text-white bg-slate-800"
+                      >
+                        {c.nombre} ({c.temporada})
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => setPantalla('MODAL_NUEVO_CLUB')}
+                    className="text-[10px] bg-emerald-700 hover:bg-emerald-600 text-white font-semibold px-2 py-1 rounded shadow"
+                    title="Crear un nuevo club independiente"
+                  >
+                    + Nuevo Club
+                  </button>
+                  <button
+                    onClick={() => setEditandoClub(true)}
+                    className="text-[10px] text-slate-400 hover:text-white underline ml-1"
+                  >
+                    (editar)
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center flex-wrap gap-2.5">
+            <div className="flex bg-slate-800 p-1 rounded-lg border border-slate-700 text-xs">
+              <button
+                onClick={() => {
+                  setGenero('FEMENINO');
+                  setPantalla(
+                    tipoEvaluacion === 'JUGADORES'
+                      ? 'EQUIPOS'
+                      : 'LISTA_ENTRENADORES'
+                  );
+                }}
+                className={`px-3 py-1 rounded font-semibold transition ${
+                  genero === 'FEMENINO'
+                    ? 'bg-blue-600 text-white shadow'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Sección Femenina
+              </button>
+              <button
+                onClick={() => {
+                  setGenero('MASCULINO');
+                  setPantalla(
+                    tipoEvaluacion === 'JUGADORES'
+                      ? 'EQUIPOS'
+                      : 'LISTA_ENTRENADORES'
+                  );
+                }}
+                className={`px-3 py-1 rounded font-semibold transition ${
+                  genero === 'MASCULINO'
+                    ? 'bg-blue-600 text-white shadow'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Sección Masculina
+              </button>
+            </div>
+
+            <div className="flex bg-slate-800 p-1 rounded-lg border border-slate-700 text-xs">
+              <button
+                onClick={() => {
+                  setTipoEvaluacion('JUGADORES');
+                  setPantalla('EQUIPOS');
+                }}
+                className={`px-3 py-1 rounded font-semibold transition ${
+                  tipoEvaluacion === 'JUGADORES'
+                    ? 'bg-slate-600 text-white'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Jugador@s
+              </button>
+              <button
+                onClick={() => {
+                  setTipoEvaluacion('ENTRENADORES');
+                  setPantalla('LISTA_ENTRENADORES');
+                }}
+                className={`px-3 py-1 rounded font-semibold transition ${
+                  tipoEvaluacion === 'ENTRENADORES'
+                    ? 'bg-slate-600 text-white'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Entrenador@s
+              </button>
+            </div>
+
+            <select
+              value={periodo}
+              onChange={(e) => setPeriodo(e.target.value as Period)}
+              className="bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg border border-slate-700 focus:outline-none"
+            >
+              <option value="Inicial">Ev. Inicial</option>
+              <option value="Media">Ev. Media</option>
+              <option value="Final">Ev. Final</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      {/* Contenedor Principal */}
+      <main className="max-w-4xl mx-auto mt-6 px-4 print:mt-0 print:px-0 print:max-w-full print:w-full">
+        {/* PANTALLA: MODAL / CREAR NUEVO CLUB */}
+        {pantalla === 'MODAL_NUEVO_CLUB' && (
+          <div className="bg-white rounded-xl shadow border border-slate-200 p-6 max-w-md mx-auto space-y-4">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">
+                Crear Nuevo Club / Entidad
+              </h2>
+              <p className="text-xs text-slate-500">
+                Se generará una plantilla limpia e independiente para este nuevo
+                club.
+              </p>
+            </div>
+
+            <form onSubmit={handleCrearClub} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Nombre del Club o Colegio
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej: CB Juventud Laguna"
+                  value={nuevoClubNombre}
+                  onChange={(e) => setNuevoClubNombre(e.target.value)}
+                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Temporada Inicial
+                </label>
+                <input
+                  type="text"
+                  placeholder="2026/27"
+                  value={nuevoClubTemporada}
+                  onChange={(e) => setNuevoClubTemporada(e.target.value)}
+                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setPantalla('EQUIPOS')}
+                  className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-semibold hover:bg-slate-200"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-emerald-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-emerald-700 shadow"
+                >
+                  Crear Club y Plantilla
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* PANTALLA 1: LISTADO DE EQUIPOS */}
+        {pantalla === 'EQUIPOS' && (
+          <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">
+                  {clubActivo.nombre} — Sección{' '}
+                  {genero === 'FEMENINO' ? 'Femenina' : 'Masculina'}
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Temporada {clubActivo.temporada} • Gestión de categorías y
+                  plantillas
+                </p>
+              </div>
+              <button
+                onClick={() => setPantalla('MODAL_NUEVO_EQUIPO')}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow-sm transition"
+              >
+                + Nuevo Equipo
+              </button>
+            </div>
+
+            {equiposFiltrados.length === 0 ? (
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center text-xs text-slate-500">
+                No hay equipos dados de alta en la Sección{' '}
+                {genero === 'FEMENINO' ? 'Femenina' : 'Masculina'} de este club.
+                Pulsa en <strong>+ Nuevo Equipo</strong> para crearlo.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {equiposFiltrados.map((equipo) => (
+                  <div
+                    key={equipo.id}
+                    onClick={() => {
+                      setEquipoSeleccionado(equipo);
+                      setPantalla('PLANTILLA');
+                    }}
+                    className="p-5 border border-slate-200 rounded-xl hover:border-emerald-500 hover:shadow-md transition cursor-pointer bg-slate-50/50"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-bold text-slate-900 text-base">
+                        {equipo.nombre}
+                      </h3>
+                      <span className="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-medium">
+                        {equipo.jugadores.length}{' '}
+                        {genero === 'FEMENINO' ? 'jugadoras' : 'jugadores'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mb-3">
+                      {equipo.categoria}
+                    </p>
+                    <div className="text-xs text-slate-600 flex items-center justify-between border-t border-slate-200/80 pt-3">
+                      <span>
+                        Entrenador/a: <strong>{equipo.entrenador}</strong>
+                      </span>
+                      <span className="text-emerald-600 font-semibold">
+                        Ver plantilla →
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* PANTALLA: PLANTILLA DEL EQUIPO */}
+        {pantalla === 'PLANTILLA' && (
+          <div className="bg-white rounded-xl shadow border border-slate-200 p-6 space-y-6">
+            <div className="flex justify-between items-center pb-4 border-b border-slate-200">
+              <div>
+                <button
+                  onClick={() => setPantalla('EQUIPOS')}
+                  className="text-xs text-emerald-700 font-semibold mb-1 hover:underline"
+                >
+                  ← Volver a equipos de {clubActivo.nombre}
+                </button>
+                <h2 className="text-xl font-bold text-slate-900">
+                  {equipoSeleccionado.nombre}
+                </h2>
+                <p className="text-xs text-slate-500">
+                  {equipoSeleccionado.categoria} • Entrenador/a:{' '}
+                  {equipoSeleccionado.entrenador} •{' '}
+                  <strong>
+                    {equipoSeleccionado.sesiones?.length || 0} sesiones
+                    registradas
+                  </strong>
+                </p>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleAbrirPaseLista}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3.5 py-1.5 rounded-lg font-semibold shadow-sm transition"
+                >
+                  📋 Pasar Lista
+                </button>
+                <button
+                  onClick={() => setPantalla('INFORME_EQUIPO')}
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs px-3.5 py-1.5 rounded-lg font-semibold shadow-sm transition"
+                >
+                  🖨️ Imprimir Todo
+                </button>
+              </div>
+            </div>
+
+            <form
+              onSubmit={handleAddJugador}
+              className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs flex flex-wrap items-end gap-3"
+            >
+              <div className="flex-1 min-w-[150px]">
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  Nombre y Apellidos
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Nombre de la jugadora/o"
+                  value={nuevoNombreJugador}
+                  onChange={(e) => setNuevoNombreJugador(e.target.value)}
+                  className="w-full border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 bg-white"
+                />
+              </div>
+              <div className="w-16">
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  Dorsal
+                </label>
+                <input
+                  type="number"
+                  placeholder="Ej: 7"
+                  value={nuevoDorsal}
+                  onChange={(e) => setNuevoDorsal(e.target.value)}
+                  className="w-full border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 bg-white"
+                />
+              </div>
+              <div className="w-20">
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  Año Nac.
+                </label>
+                <input
+                  type="number"
+                  placeholder="2015"
+                  value={nuevoNacimiento}
+                  onChange={(e) => setNuevoNacimiento(e.target.value)}
+                  className="w-full border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 bg-white"
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-1.5 rounded shadow-sm"
+              >
+                + Añadir
+              </button>
+            </form>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-500 font-semibold uppercase">
+                    <th className="pb-3 px-2">Dorsal</th>
+                    <th className="pb-3 px-2">Nombre</th>
+                    <th className="pb-3 px-2">Año</th>
+                    <th className="pb-3 px-2 text-center">Asistencia Real</th>
+                    <th className="pb-3 px-2 text-center">Ev. Inicial</th>
+                    <th className="pb-3 px-2 text-center">Ev. Media</th>
+                    <th className="pb-3 px-2 text-center">Ev. Final</th>
+                    <th className="pb-3 px-2 text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {equipoSeleccionado.jugadores.map((jugador) => {
+                    const asist = calcularAsistenciaJugador(
+                      jugador.id,
+                      equipoSeleccionado
+                    );
+                    return (
+                      <tr key={jugador.id} className="hover:bg-slate-50">
+                        <td className="py-3 px-2 font-bold text-slate-700">
+                          #{jugador.dorsal}
+                        </td>
+                        <td className="py-3 px-2 font-medium text-slate-900">
+                          {jugador.nombre}
+                        </td>
+                        <td className="py-3 px-2 text-slate-500">
+                          {jugador.nacimiento}
+                        </td>
+                        <td className="py-3 px-2 text-center">
+                          <span
+                            className={`inline-block font-bold px-2 py-0.5 rounded text-[11px] ${
+                              asist.pct >= 85
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : asist.pct >= 70
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-rose-100 text-rose-800'
+                            }`}
+                          >
+                            {asist.pct}% ({asist.presentes}/
+                            {asist.totalSesiones})
+                          </span>
+                        </td>
+                        <td className="py-3 px-2 text-center">
+                          {badgeStatus(jugador.inicial)}
+                        </td>
+                        <td className="py-3 px-2 text-center">
+                          {badgeStatus(jugador.media)}
+                        </td>
+                        <td className="py-3 px-2 text-center">
+                          {badgeStatus(jugador.final)}
+                        </td>
+                        <td className="py-3 px-2 text-right space-x-1.5">
+                          <button
+                            onClick={() => {
+                              setJugadorSeleccionado(jugador);
+                              setPantalla('FORMULARIO');
+                            }}
+                            className="bg-emerald-600 text-white px-2.5 py-1 rounded hover:bg-emerald-700 font-medium"
+                          >
+                            Evaluar
+                          </button>
+                          <button
+                            onClick={() => {
+                              setJugadorSeleccionado(jugador);
+                              setPantalla('INFORME');
+                            }}
+                            className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded hover:bg-slate-200 font-medium border border-slate-200"
+                          >
+                            Ficha
+                          </button>
+                          <button
+                            onClick={() => {
+                              setJugadorSeleccionado(jugador);
+                              setPantalla('HISTORIAL_JUGADOR');
+                            }}
+                            className="bg-blue-50 text-blue-700 px-2 py-1 rounded hover:bg-blue-100 font-medium border border-blue-200"
+                          >
+                            Historial
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* PANTALLA: MODAL / REGISTRAR PASE DE LISTA */}
+        {pantalla === 'PASAR_LISTA' && (
+          <div className="bg-white rounded-xl shadow border border-slate-200 p-6 max-w-2xl mx-auto space-y-6">
+            <div className="flex justify-between items-center pb-4 border-b border-slate-200">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">
+                  Registro Diario de Asistencia
+                </h2>
+                <p className="text-xs text-slate-500">
+                  {clubActivo.nombre} • {equipoSeleccionado.nombre}
+                </p>
+              </div>
+              <button
+                onClick={() => setPantalla('PLANTILLA')}
+                className="text-xs text-slate-500 hover:text-slate-700"
+              >
+                ✕ Cancelar
+              </button>
+            </div>
+
+            <form onSubmit={handleGuardarSesion} className="space-y-6 text-xs">
+              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Fecha de la sesión
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={sessionFecha}
+                    onChange={(e) => setSessionFecha(e.target.value)}
+                    className="w-full border border-slate-300 rounded p-2 bg-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Tipo de Convocatoria
+                  </label>
+                  <select
+                    value={sessionTipo}
+                    onChange={(e) =>
+                      setSessionTipo(e.target.value as SessionType)
+                    }
+                    className="w-full border border-slate-300 rounded p-2 bg-white focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="ENTRENAMIENTO">Entrenamiento Regular</option>
+                    <option value="PARTIDO">Partido Oficial / Amistoso</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
+                  Control de Jugador@s
+                </h3>
+                <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden">
+                  {equipoSeleccionado.jugadores.map((jugador) => {
+                    const estado = sessionAsistencias[jugador.id] || 'PRESENTE';
+                    return (
+                      <div
+                        key={jugador.id}
+                        className="flex justify-between items-center p-3 bg-white hover:bg-slate-50"
+                      >
+                        <div>
+                          <span className="font-bold text-slate-900">
+                            #{jugador.dorsal} {jugador.nombre}
+                          </span>
+                          <span className="text-[11px] text-slate-400 ml-2">
+                            ({jugador.nacimiento})
+                          </span>
+                        </div>
+
+                        <div className="flex items-center space-x-1.5">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSessionAsistencias({
+                                ...sessionAsistencias,
+                                [jugador.id]: 'PRESENTE',
+                              })
+                            }
+                            className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
+                              estado === 'PRESENTE'
+                                ? 'bg-emerald-600 text-white shadow'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                          >
+                            ✅ Presente
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSessionAsistencias({
+                                ...sessionAsistencias,
+                                [jugador.id]: 'FALTA',
+                              })
+                            }
+                            className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
+                              estado === 'FALTA'
+                                ? 'bg-rose-600 text-white shadow'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                          >
+                            ❌ Falta
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSessionAsistencias({
+                                ...sessionAsistencias,
+                                [jugador.id]: 'JUSTIFICADA',
+                              })
+                            }
+                            className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
+                              estado === 'JUSTIFICADA'
+                                ? 'bg-amber-600 text-white shadow'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                          >
+                            📝 Justificada
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSessionAsistencias({
+                                ...sessionAsistencias,
+                                [jugador.id]: 'LESIONADO',
+                              })
+                            }
+                            className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
+                              estado === 'LESIONADO'
+                                ? 'bg-blue-600 text-white shadow'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                          >
+                            🩹 Lesión
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setPantalla('PLANTILLA')}
+                  className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-semibold hover:bg-slate-200"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-emerald-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-emerald-700 shadow"
+                >
+                  Guardar Sesión y Calcular Asistencias
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* PANTALLA: HISTORIAL */}
+        {pantalla === 'HISTORIAL_JUGADOR' && (
+          <div className="bg-white rounded-xl shadow border border-slate-200 p-6 space-y-6">
+            <div className="flex justify-between items-start pb-4 border-b border-slate-200">
+              <div>
+                <button
+                  onClick={() => setPantalla('PLANTILLA')}
+                  className="text-xs text-emerald-700 font-semibold mb-1 hover:underline"
+                >
+                  ← Volver a plantilla
+                </button>
+                <h2 className="text-xl font-bold text-slate-900">
+                  Historial y Progresión Multitemporada
+                </h2>
+                <p className="text-xs text-slate-500">
+                  {jugadorSeleccionado.nombre} • Nacimiento:{' '}
+                  {jugadorSeleccionado.nacimiento} • ID:{' '}
+                  {jugadorSeleccionado.id}
+                </p>
+              </div>
+              <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                Seguimiento Longitudinal Activo
+              </span>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+                Línea de Tiempo de Evaluaciones
+              </h3>
+              {jugadorSeleccionado.historial &&
+              jugadorSeleccionado.historial.length > 0 ? (
+                <div className="border-l-2 border-emerald-500 ml-3 pl-4 space-y-6">
+                  {jugadorSeleccionado.historial.map((rec, idx) => (
+                    <div
+                      key={idx}
+                      className="relative bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs"
+                    >
+                      <div className="absolute -left-[23px] top-4 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-bold text-slate-900 text-sm">
+                          {rec.temporada} — {rec.categoria}
+                        </span>
+                        <span className="text-slate-500">
+                          {rec.periodo} ({rec.fecha})
+                        </span>
+                      </div>
+                      <p className="mb-1 text-slate-700">
+                        <strong>Nivel predominante:</strong>{' '}
+                        <span className="text-emerald-700 font-semibold">
+                          {rec.promedioNivel}
+                        </span>
+                      </p>
+                      <p className="mb-1 text-slate-700">
+                        <strong>Fortalezas:</strong> {rec.fortalezas}
+                      </p>
+                      <p className="text-slate-700">
+                        <strong>Objetivos trabajados:</strong> {rec.objetivos}
+                      </p>
+                    </div>
+                  ))}
+                  <div className="relative bg-blue-50 border border-blue-200 rounded-lg p-4 text-xs">
+                    <div className="absolute -left-[23px] top-4 w-3 h-3 rounded-full bg-blue-600 border-2 border-white" />
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-bold text-blue-900 text-sm">
+                        Temporada {clubActivo.temporada} (Actual) —{' '}
+                        {equipoSeleccionado.categoria}
+                      </span>
+                      <span className="text-blue-700 font-semibold">
+                        En curso
+                      </span>
+                    </div>
+                    <p className="text-slate-700">
+                      Evaluación Inicial registrada. El sistema acumulará
+                      automáticamente la progresión técnica.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 text-center text-xs text-slate-500">
+                  Este deportista no tiene registros anteriores cargados.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* PANTALLA: LISTA ENTRENADORES */}
+        {pantalla === 'LISTA_ENTRENADORES' && (
+          <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">
+                  Cuerpo Técnico — {clubActivo.nombre} (
+                  {genero === 'FEMENINO' ? 'Femenino' : 'Masculino'})
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Evaluación del cuerpo técnico y metodología de trabajo
+                </p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-500 font-semibold uppercase">
+                    <th className="pb-3 px-2">Entrenador/a</th>
+                    <th className="pb-3 px-2">Equipo Asignado</th>
+                    <th className="pb-3 px-2 text-center">Ev. Inicial</th>
+                    <th className="pb-3 px-2 text-center">Ev. Media</th>
+                    <th className="pb-3 px-2 text-center">Ev. Final</th>
+                    <th className="pb-3 px-2 text-right">Acción</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {entrenadoresFiltrados.map((coach) => (
+                    <tr key={coach.id} className="hover:bg-slate-50">
+                      <td className="py-3.5 px-2 font-bold text-slate-800">
+                        {coach.nombre}
+                      </td>
+                      <td className="py-3.5 px-2 text-slate-600">
+                        {coach.equipoNombre}
+                      </td>
+                      <td className="py-3.5 px-2 text-center">
+                        {badgeStatus(coach.inicial)}
+                      </td>
+                      <td className="py-3.5 px-2 text-center">
+                        {badgeStatus(coach.media)}
+                      </td>
+                      <td className="py-3.5 px-2 text-center">
+                        {badgeStatus(coach.final)}
+                      </td>
+                      <td className="py-3.5 px-2 text-right space-x-2">
+                        <button
+                          onClick={() => {
+                            setCoachSeleccionado(coach);
+                            setPantalla('FORMULARIO');
+                          }}
+                          className="bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 font-medium"
+                        >
+                          Evaluar
+                        </button>
+                        <button
+                          onClick={() => {
+                            setCoachSeleccionado(coach);
+                            setPantalla('INFORME');
+                          }}
+                          className="bg-slate-100 text-slate-700 px-3 py-1 rounded hover:bg-slate-200 font-medium border border-slate-200"
+                        >
+                          Ficha
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* PANTALLA: CREAR EQUIPO */}
+        {pantalla === 'MODAL_NUEVO_EQUIPO' && (
+          <div className="bg-white rounded-xl shadow border border-slate-200 p-6 max-w-lg mx-auto">
+            <h2 className="text-lg font-bold text-slate-900 mb-1">
+              Crear Equipo — {clubActivo.nombre} (
+              {genero === 'FEMENINO' ? 'Femenina' : 'Masculina'})
+            </h2>
+            <p className="text-xs text-slate-500 mb-6">
+              Introduce los datos del nuevo equipo para la temporada{' '}
+              {clubActivo.temporada}
+            </p>
+
+            <form onSubmit={handleCrearEquipo} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Nombre del equipo
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej: Cadete Preferente"
+                  value={nuevoNombreEquipo}
+                  onChange={(e) => setNuevoNombreEquipo(e.target.value)}
+                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Categoría / Edades
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej: Cadete (2011-2012)"
+                  value={nuevaCatEquipo}
+                  onChange={(e) => setNuevaCatEquipo(e.target.value)}
+                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Entrenador/a asignado/a
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej: Marcos López"
+                  value={nuevoEntrenador}
+                  onChange={(e) => setNuevoEntrenador(e.target.value)}
+                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setPantalla('EQUIPOS')}
+                  className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-semibold hover:bg-slate-200"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-emerald-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-emerald-700 shadow"
+                >
+                  Guardar Equipo
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* PANTALLA 3: FORMULARIO */}
+        {pantalla === 'FORMULARIO' && (
+          <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
+            <div className="flex justify-between items-center pb-4 border-b border-slate-200 mb-6">
+              <div>
+                <button
+                  onClick={() =>
+                    setPantalla(
+                      tipoEvaluacion === 'JUGADORES'
+                        ? 'PLANTILLA'
+                        : 'LISTA_ENTRENADORES'
+                    )
+                  }
+                  className="text-xs text-emerald-700 font-semibold mb-1 hover:underline"
+                >
+                  ← Volver
+                </button>
+                <h2 className="text-xl font-bold text-slate-900">
+                  {tipoEvaluacion === 'JUGADORES'
+                    ? jugadorSeleccionado.nombre
+                    : coachSeleccionado?.nombre}
+                </h2>
+                <p className="text-xs text-slate-500">
+                  {tipoEvaluacion === 'JUGADORES'
+                    ? `${clubActivo.nombre} • ${equipoSeleccionado.nombre} • dorsal ${jugadorSeleccionado.dorsal}`
+                    : `${clubActivo.nombre} • ${coachSeleccionado?.equipoNombre} • Entrenador/a`}
+                </p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full font-semibold border border-emerald-200">
+                  Evaluación {periodo}
+                </span>
+                <button
+                  onClick={() => setPantalla('INFORME')}
+                  className="bg-slate-900 text-white text-xs px-3 py-1.5 rounded font-medium hover:bg-slate-800"
+                >
+                  Ver Ficha
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-4 pb-6 mb-6 border-b border-slate-100 text-xs text-slate-600 font-medium">
+              {nivelesActuales.map((n) => (
+                <div key={n.key} className="flex items-center space-x-1.5">
+                  <span
+                    className="w-3.5 h-3.5 rounded-full border border-slate-300 inline-block shadow-sm"
+                    style={{ backgroundColor: n.color }}
+                  />
+                  <span>{n.label}</span>
+                </div>
+              ))}
+            </div>
+
+            {tipoEvaluacion === 'JUGADORES' ? (
+              <div className="space-y-8">
+                {RUBRICA_JUGADORES.map((cat) => (
+                  <div key={cat.nombre}>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 mb-4 border-b-2 border-slate-900 pb-1">
+                      {cat.nombre}
+                    </h3>
+                    <div className="divide-y divide-slate-100">
+                      {cat.items.map((item) => {
+                        const sel = respuestas[item]?.nivel;
+                        const obs = respuestas[item]?.obs || '';
+                        const activeLevel = nivelesActuales.find(
+                          (l) => l.key === sel
+                        );
+                        const isObsOpen = obsAbiertas[item] || obs.length > 0;
+
+                        return (
+                          <div key={item} className="py-3.5">
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="flex items-center space-x-2">
+                                <span className="font-medium text-slate-800 text-sm">
+                                  {item}
+                                </span>
+                                {!isObsOpen && (
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleObs(item)}
+                                    className="text-[11px] text-slate-400 hover:text-emerald-700 underline"
+                                  >
+                                    + nota
+                                  </button>
+                                )}
+                              </div>
+
+                              <div className="flex items-center space-x-2.5">
+                                {nivelesActuales.map((lvl) => (
+                                  <button
+                                    key={lvl.key}
+                                    type="button"
+                                    onClick={() => handleScore(item, lvl.key)}
+                                    className={`w-6 h-6 rounded-full border-2 transition-all ${
+                                      sel === lvl.key
+                                        ? 'scale-110 shadow-sm'
+                                        : 'border-slate-300 bg-white hover:border-slate-400'
+                                    }`}
+                                    style={{
+                                      backgroundColor:
+                                        sel === lvl.key ? lvl.color : '#ffffff',
+                                      borderColor:
+                                        sel === lvl.key ? lvl.color : '#cbd5e1',
+                                    }}
+                                    title={lvl.label}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+
+                            {activeLevel &&
+                              activeLevel.key !== 'NO_OBSERVADO' && (
+                                <div className="bg-slate-50 border border-slate-200 rounded-md p-2.5 my-2 text-xs text-slate-700">
+                                  <strong className="font-semibold">
+                                    {activeLevel.label}:{' '}
+                                  </strong>
+                                  {activeLevel.desc}
+                                </div>
+                              )}
+
+                            {isObsOpen && (
+                              <div className="mt-2 flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="Observación cualitativa..."
+                                  value={obs}
+                                  onChange={(e) =>
+                                    handleObs(item, e.target.value)
+                                  }
+                                  className="w-full text-xs border border-slate-200 rounded px-3 py-1.5 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => toggleObs(item)}
+                                  className="text-slate-400 hover:text-slate-600 text-xs px-1"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+
+                <div className="pt-6 border-t border-slate-200 space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
+                      Fortalezas
+                    </label>
+                    <textarea
+                      value={fortalezas}
+                      onChange={(e) => setFortalezas(e.target.value)}
+                      rows={2}
+                      className="w-full text-xs border border-slate-200 rounded-md p-2.5 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
+                      Objetivos de mejora
+                    </label>
+                    <textarea
+                      value={objetivos}
+                      onChange={(e) => setObjetivos(e.target.value)}
+                      rows={2}
+                      className="w-full text-xs border border-slate-200 rounded-md p-2.5 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
+                      Nombre del Evaluador/a
+                    </label>
+                    <input
+                      type="text"
+                      value={evaluadorNombre}
+                      onChange={(e) => setEvaluadorNombre(e.target.value)}
+                      className="w-full text-xs border border-slate-200 rounded-md p-2 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {RUBRICA_ENTRENADORES.map((cat) => (
+                  <div key={cat.nombre}>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 mb-4 border-b-2 border-slate-900 pb-1">
+                      {cat.nombre}
+                    </h3>
+                    <div className="divide-y divide-slate-100">
+                      {cat.items.map((item) => {
+                        const sel = respuestas[item.nombre]?.nivel;
+                        const obs = respuestas[item.nombre]?.obs || '';
+                        const activeLevel = nivelesActuales.find(
+                          (l) => l.key === sel
+                        );
+                        const dynamicDesc =
+                          (item.descs as Record<string, string>)[sel || ''] ||
+                          activeLevel?.desc;
+                        const isObsOpen =
+                          obsAbiertas[item.nombre] || obs.length > 0;
+
+                        return (
+                          <div key={item.nombre} className="py-3.5">
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="flex items-center space-x-2">
+                                <span className="font-medium text-slate-800 text-sm">
+                                  {item.nombre}
+                                </span>
+                                {!isObsOpen && (
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleObs(item.nombre)}
+                                    className="text-[11px] text-slate-400 hover:text-emerald-700 underline"
+                                  >
+                                    + nota
+                                  </button>
+                                )}
+                              </div>
+
+                              <div className="flex items-center space-x-2.5">
+                                {nivelesActuales.map((lvl) => (
+                                  <button
+                                    key={lvl.key}
+                                    type="button"
+                                    onClick={() =>
+                                      handleScore(item.nombre, lvl.key)
+                                    }
+                                    className={`w-6 h-6 rounded-full border-2 transition-all ${
+                                      sel === lvl.key
+                                        ? 'scale-110 shadow-sm'
+                                        : 'border-slate-300 bg-white hover:border-slate-400'
+                                    }`}
+                                    style={{
+                                      backgroundColor:
+                                        sel === lvl.key ? lvl.color : '#ffffff',
+                                      borderColor:
+                                        sel === lvl.key ? lvl.color : '#cbd5e1',
+                                    }}
+                                    title={lvl.label}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+
+                            {activeLevel &&
+                              activeLevel.key !== 'NO_OBSERVADO' && (
+                                <div className="bg-slate-50 border border-slate-200 rounded-md p-2.5 my-2 text-xs text-slate-700">
+                                  <strong className="font-semibold">
+                                    {activeLevel.label}:{' '}
+                                  </strong>
+                                  {dynamicDesc}
+                                </div>
+                              )}
+
+                            {isObsOpen && (
+                              <div className="mt-2 flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="Observación cualitativa..."
+                                  value={obs}
+                                  onChange={(e) =>
+                                    handleObs(item.nombre, e.target.value)
+                                  }
+                                  className="w-full text-xs border border-slate-200 rounded px-3 py-1.5 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => toggleObs(item.nombre)}
+                                  className="text-slate-400 hover:text-slate-600 text-xs px-1"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-8 flex justify-between items-center border-t border-slate-200 pt-4">
+              <button
+                onClick={() =>
+                  setPantalla(
+                    tipoEvaluacion === 'JUGADORES'
+                      ? 'PLANTILLA'
+                      : 'LISTA_ENTRENADORES'
+                  )
+                }
+                className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2 rounded"
+              >
+                Guardar borrador
+              </button>
+              <button
+                onClick={() => setPantalla('INFORME')}
+                className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2 rounded shadow"
+              >
+                Cerrar ficha y ver informe
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* PANTALLA 4: INFORME OFICIAL (REESTRUCTURADO 100% HOJA A4) */}
+        {pantalla === 'INFORME' && (
+          <div className="print-full-page bg-white rounded-xl shadow border border-slate-200 p-8 print:p-0 print:border-none print:shadow-none print:rounded-none">
+            {/* Cabecera Oficial */}
+            <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3">
+              <div className="flex items-center space-x-4">
+                <div className="w-14 h-14 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center p-1 overflow-hidden">
+                  {clubActivo.logoUrl ? (
+                    <img
+                      src={clubActivo.logoUrl}
+                      alt="Escudo"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <span className="font-bold text-slate-800 text-xl">
+                      {siglasClub || 'CB'}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                    {tipoEvaluacion === 'JUGADORES'
+                      ? jugadorSeleccionado.nombre
+                      : coachSeleccionado?.nombre}
+                  </h2>
+                  <p className="text-xs text-slate-600 font-medium">
+                    {clubActivo.nombre} •{' '}
+                    {tipoEvaluacion === 'JUGADORES'
+                      ? equipoSeleccionado.nombre
+                      : coachSeleccionado?.equipoNombre}
+                    {tipoEvaluacion === 'JUGADORES'
+                      ? ` • Dorsal ${jugadorSeleccionado.dorsal} • Nacimiento: ${jugadorSeleccionado.nacimiento}`
+                      : ' • Entrenador/a Principal'}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                  Temporada {clubActivo.temporada}
+                </p>
+                <p className="text-xs text-slate-500">
+                  Evaluación {periodo} •{' '}
+                  {new Date().toLocaleDateString('es-ES')}
+                </p>
+                {tipoEvaluacion === 'JUGADORES' && (
+                  <span className="inline-block mt-1 text-[11px] bg-slate-100 text-slate-800 px-2.5 py-0.5 rounded font-semibold border border-slate-200">
+                    Asistencia: {asistActual.pct}% ({asistActual.presentes}/
+                    {asistActual.totalSesiones} ses.)
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* 2 Columnas de Categorías */}
+            <div className="grid grid-cols-2 gap-8 my-4 text-xs">
+              {/* Columna Izquierda */}
+              <div className="space-y-4">
+                <div>
+                  <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
+                    Desarrollo Motor
+                  </div>
+                  <div className="space-y-1">
+                    {RUBRICA_JUGADORES[0].items.map((item) => {
+                      const lvlKey = respuestas[item]?.nivel;
+                      const level = nivelesActuales.find(
+                        (l) => l.key === lvlKey
+                      );
+                      return (
+                        <div
+                          key={item}
+                          className="flex justify-between items-center py-0.5 px-1 bg-white"
+                        >
+                          <span className="text-slate-800 font-medium text-[11.5px]">
+                            {item}
+                          </span>
+                          <span
+                            className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
+                            style={{
+                              color: level?.color || '#64748B',
+                              backgroundColor:
+                                level?.key === 'EXCELENTE'
+                                  ? '#F0FDF4'
+                                  : level?.key === 'CONSOLIDADO'
+                                  ? '#F0FDF4'
+                                  : level?.key === 'EN_DESARROLLO'
+                                  ? '#FFFBEB'
+                                  : level?.key === 'NECESITA_APOYO'
+                                  ? '#FEF2F2'
+                                  : '#F8FAFC',
+                            }}
+                          >
+                            {level ? level.label : 'Sin evaluar'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
+                    Técnica Individual
+                  </div>
+                  <div className="space-y-1">
+                    {RUBRICA_JUGADORES[1].items.map((item) => {
+                      const lvlKey = respuestas[item]?.nivel;
+                      const level = nivelesActuales.find(
+                        (l) => l.key === lvlKey
+                      );
+                      return (
+                        <div
+                          key={item}
+                          className="flex justify-between items-center py-0.5 px-1 bg-white"
+                        >
+                          <span className="text-slate-800 font-medium text-[11.5px]">
+                            {item}
+                          </span>
+                          <span
+                            className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
+                            style={{
+                              color: level?.color || '#64748B',
+                              backgroundColor:
+                                level?.key === 'EXCELENTE'
+                                  ? '#F0FDF4'
+                                  : level?.key === 'CONSOLIDADO'
+                                  ? '#F0FDF4'
+                                  : level?.key === 'EN_DESARROLLO'
+                                  ? '#FFFBEB'
+                                  : level?.key === 'NECESITA_APOYO'
+                                  ? '#FEF2F2'
+                                  : '#F8FAFC',
+                            }}
+                          >
+                            {level ? level.label : 'Sin evaluar'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Columna Derecha */}
+              <div className="space-y-4">
+                <div>
+                  <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
+                    Comprensión del Juego
+                  </div>
+                  <div className="space-y-1">
+                    {RUBRICA_JUGADORES[2].items.map((item) => {
+                      const lvlKey = respuestas[item]?.nivel;
+                      const level = nivelesActuales.find(
+                        (l) => l.key === lvlKey
+                      );
+                      return (
+                        <div
+                          key={item}
+                          className="flex justify-between items-center py-0.5 px-1 bg-white"
+                        >
+                          <span className="text-slate-800 font-medium text-[11.5px]">
+                            {item}
+                          </span>
+                          <span
+                            className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
+                            style={{
+                              color: level?.color || '#64748B',
+                              backgroundColor:
+                                level?.key === 'EXCELENTE'
+                                  ? '#F0FDF4'
+                                  : level?.key === 'CONSOLIDADO'
+                                  ? '#F0FDF4'
+                                  : level?.key === 'EN_DESARROLLO'
+                                  ? '#FFFBEB'
+                                  : level?.key === 'NECESITA_APOYO'
+                                  ? '#FEF2F2'
+                                  : '#F8FAFC',
+                            }}
+                          >
+                            {level ? level.label : 'Sin evaluar'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
+                    Defensa
+                  </div>
+                  <div className="space-y-1">
+                    {RUBRICA_JUGADORES[3].items.map((item) => {
+                      const lvlKey = respuestas[item]?.nivel;
+                      const level = nivelesActuales.find(
+                        (l) => l.key === lvlKey
+                      );
+                      return (
+                        <div
+                          key={item}
+                          className="flex justify-between items-center py-0.5 px-1 bg-white"
+                        >
+                          <span className="text-slate-800 font-medium text-[11.5px]">
+                            {item}
+                          </span>
+                          <span
+                            className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
+                            style={{
+                              color: level?.color || '#64748B',
+                              backgroundColor:
+                                level?.key === 'EXCELENTE'
+                                  ? '#F0FDF4'
+                                  : level?.key === 'CONSOLIDADO'
+                                  ? '#F0FDF4'
+                                  : level?.key === 'EN_DESARROLLO'
+                                  ? '#FFFBEB'
+                                  : level?.key === 'NECESITA_APOYO'
+                                  ? '#FEF2F2'
+                                  : '#F8FAFC',
+                            }}
+                          >
+                            {level ? level.label : 'Sin evaluar'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Radar + Fortalezas/Objetivos */}
+            <div className="grid grid-cols-12 gap-6 pt-3 border-t border-slate-200 items-center">
+              <div className="col-span-4 flex flex-col items-center justify-center">
+                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Perfil de Rendimiento
+                </span>
+                <svg
+                  width="150"
+                  height="150"
+                  viewBox="0 0 150 150"
+                  className="overflow-visible"
+                >
+                  <polygon
+                    points="75,25 125,75 75,125 25,75"
+                    fill="none"
+                    stroke="#E2E8F0"
+                    strokeWidth="1.5"
+                  />
+                  <polygon
+                    points="75,50 100,75 75,100 50,75"
+                    fill="none"
+                    stroke="#E2E8F0"
+                    strokeWidth="1"
+                  />
+                  <line
+                    x1="75"
+                    y1="25"
+                    x2="75"
+                    y2="125"
+                    stroke="#CBD5E1"
+                    strokeWidth="1"
+                    strokeDasharray="2,2"
+                  />
+                  <line
+                    x1="25"
+                    y1="75"
+                    x2="125"
+                    y2="75"
+                    stroke="#CBD5E1"
+                    strokeWidth="1"
+                    strokeDasharray="2,2"
+                  />
+
+                  <polygon
+                    points={radarPoints}
+                    fill="rgba(22, 163, 74, 0.25)"
+                    stroke="#16A34A"
+                    strokeWidth="2.5"
+                  />
+
+                  <text
+                    x="75"
+                    y="17"
+                    textAnchor="middle"
+                    className="text-[8px] font-bold fill-slate-700"
+                  >
+                    MOTOR
+                  </text>
+                  <text
+                    x="132"
+                    y="78"
+                    textAnchor="start"
+                    className="text-[8px] font-bold fill-slate-700"
+                  >
+                    TÉCNICA
+                  </text>
+                  <text
+                    x="75"
+                    y="137"
+                    textAnchor="middle"
+                    className="text-[8px] font-bold fill-slate-700"
+                  >
+                    TÁCTICA
+                  </text>
+                  <text
+                    x="18"
+                    y="78"
+                    textAnchor="end"
+                    className="text-[8px] font-bold fill-slate-700"
+                  >
+                    DEFENSA
+                  </text>
+                </svg>
+              </div>
+
+              <div className="col-span-8 space-y-2.5 text-xs">
+                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                  <h5 className="font-bold text-slate-900 mb-0.5 text-[10.5px] uppercase tracking-wider">
+                    Fortalezas Destacadas
+                  </h5>
+                  <p className="text-slate-700 leading-relaxed text-[11px]">
+                    {fortalezas || 'Sin observaciones registradas.'}
+                  </p>
+                </div>
+                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                  <h5 className="font-bold text-slate-900 mb-0.5 text-[10.5px] uppercase tracking-wider">
+                    Objetivos de Mejora
+                  </h5>
+                  <p className="text-slate-700 leading-relaxed text-[11px]">
+                    {objetivos || 'Sin objetivos registrados.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Pie de Informe */}
+            <div className="pt-3 border-t border-slate-200 flex justify-between items-center text-[9.5px] text-slate-500 font-medium">
+              <div className="flex items-center space-x-3">
+                <span className="font-bold text-slate-700 uppercase">
+                  Criterios:
+                </span>
+                <span className="flex items-center space-x-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                  <span>Excelente</span>
+                </span>
+                <span className="flex items-center space-x-1">
+                  <span className="w-2 h-2 rounded-full bg-green-500" />
+                  <span>Consolidado</span>
+                </span>
+                <span className="flex items-center space-x-1">
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  <span>En desarrollo</span>
+                </span>
+                <span className="flex items-center space-x-1">
+                  <span className="w-2 h-2 rounded-full bg-rose-500" />
+                  <span>Necesita apoyo</span>
+                </span>
+              </div>
+              <div>
+                <span>
+                  Evaluador: <strong>{evaluadorNombre}</strong> •{' '}
+                  {clubActivo.nombre}
+                </span>
+              </div>
+            </div>
+
+            {/* Botones de acción */}
+            <div className="mt-4 flex justify-between items-center pt-3 border-t border-slate-100 print:hidden">
+              <button
+                onClick={() => setPantalla('FORMULARIO')}
+                className="text-xs text-slate-600 hover:text-slate-900 font-semibold"
+              >
+                ← Volver a editar ficha
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="bg-slate-900 text-white text-xs px-5 py-2.5 rounded font-medium hover:bg-slate-800 shadow"
+              >
+                Imprimir o guardar en PDF
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* PANTALLA 5: INFORME DE EQUIPO COMPLETO (BULK PRINT) */}
+        {pantalla === 'INFORME_EQUIPO' && (
+          <div className="space-y-8 print:space-y-0">
+            <div className="bg-white p-4 rounded-xl shadow border border-slate-200 flex justify-between items-center print:hidden">
+              <div>
+                <h3 className="font-bold text-slate-900">
+                  Dossier Completo de {equipoSeleccionado.nombre}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  {clubActivo.nombre} • {equipoSeleccionado.jugadores.length}{' '}
+                  fichas individuales.
+                </p>
+              </div>
+              <div className="space-x-2">
+                <button
+                  onClick={() => setPantalla('PLANTILLA')}
+                  className="text-xs text-slate-600 px-3 py-2 rounded font-semibold hover:bg-slate-100"
+                >
+                  ← Volver
+                </button>
+                <button
+                  onClick={() => window.print()}
+                  className="bg-slate-900 text-white text-xs px-5 py-2 rounded font-semibold shadow hover:bg-slate-800"
+                >
+                  Imprimir Todo el Equipo (PDF)
+                </button>
+              </div>
+            </div>
+
+            {equipoSeleccionado.jugadores.map((jugador) => {
+              const asist = calcularAsistenciaJugador(
+                jugador.id,
+                equipoSeleccionado
+              );
+              return (
+                <div
+                  key={jugador.id}
+                  className="print-full-page bg-white rounded-xl shadow border border-slate-200 p-8 page-break print:p-0 print:border-none print:shadow-none print:rounded-none"
+                >
+                  <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-14 h-14 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center p-1 overflow-hidden">
+                        {clubActivo.logoUrl ? (
+                          <img
+                            src={clubActivo.logoUrl}
+                            alt="Escudo"
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <span className="font-bold text-slate-800 text-xl">
+                            {siglasClub || 'CB'}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-slate-900">
+                          {jugador.nombre}
+                        </h2>
+                        <p className="text-xs text-slate-600 font-medium">
+                          {clubActivo.nombre} • {equipoSeleccionado.nombre} •
+                          Dorsal {jugador.dorsal} • {jugador.nacimiento}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                        Temporada {clubActivo.temporada}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        Evaluación {periodo} • Asistencia: {asist.pct}% (
+                        {asist.presentes}/{asist.totalSesiones} ses.)
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-8 my-4 text-xs">
+                    <div className="space-y-4">
+                      <div>
+                        <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
+                          Desarrollo Motor
+                        </div>
+                        <div className="space-y-1">
+                          {RUBRICA_JUGADORES[0].items.map((item) => (
+                            <div
+                              key={item}
+                              className="flex justify-between items-center py-0.5 px-1 bg-white"
+                            >
+                              <span className="text-slate-800 font-medium text-[11.5px]">
+                                {item}
+                              </span>
+                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">
+                                Consolidado
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
+                          Técnica Individual
+                        </div>
+                        <div className="space-y-1">
+                          {RUBRICA_JUGADORES[1].items.map((item) => (
+                            <div
+                              key={item}
+                              className="flex justify-between items-center py-0.5 px-1 bg-white"
+                            >
+                              <span className="text-slate-800 font-medium text-[11.5px]">
+                                {item}
+                              </span>
+                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">
+                                Consolidado
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
+                          Comprensión del Juego
+                        </div>
+                        <div className="space-y-1">
+                          {RUBRICA_JUGADORES[2].items.map((item) => (
+                            <div
+                              key={item}
+                              className="flex justify-between items-center py-0.5 px-1 bg-white"
+                            >
+                              <span className="text-slate-800 font-medium text-[11.5px]">
+                                {item}
+                              </span>
+                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">
+                                Consolidado
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
+                          Defensa
+                        </div>
+                        <div className="space-y-1">
+                          {RUBRICA_JUGADORES[3].items.map((item) => (
+                            <div
+                              key={item}
+                              className="flex justify-between items-center py-0.5 px-1 bg-white"
+                            >
+                              <span className="text-slate-800 font-medium text-[11.5px]">
+                                {item}
+                              </span>
+                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">
+                                Consolidado
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-200 flex justify-between items-center text-[9.5px] text-slate-500 font-medium">
+                    <div className="flex items-center space-x-3">
+                      <span className="font-bold text-slate-700 uppercase">
+                        Criterios:
+                      </span>
+                      <span className="flex items-center space-x-1">
+                        <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                        <span>Excelente</span>
+                      </span>
+                      <span className="flex items-center space-x-1">
+                        <span className="w-2 h-2 rounded-full bg-green-500" />
+                        <span>Consolidado</span>
+                      </span>
+                      <span className="flex items-center space-x-1">
+                        <span className="w-2 h-2 rounded-full bg-amber-500" />
+                        <span>En desarrollo</span>
+                      </span>
+                      <span className="flex items-center space-x-1">
+                        <span className="w-2 h-2 rounded-full bg-rose-500" />
+                        <span>Necesita apoyo</span>
+                      </span>
+                    </div>
+                    <span>
+                      Evaluador: {evaluadorNombre} • {clubActivo.nombre}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
