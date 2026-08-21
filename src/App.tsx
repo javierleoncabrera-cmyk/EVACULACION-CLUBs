@@ -590,8 +590,9 @@ export default function App() {
                 <span>Dirección Técnica &amp; Metodología Deportiva</span>
               </div>
 
+              {/* Titular con doble énfasis en Mayúsculas */}
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight mb-4">
-                El estándar digital en evaluación técnica y seguimiento deportivo.
+                El control absoluto de la <span className="text-emerald-400">EVOLUCIÓN</span> técnica y el <span className="text-emerald-400">RENDIMIENTO</span> deportivo.
               </h1>
               
               <p className="text-slate-400 text-sm leading-relaxed mb-8">
