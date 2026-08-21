@@ -300,7 +300,6 @@ export default function App() {
   const [jugadorSeleccionado, setJugadorSeleccionado] = useState<Player>(equipoSeleccionado?.jugadores?.[0] || EQUIPOS_INICIALES[0].jugadores[0]);
   const [coachSeleccionado, setCoachSeleccionado] = useState<Coach | null>(null);
 
-  // Persistencia y Carga con Supabase
   useEffect(() => {
     const cargarDatosNube = async () => {
       try {
@@ -394,6 +393,7 @@ export default function App() {
     setPantalla('EQUIPOS');
   };
 
+  // Crear Usuario
   const handleCrearUsuario = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevoUserEmail || !nuevoUserNombre || !nuevoUserPass) {
@@ -415,6 +415,23 @@ export default function App() {
     setNuevoUserPass('');
     setNuevoUserNombre('');
     alert(`Usuario creado:\nEmail: ${nuevoU.email}\nClave: ${nuevoU.pass}`);
+  };
+
+  // Actualizar Contraseña de cualquier usuario
+  const handleActualizarPassword = (userId: string, nuevaClave: string) => {
+    if (!nuevaClave.trim()) return;
+    setUsuarios(usuarios.map(u => u.id === userId ? { ...u, pass: nuevaClave.trim() } : u));
+    if (sessionUser && sessionUser.id === userId) {
+      setSessionUser({ ...sessionUser, pass: nuevaClave.trim() });
+    }
+  };
+
+  // Eliminar Usuario
+  const handleEliminarUsuario = (userId: string, nombre: string) => {
+    if (confirm(`¿Estás seguro de eliminar el acceso de "${nombre}" permanentemente?`)) {
+      setUsuarios(usuarios.filter(u => u.id !== userId));
+      alert(`Usuario ${nombre} eliminado.`);
+    }
   };
 
   const handleCrearClub = async (e: React.FormEvent) => {
@@ -540,7 +557,6 @@ export default function App() {
     return { pct, presentes, totalValidas, totalSesiones: sesiones.length };
   };
 
-  // Exportar a Excel / CSV
   const handleExportarExcel = () => {
     let csvContent = 'data:text/csv;charset=utf-8,';
     csvContent += 'Dorsal;Nombre;Nacimiento;Porcentaje Asistencia;Sesiones Totales;Ev Inicial;Ev Media;Ev Final\n';
@@ -658,7 +674,6 @@ export default function App() {
   const handleAddJugador = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevoNombreJugador) return;
-    // Generación de Token Criptográfico Seguro (RGPD)
     const randomHex = Math.random().toString(36).substring(2, 8) + Date.now().toString(36).substring(4);
     const secureToken = `sec_${randomHex}`;
     
@@ -723,9 +738,7 @@ export default function App() {
   const publicFamilyUrl = `https://evaculacion-clu-bs.vercel.app/?token=${jugadorSeleccionado?.tokenPublico || 'sec_8f9a2b1c4e7d'}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(publicFamilyUrl)}`;
 
-  // ==========================================
-  // VISTA PÚBLICA PARA FAMILIAS (DESDE EL QR)
-  // ==========================================
+  // VISTA PÚBLICA FAMILIAS (QR)
   if (publicToken) {
     let jugadorPublico: Player | undefined;
     let equipoPublico: Team | undefined;
@@ -758,7 +771,6 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-100 text-slate-900 p-4 sm:p-6 font-sans">
         <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-200 p-6 sm:p-8 space-y-6">
-          
           <div className="flex justify-between items-center border-b pb-4">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center p-1 font-bold text-slate-800 text-base overflow-hidden">
@@ -840,13 +852,12 @@ export default function App() {
               Acceso Entrenadores →
             </button>
           </div>
-
         </div>
       </div>
     );
   }
 
-  // VISTA: LOGIN DE GESTIÓN
+  // VISTA: LOGIN
   if (!sessionUser) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans">
@@ -1254,8 +1265,8 @@ export default function App() {
             <div className="bg-purple-900 text-white p-6 rounded-2xl shadow flex justify-between items-center">
               <div>
                 <span className="text-xs uppercase tracking-wider font-bold text-purple-300">Panel Maestro de la Plataforma</span>
-                <h2 className="text-2xl font-bold">Gestión de Clubes y Cuentas de Acceso</h2>
-                <p className="text-xs text-purple-200 mt-1">Crea nuevos clubes y asigna directores técnicos o entrenadores con contraseña.</p>
+                <h2 className="text-2xl font-bold">Gestión de Clubes, Accesos y Contraseñas</h2>
+                <p className="text-xs text-purple-200 mt-1">Modifica credenciales, da de alta o elimina usuarios con acceso.</p>
               </div>
               <button
                 onClick={() => setPantalla('EQUIPOS')}
@@ -1265,6 +1276,7 @@ export default function App() {
               </button>
             </div>
 
+            {/* 1. Alta de Club */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">1. Dar de Alta Nuevo Club / Colegio</h3>
               <form onSubmit={handleCrearClub} className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -1292,6 +1304,7 @@ export default function App() {
               </form>
             </div>
 
+            {/* Clubes Activos */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">Clubes Activos (Modificar Nombre o Escudo)</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1316,6 +1329,7 @@ export default function App() {
               </div>
             </div>
 
+            {/* 2. Crear Usuario con Contraseña */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">2. Crear Usuario y Asignar Contraseña</h3>
               <form onSubmit={handleCrearUsuario} className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
@@ -1371,39 +1385,62 @@ export default function App() {
               </form>
             </div>
 
+            {/* 3. Listado de Usuarios con Edición de Contraseña y Borrado */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
-              <h3 className="font-bold text-slate-900 text-sm mb-4">3. Usuarios, Contraseñas y Permisos Activos</h3>
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 uppercase font-semibold">
-                    <th className="pb-2">Nombre</th>
-                    <th className="pb-2">Correo</th>
-                    <th className="pb-2">Contraseña</th>
-                    <th className="pb-2">Rol Asignado</th>
-                    <th className="pb-2">Club Vinculado</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {usuarios.map(u => {
-                    const userClub = clubs.find(c => c.id === u.clubId);
-                    return (
-                      <tr key={u.id} className="hover:bg-slate-50">
-                        <td className="py-2.5 font-bold text-slate-900">{u.name}</td>
-                        <td className="py-2.5 text-slate-600">{u.email}</td>
-                        <td className="py-2.5 font-mono text-slate-500">{u.pass}</td>
-                        <td className="py-2.5">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            u.role === 'SUPER_ADMIN' ? 'bg-purple-100 text-purple-800' : u.role === 'DIRECTOR' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'
-                          }`}>
-                            {u.role}
-                          </span>
-                        </td>
-                        <td className="py-2.5 text-slate-700">{userClub ? userClub.nombre : 'Plataforma Global'}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <h3 className="font-bold text-slate-900 text-sm mb-4">3. Gestión de Contraseñas y Usuarios Activos</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-500 uppercase font-semibold">
+                      <th className="pb-2">Nombre</th>
+                      <th className="pb-2">Correo</th>
+                      <th className="pb-2">Contraseña (Editable)</th>
+                      <th className="pb-2">Rol</th>
+                      <th className="pb-2">Club</th>
+                      <th className="pb-2 text-right">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {usuarios.map(u => {
+                      const userClub = clubs.find(c => c.id === u.clubId);
+                      return (
+                        <tr key={u.id} className="hover:bg-slate-50">
+                          <td className="py-2.5 font-bold text-slate-900">{u.name}</td>
+                          <td className="py-2.5 text-slate-600">{u.email}</td>
+                          <td className="py-2.5">
+                            <input
+                              type="text"
+                              value={u.pass}
+                              onChange={(e) => handleActualizarPassword(u.id, e.target.value)}
+                              className="bg-slate-100 border border-slate-300 rounded px-2 py-1 font-mono text-slate-800 text-xs w-28 focus:outline-none focus:border-emerald-500"
+                              title="Modifica aquí la contraseña directamente"
+                            />
+                          </td>
+                          <td className="py-2.5">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              u.role === 'SUPER_ADMIN' ? 'bg-purple-100 text-purple-800' : u.role === 'DIRECTOR' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'
+                            }`}>
+                              {u.role}
+                            </span>
+                          </td>
+                          <td className="py-2.5 text-slate-700">{userClub ? userClub.nombre : 'Global'}</td>
+                          <td className="py-2.5 text-right">
+                            {u.role !== 'SUPER_ADMIN' && (
+                              <button
+                                onClick={() => handleEliminarUsuario(u.id, u.name)}
+                                className="text-rose-600 hover:text-rose-800 font-semibold px-2 py-1 rounded hover:bg-rose-50 border border-rose-200"
+                                title="Eliminar usuario"
+                              >
+                                🗑️ Eliminar
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
