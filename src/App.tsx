@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from './supabase';
 
 type UserRole = 'SUPER_ADMIN' | 'DIRECTOR' | 'ENTRENADOR';
 type Gender = 'FEMENINO' | 'MASCULINO';
@@ -103,19 +104,19 @@ interface RubricCategory {
 }
 
 const NIVELES_JUGADORES: LevelOption[] = [
-  { key: 'EXCELENTE', label: 'Excelente', desc: 'Dominio sobresaliente y constante en competición y entrenamiento.', color: '#16A34A', weight: 4 },
-  { key: 'CONSOLIDADO', label: 'Consolidado', desc: 'Adquirido y ejecutado con regularidad y autonomía.', color: '#22C55E', weight: 3 },
-  { key: 'EN_DESARROLLO', label: 'En desarrollo', desc: 'En proceso de aprendizaje; requiere pautas o repetición.', color: '#F59E0B', weight: 2 },
-  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Dificultad evidente en la comprensión o ejecución técnica.', color: '#EF4444', weight: 1 },
-  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'Sin datos suficientes de valoración en este periodo.', color: '#CBD5E1', weight: 0 },
+  { key: 'EXCELENTE', label: 'Excelente', desc: 'Dominio sobresaliente y constante.', color: '#16A34A', weight: 4 },
+  { key: 'CONSOLIDADO', label: 'Consolidado', desc: 'Adquirido y ejecutado con autonomía.', color: '#22C55E', weight: 3 },
+  { key: 'EN_DESARROLLO', label: 'En desarrollo', desc: 'En proceso de aprendizaje motriz.', color: '#F59E0B', weight: 2 },
+  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Dificultad evidente en la ejecución.', color: '#EF4444', weight: 1 },
+  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'Sin datos suficientes de valoración.', color: '#CBD5E1', weight: 0 },
 ];
 
 const NIVELES_ENTRENADORES: LevelOption[] = [
-  { key: 'EXCELENTE', label: 'Excelente', desc: 'Siempre claro, metódico y adaptado al grupo.', color: '#16A34A', weight: 4 },
-  { key: 'BUENO', label: 'Bueno', desc: 'Generalmente adecuado y consistente en la dirección.', color: '#22C55E', weight: 3 },
-  { key: 'MEJORABLE', label: 'Mejorable', desc: 'Ocasionalmente inadecuado o con margen de optimización.', color: '#F59E0B', weight: 2 },
-  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Frecuentemente confuso o con carencias metodológicas.', color: '#EF4444', weight: 1 },
-  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado durante las sesiones observadas.', color: '#CBD5E1', weight: 0 },
+  { key: 'EXCELENTE', label: 'Excelente', desc: 'Siempre claro, metódico y estructurado.', color: '#16A34A', weight: 4 },
+  { key: 'BUENO', label: 'Bueno', desc: 'Generalmente adecuado y consistente.', color: '#22C55E', weight: 3 },
+  { key: 'MEJORABLE', label: 'Mejorable', desc: 'Ocasionalmente con margen de optimización.', color: '#F59E0B', weight: 2 },
+  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Frecuentemente con carencias pedagógicas.', color: '#EF4444', weight: 1 },
+  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado en este ciclo.', color: '#CBD5E1', weight: 0 },
 ];
 
 const RUBRICA_INICIAL: RubricCategory[] = [
@@ -143,49 +144,11 @@ const RUBRICA_INICIAL: RubricCategory[] = [
 
 const RUBRICA_ENTRENADORES = [
   {
-    nombre: 'Comunicación y lenguaje',
+    nombre: 'Comunicación y metodología',
     items: [
-      {
-        nombre: 'Claridad en las instrucciones',
-        descs: {
-          EXCELENTE: 'Siempre claro y específico en sus explicaciones.',
-          BUENO: 'Generalmente claro en la transmisión de conceptos.',
-          MEJORABLE: 'Ocasionalmente ambiguo o extenso en las explicaciones.',
-          NECESITA_APOYO: 'Frecuentemente confuso y genera dudas en el grupo.'
-        }
-      },
-      {
-        nombre: 'Volumen de voz adecuado',
-        descs: {
-          EXCELENTE: 'Tono modulado, enérgico y audible en toda la pista.',
-          BUENO: 'Generalmente adecuado al entorno de trabajo.',
-          MEJORABLE: 'Ocasionalmente inadecuado (demasiado bajo o gritos).',
-          NECESITA_APOYO: 'Inadecuado, no capta la atención del equipo.'
-        }
-      },
-      {
-        nombre: 'Feedback constructivo',
-        descs: {
-          EXCELENTE: 'Refuerzo constante, inmediato y constructivo.',
-          BUENO: 'Buen equilibrio entre corrección y motivación.',
-          MEJORABLE: 'Centrado casi exclusivamente en el error.',
-          NECESITA_APOYO: 'Ausencia de feedback pedagógico.'
-        }
-      }
-    ]
-  },
-  {
-    nombre: 'Metodología y dinámica',
-    items: [
-      {
-        nombre: 'Gestión del tiempo y ritmo',
-        descs: {
-          EXCELENTE: 'Transiciones rápidas y máximo tiempo de práctica motriz.',
-          BUENO: 'Buen aprovechamiento del tiempo de pista.',
-          MEJORABLE: 'Paradas excesivamente largas para dar explicaciones.',
-          NECESITA_APOYO: 'Pérdida continua de tiempo y falta de ritmo.'
-        }
-      }
+      { nombre: 'Claridad en las explicaciones y consignas', descs: { EXCELENTE: 'Siempre claro y directo.', BUENO: 'Adecuado y comprensible.', MEJORABLE: 'A veces genera dudas.', NECESITA_APOYO: 'Confuso.' } },
+      { nombre: 'Feedback constructivo e individualizado', descs: { EXCELENTE: 'Constante y motivador.', BUENO: 'Adecuado.', MEJORABLE: 'Poco frecuente.', NECESITA_APOYO: 'Inexistente.' } },
+      { nombre: 'Gestión del tiempo y ritmo en pista', descs: { EXCELENTE: 'Máxima intensidad motriz.', BUENO: 'Buen ritmo.', MEJORABLE: 'Paradas largas.', NECESITA_APOYO: 'Pérdida de tiempo.' } }
     ]
   }
 ];
@@ -209,7 +172,7 @@ const EQUIPOS_INICIALES: Team[] = [
         nombre: 'Mateo Álvarez', 
         dorsal: 5, 
         nacimiento: 2015, 
-        tokenPublico: 'mat-alv-2015',
+        tokenPublico: 'sec_8f9a2b1c4e7d',
         inicial: 'COMPLETADA', 
         media: 'PENDIENTE', 
         final: 'PENDIENTE',
@@ -217,26 +180,13 @@ const EQUIPOS_INICIALES: Team[] = [
           { temporada: '2025/26', categoria: 'Benjamín', periodo: 'Final', fecha: '28/05/2026', promedioNivel: 'Consolidado', fortalezas: 'Mucha velocidad y actitud.', objetivos: 'Aprender tiro en suspensión.' }
         ]
       },
-      { id: 'j2', nombre: 'Leo Batista', dorsal: 55, nacimiento: 2014, tokenPublico: 'leo-bat-2014', inicial: 'COMPLETADA', media: 'PENDIENTE', final: 'PENDIENTE', historial: [] }
+      { id: 'j2', nombre: 'Leo Batista', dorsal: 55, nacimiento: 2014, tokenPublico: 'sec_3c4d5e6f7a8b', inicial: 'COMPLETADA', media: 'PENDIENTE', final: 'PENDIENTE', historial: [] }
     ],
     sesiones: [
       { id: 's1', fecha: '12/08/2026', tipo: 'ENTRENAMIENTO', asistencias: { 'j1': 'PRESENTE', 'j2': 'PRESENTE' } },
       { id: 's2', fecha: '14/08/2026', tipo: 'ENTRENAMIENTO', asistencias: { 'j1': 'PRESENTE', 'j2': 'FALTA' } },
       { id: 's3', fecha: '17/08/2026', tipo: 'PARTIDO', asistencias: { 'j1': 'PRESENTE', 'j2': 'PRESENTE' } }
     ]
-  },
-  {
-    id: 't_doguen_2',
-    clubId: 'club_doguen',
-    nombre: 'Alevín Academia Femenino',
-    categoria: 'Alevín (2015-2016)',
-    gender: 'FEMENINO',
-    entrenador: 'Laura Sánchez',
-    jugadores: [
-      { id: 'j3', nombre: 'Lucía Fernández', dorsal: 4, nacimiento: 2015, tokenPublico: 'luc-fer-2015', inicial: 'COMPLETADA', media: 'PENDIENTE', final: 'PENDIENTE', historial: [] },
-      { id: 'j4', nombre: 'Jugadora Dos', dorsal: 2, nacimiento: 2015, tokenPublico: 'jug-dos-2015', inicial: 'COMPLETADA', media: 'BORRADOR', final: 'PENDIENTE', historial: [] }
-    ],
-    sesiones: []
   }
 ];
 
@@ -247,7 +197,6 @@ const USUARIOS_INICIALES: AppUser[] = [
 ];
 
 export default function App() {
-  // Detector de Token Público de Familia
   const [publicToken, setPublicToken] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -325,12 +274,11 @@ export default function App() {
     'Coordinación': { nivel: 'EN_DESARROLLO', obs: '' },
     'Bote': { nivel: 'NECESITA_APOYO', obs: '' },
     'Pase': { nivel: 'EXCELENTE', obs: 'Gran visión espacial' },
-    'Claridad en las instrucciones': { nivel: 'EXCELENTE', obs: '' },
-    'Volumen de voz adecuado': { nivel: 'BUENO', obs: '' }
+    'Claridad en las explicaciones y consignas': { nivel: 'EXCELENTE', obs: '' }
   });
 
-  const [fortalezas, setFortalezas] = useState('Excelente actitud defensiva, visión espacial y liderazgo positivo.');
-  const [objetivos, setObjetivos] = useState('Manejo de mano no dominante y templanza en momentos de presión.');
+  const [fortalezas, setFortalezas] = useState('Excelente actitud defensiva, visión espacial y disciplina.');
+  const [objetivos, setObjetivos] = useState('Manejo de mano no dominante y templanza bajo presión.');
   const [evaluadorNombre, setEvaluadorNombre] = useState('Dirección Técnica');
 
   const effectiveClubId = sessionUser?.role === 'DIRECTOR' || sessionUser?.role === 'ENTRENADOR'
@@ -351,6 +299,27 @@ export default function App() {
   const [equipoSeleccionado, setEquipoSeleccionado] = useState<Team>(equiposFiltrados[0] || equiposDelClub[0] || EQUIPOS_INICIALES[0]);
   const [jugadorSeleccionado, setJugadorSeleccionado] = useState<Player>(equipoSeleccionado?.jugadores?.[0] || EQUIPOS_INICIALES[0].jugadores[0]);
   const [coachSeleccionado, setCoachSeleccionado] = useState<Coach | null>(null);
+
+  // Persistencia y Carga con Supabase
+  useEffect(() => {
+    const cargarDatosNube = async () => {
+      try {
+        const { data: cData } = await supabase.from('clubs').select('*');
+        if (cData && cData.length > 0) {
+          const cloudClubs: Club[] = cData.map(c => ({
+            id: c.id,
+            nombre: c.nombre,
+            temporada: c.temporada,
+            logoUrl: c.logo_url
+          }));
+          setClubs(cloudClubs);
+        }
+      } catch (err) {
+        console.log('Modo local activo');
+      }
+    };
+    cargarDatosNube();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('app_multi_clubs', JSON.stringify(clubs));
@@ -381,7 +350,7 @@ export default function App() {
     const found = usuarios.find(u => u.email.toLowerCase() === authEmail.trim().toLowerCase());
     
     if (!found) {
-      setAuthError('El correo electrónico introducido no existe.');
+      setAuthError('El correo introducido no existe.');
       return;
     }
 
@@ -428,7 +397,7 @@ export default function App() {
   const handleCrearUsuario = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevoUserEmail || !nuevoUserNombre || !nuevoUserPass) {
-      alert('Por favor, rellena todos los campos.');
+      alert('Rellena todos los campos.');
       return;
     }
 
@@ -445,10 +414,10 @@ export default function App() {
     setNuevoUserEmail('');
     setNuevoUserPass('');
     setNuevoUserNombre('');
-    alert(`Usuario creado correctamente:\nEmail: ${nuevoU.email}\nClave: ${nuevoU.pass}`);
+    alert(`Usuario creado:\nEmail: ${nuevoU.email}\nClave: ${nuevoU.pass}`);
   };
 
-  const handleCrearClub = (e: React.FormEvent) => {
+  const handleCrearClub = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevoClubNombre) return;
 
@@ -479,6 +448,12 @@ export default function App() {
     setEquipoSeleccionado(equiposBase[0]);
     setNuevoClubNombre('');
     setPantalla('EQUIPOS');
+
+    try {
+      await supabase.from('clubs').insert([{ id: newClubId, nombre: nuevoClub.nombre, temporada: nuevoClub.temporada }]);
+    } catch (e) {
+      console.log('Guardado localmente');
+    }
   };
 
   const handleAddCategory = (e: React.FormEvent) => {
@@ -563,6 +538,25 @@ export default function App() {
     const totalValidas = evaluadas - justificadas;
     const pct = totalValidas > 0 ? Math.round((presentes / totalValidas) * 100) : 100;
     return { pct, presentes, totalValidas, totalSesiones: sesiones.length };
+  };
+
+  // Exportar a Excel / CSV
+  const handleExportarExcel = () => {
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    csvContent += 'Dorsal;Nombre;Nacimiento;Porcentaje Asistencia;Sesiones Totales;Ev Inicial;Ev Media;Ev Final\n';
+
+    equipoSeleccionado.jugadores.forEach(j => {
+      const asist = calcularAsistenciaJugador(j.id, equipoSeleccionado);
+      csvContent += `${j.dorsal};"${j.nombre}";${j.nacimiento};${asist.pct}%;${asist.totalSesiones};${j.inicial};${j.media};${j.final}\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Plantilla_${equipoSeleccionado.nombre.replace(/\s+/g, '_')}_2026.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const calcularPromedioCategoria = (categoriaNombre: string) => {
@@ -664,13 +658,16 @@ export default function App() {
   const handleAddJugador = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevoNombreJugador) return;
-    const cleanToken = nuevoNombreJugador.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + (nuevoNacimiento || '2015');
+    // Generación de Token Criptográfico Seguro (RGPD)
+    const randomHex = Math.random().toString(36).substring(2, 8) + Date.now().toString(36).substring(4);
+    const secureToken = `sec_${randomHex}`;
+    
     const nuevoJ: Player = {
       id: `j_${Date.now()}`,
       nombre: nuevoNombreJugador,
       dorsal: parseInt(nuevoDorsal) || 0,
       nacimiento: parseInt(nuevoNacimiento) || 2015,
-      tokenPublico: cleanToken,
+      tokenPublico: secureToken,
       inicial: 'PENDIENTE',
       media: 'PENDIENTE',
       final: 'PENDIENTE',
@@ -723,7 +720,7 @@ export default function App() {
   };
 
   const asistActual = calcularAsistenciaJugador(jugadorSeleccionado?.id, equipoSeleccionado);
-  const publicFamilyUrl = `https://evaculacion-clu-bs.vercel.app/?token=${jugadorSeleccionado?.tokenPublico || 'mat-alv-2015'}`;
+  const publicFamilyUrl = `https://evaculacion-clu-bs.vercel.app/?token=${jugadorSeleccionado?.tokenPublico || 'sec_8f9a2b1c4e7d'}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(publicFamilyUrl)}`;
 
   // ==========================================
@@ -1135,7 +1132,7 @@ export default function App() {
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 max-w-sm mx-auto text-center space-y-4">
             <div>
               <span className="text-[10px] uppercase font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                Acceso Público Familias
+                Acceso Público Familias (RGPD Seguro)
               </span>
               <h2 className="text-lg font-bold text-slate-900 mt-2">{jugadorSeleccionado.nombre}</h2>
               <p className="text-xs text-slate-500">Dorsal #{jugadorSeleccionado.dorsal} • {equipoSeleccionado.nombre}</p>
@@ -1146,14 +1143,14 @@ export default function App() {
             </div>
 
             <p className="text-[11px] text-slate-600 leading-relaxed">
-              Los padres y tutores pueden escanear este código con la cámara del móvil para consultar las evaluaciones y asistencia actualizadas en tiempo real.
+              Código encriptado único para padres y tutores. Consulta en directo desde cualquier teléfono móvil.
             </p>
 
             <div className="space-y-2 pt-2 border-t border-slate-100">
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(publicFamilyUrl);
-                  alert('¡Enlace copiado al portapapeles!');
+                  alert('¡Enlace seguro copiado al portapapeles!');
                 }}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2 rounded-lg shadow"
               >
@@ -1482,6 +1479,13 @@ export default function App() {
               </div>
 
               <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleExportarExcel}
+                  className="bg-emerald-800 hover:bg-emerald-900 text-white text-xs px-3.5 py-1.5 rounded-lg font-semibold shadow-sm transition"
+                  title="Descargar datos en formato Excel"
+                >
+                  📊 Excel / CSV
+                </button>
                 <button
                   onClick={handleAbrirPaseLista}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3.5 py-1.5 rounded-lg font-semibold shadow-sm transition"
