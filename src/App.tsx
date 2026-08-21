@@ -438,6 +438,61 @@ export default function App() {
     }
   };
 
+  const handleAbrirPaseLista = () => {
+    const initStatus: Record<string, AttendanceStatus> = {};
+    if (equipoSeleccionado && equipoSeleccionado.jugadores) {
+      equipoSeleccionado.jugadores.forEach(j => {
+        initStatus[j.id] = 'PRESENTE';
+      });
+    }
+    setSessionAsistencias(initStatus);
+    setPantalla('PASAR_LISTA');
+  };
+
+  const handleGuardarSesion = (e: React.FormEvent) => {
+    e.preventDefault();
+    const nuevaSesion: Session = {
+      id: Date.now().toString(),
+      fecha: sessionFecha,
+      tipo: sessionTipo,
+      asistencias: sessionAsistencias
+    };
+    const actualizados = equipos.map(eq => {
+      if (eq.id === equipoSeleccionado.id) {
+        const ses = [...(eq.sesiones || []), nuevaSesion];
+        const eqActualizado = { ...eq, sesiones: ses };
+        setEquipoSeleccionado(eqActualizado);
+        return eqActualizado;
+      }
+      return eq;
+    });
+    setEquipos(actualizados);
+    setPantalla('PLANTILLA');
+  };
+
+  const handleCrearEquipo = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevoNombreEquipo) return;
+    const nuevo: Team = {
+      id: `t_${Date.now()}`,
+      clubId: clubActivo.id,
+      nombre: nuevoNombreEquipo,
+      categoria: nuevaCatEquipo || 'General',
+      gender: genero,
+      entrenador: nuevoEntrenador || 'Por asignar',
+      jugadores: [],
+      sesiones: []
+    };
+    setEquipos([...equipos, nuevo]);
+    setEquipoSeleccionado(nuevo);
+    setNuevoNombreEquipo(''); setNuevaCatEquipo(''); setNuevoEntrenador('');
+    setPantalla('EQUIPOS');
+  };
+
+  const asistActual = calcularAsistenciaJugador(jugadorSeleccionado?.id, equipoSeleccionado);
+  const publicFamilyUrl = `https://evaculacion-clu-bs.vercel.app/?token=${jugadorSeleccionado?.tokenPublico || 'sec_8f9a2b1c4e7d'}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(publicFamilyUrl)}`;
+
   const badgeStatus = (status: string) => (
     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${status === 'COMPLETADA' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'}`}>
       {status}
@@ -899,9 +954,9 @@ export default function App() {
                 <h2 className="text-xl font-bold">{equipoSeleccionado.nombre}</h2>
               </div>
               <div className="space-x-2">
-                <button onClick={handleExportarExcel} className="bg-emerald-800 text-white text-xs px-3 py-1.5 rounded-lg font-semibold">📊 Excel</button>
-                <button onClick={handleAbrirPaseLista} className="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold">📋 Pasar Lista</button>
-                <button onClick={() => setPantalla('INFORME_EQUIPO')} className="bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg font-semibold">🖨️ Imprimir Todo</button>
+                <button onClick={handleExportarExcel} className="bg-emerald-800 text-white text-xs px-3.5 py-1.5 rounded-lg font-semibold">📊 Excel</button>
+                <button onClick={handleAbrirPaseLista} className="bg-emerald-600 text-white text-xs px-3.5 py-1.5 rounded-lg font-semibold">📋 Pasar Lista</button>
+                <button onClick={() => setPantalla('INFORME_EQUIPO')} className="bg-slate-900 text-white text-xs px-3.5 py-1.5 rounded-lg font-semibold">🖨️ Imprimir Todo</button>
               </div>
             </div>
 
