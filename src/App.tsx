@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabase';
 
 type UserRole = 'SUPER_ADMIN' | 'DIRECTOR' | 'ENTRENADOR';
 type Gender = 'FEMENINO' | 'MASCULINO';
@@ -163,7 +162,7 @@ const USUARIOS_INICIALES: AppUser[] = [
 ];
 
 export default function App() {
-  const [publicToken] = useState<string | null>(() => {
+  const [publicToken, setPublicToken] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       return params.get('token');
