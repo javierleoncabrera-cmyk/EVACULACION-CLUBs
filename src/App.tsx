@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabase';
 
 type UserRole = 'SUPER_ADMIN' | 'DIRECTOR' | 'ENTRENADOR';
 type Gender = 'FEMENINO' | 'MASCULINO';
@@ -19,8 +18,7 @@ type Screen =
   | 'FORMULARIO' 
   | 'INFORME' 
   | 'INFORME_EQUIPO' 
-  | 'MODAL_NUEVO_EQUIPO' 
-  | 'MODAL_NUEVO_CLUB';
+  | 'MODAL_NUEVO_EQUIPO';
 
 interface LevelOption {
   key: string;
@@ -284,7 +282,6 @@ export default function App() {
   const [periodo, setPeriodo] = useState<Period>('Inicial');
   const [pantalla, setPantalla] = useState<Screen>('EQUIPOS');
 
-  // Formulario Auth & SuperAdmin
   const [authEmail, setAuthEmail] = useState('');
   const [authPass, setAuthPass] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
@@ -295,16 +292,13 @@ export default function App() {
   const [nuevoUserRol, setNuevoUserRol] = useState<UserRole>('DIRECTOR');
   const [nuevoUserClubId, setNuevoUserClubId] = useState<string>(CLUBS_INICIALES[0].id);
 
-  // Formulario nuevo club
   const [nuevoClubNombre, setNuevoClubNombre] = useState('');
   const [nuevoClubTemporada, setNuevoClubTemporada] = useState('2026/27');
 
-  // Formulario asistencias
   const [sessionFecha, setSessionFecha] = useState<string>(new Date().toISOString().split('T')[0]);
   const [sessionTipo, setSessionTipo] = useState<SessionType>('ENTRENAMIENTO');
   const [sessionAsistencias, setSessionAsistencias] = useState<Record<string, AttendanceStatus>>({});
 
-  // Formulario equipos y jugadores
   const [nuevoNombreEquipo, setNuevoNombreEquipo] = useState('');
   const [nuevaCatEquipo, setNuevaCatEquipo] = useState('');
   const [nuevoEntrenador, setNuevoEntrenador] = useState('');
@@ -313,7 +307,6 @@ export default function App() {
   const [nuevoDorsal, setNuevoDorsal] = useState('');
   const [nuevoNacimiento, setNuevoNacimiento] = useState('');
 
-  // Formulario editor rubricas (SUPER_ADMIN ONLY)
   const [nuevaCatNombre, setNuevaCatNombre] = useState('');
   const [nuevoItemTexto, setNuevoItemTexto] = useState<Record<string, string>>({});
 
@@ -331,18 +324,17 @@ export default function App() {
   const [objetivos, setObjetivos] = useState('Manejo de mano no dominante y templanza en momentos de presión.');
   const [evaluadorNombre, setEvaluadorNombre] = useState('Dirección Técnica');
 
-  // Club Activo según Rol
   const effectiveClubId = sessionUser?.role === 'DIRECTOR' || sessionUser?.role === 'ENTRENADOR'
     ? (sessionUser.clubId || clubActivoId)
     : clubActivoId;
 
   const clubActivo = clubs.find(c => c.id === effectiveClubId) || clubs[0] || CLUBS_INICIALES[0];
 
-  // Filtrado de Equipos
   const equiposDelClub = equipos.filter(e => e.clubId === clubActivo.id);
   const equiposFiltrados = equiposDelClub.filter(e => {
     if (sessionUser?.role === 'ENTRENADOR') {
-      return e.entrenador.toLowerCase().includes(sessionUser.name.toLowerCase()) || (sessionUser.teamId && e.id === sessionUser.teamId);
+      const coachName = sessionUser.name ? sessionUser.name.toLowerCase() : '';
+      return e.entrenador.toLowerCase().includes(coachName) || (sessionUser.teamId ? e.id === sessionUser.teamId : false);
     }
     return e.gender === genero;
   });
@@ -351,7 +343,6 @@ export default function App() {
   const [jugadorSeleccionado, setJugadorSeleccionado] = useState<Player>(equipoSeleccionado?.jugadores?.[0] || EQUIPOS_INICIALES[0].jugadores[0]);
   const [coachSeleccionado, setCoachSeleccionado] = useState<Coach | null>(null);
 
-  // Persistencia
   useEffect(() => {
     localStorage.setItem('app_multi_clubs', JSON.stringify(clubs));
     localStorage.setItem('app_multi_teams', JSON.stringify(equipos));
@@ -375,7 +366,6 @@ export default function App() {
     }
   }, [effectiveClubId]);
 
-  // Manejador de Login con validación de contraseña
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
@@ -387,7 +377,7 @@ export default function App() {
     }
 
     if (found.pass !== authPass) {
-      setAuthError('Contraseña incorrecta. Compruébala o solicita una nueva.');
+      setAuthError('Contraseña incorrecta.');
       return;
     }
 
@@ -397,18 +387,17 @@ export default function App() {
   };
 
   const handleDemoLogin = (role: UserRole) => {
-    let demoUser: AppUser;
     if (role === 'SUPER_ADMIN') {
-      demoUser = usuarios[0];
+      const demoUser = usuarios[0] || USUARIOS_INICIALES[0];
       setSessionUser(demoUser);
       setPantalla('PANEL_SUPERADMIN');
     } else if (role === 'DIRECTOR') {
-      demoUser = usuarios[1];
+      const demoUser = usuarios[1] || USUARIOS_INICIALES[1];
       setSessionUser(demoUser);
       setClubActivoId(demoUser.clubId || CLUBS_INICIALES[0].id);
       setPantalla('EQUIPOS');
     } else {
-      demoUser = usuarios[2];
+      const demoUser = usuarios[2] || USUARIOS_INICIALES[2];
       setSessionUser(demoUser);
       setClubActivoId(demoUser.clubId || CLUBS_INICIALES[0].id);
       setTipoEvaluacion('JUGADORES');
@@ -426,11 +415,10 @@ export default function App() {
     setPantalla('EQUIPOS');
   };
 
-  // Crear Usuario con Contraseña
   const handleCrearUsuario = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevoUserEmail || !nuevoUserNombre || !nuevoUserPass) {
-      alert('Por favor, rellena todos los campos incluyendo la contraseña.');
+      alert('Por favor, rellena todos los campos.');
       return;
     }
 
@@ -447,7 +435,7 @@ export default function App() {
     setNuevoUserEmail('');
     setNuevoUserPass('');
     setNuevoUserNombre('');
-    alert(`¡Usuario creado!\n\nEmail: ${nuevoU.email}\nClave: ${nuevoU.pass}\nRol: ${nuevoU.role}`);
+    alert(`Usuario creado correctamente:\nEmail: ${nuevoU.email}\nClave: ${nuevoU.pass}`);
   };
 
   const handleCrearClub = (e: React.FormEvent) => {
@@ -483,7 +471,6 @@ export default function App() {
     setPantalla('EQUIPOS');
   };
 
-  // Métodos Editor de Rúbricas (Super Admin Only)
   const handleAddCategory = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevaCatNombre) return;
@@ -520,7 +507,7 @@ export default function App() {
   };
 
   const handleRemoveCategory = (catId: string) => {
-    if (confirm('¿Eliminar esta categoría y todos sus criterios?')) {
+    if (confirm('¿Eliminar esta categoría?')) {
       setRubricas(rubricas.filter(c => c.id !== catId));
     }
   };
@@ -545,8 +532,9 @@ export default function App() {
     .slice(0, 3)
     .join('');
 
-  const calcularAsistenciaJugador = (playerId: string, team: Team) => {
-    const sesiones = team?.sesiones || [];
+  const calcularAsistenciaJugador = (playerId?: string, team?: Team) => {
+    if (!playerId || !team) return { pct: 100, presentes: 0, totalValidas: 0, totalSesiones: 0 };
+    const sesiones = team.sesiones || [];
     if (sesiones.length === 0) return { pct: 100, presentes: 0, totalValidas: 0, totalSesiones: 0 };
 
     let presentes = 0;
@@ -609,9 +597,11 @@ export default function App() {
 
   const handleAbrirPaseLista = () => {
     const initStatus: Record<string, AttendanceStatus> = {};
-    equipoSeleccionado.jugadores.forEach(j => {
-      initStatus[j.id] = 'PRESENTE';
-    });
+    if (equipoSeleccionado && equipoSeleccionado.jugadores) {
+      equipoSeleccionado.jugadores.forEach(j => {
+        initStatus[j.id] = 'PRESENTE';
+      });
+    }
     setSessionAsistencias(initStatus);
     setPantalla('PASAR_LISTA');
   };
@@ -726,7 +716,7 @@ export default function App() {
   const publicFamilyUrl = `https://evaculacion-clu-bs.vercel.app/?token=${jugadorSeleccionado?.tokenPublico || 'alumno'}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(publicFamilyUrl)}`;
 
-  // PANTALLA: LOGIN
+  // VISTA: LOGIN
   if (!sessionUser) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans">
@@ -999,7 +989,7 @@ export default function App() {
       {/* Contenedor Principal */}
       <main className="max-w-4xl mx-auto mt-6 px-4 print:mt-0 print:px-0 print:max-w-full print:w-full">
         
-        {/* PANTALLA: MODAL QR FAMILIAS */}
+        {/* MODAL QR FAMILIAS */}
         {pantalla === 'MODAL_QR' && (
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 max-w-sm mx-auto text-center space-y-4">
             <div>
@@ -1022,7 +1012,7 @@ export default function App() {
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(publicFamilyUrl);
-                  alert('¡Enlace de consulta copiado al portapapeles!');
+                  alert('¡Enlace copiado al portapapeles!');
                 }}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2 rounded-lg shadow"
               >
@@ -1038,7 +1028,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: EDITOR DE RÚBRICAS (SUPER ADMIN EXCLUSIVE) */}
+        {/* EDITOR DE RÚBRICAS */}
         {pantalla === 'EDITOR_RUBRICAS' && sessionUser.role === 'SUPER_ADMIN' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6 space-y-6">
             <div className="flex justify-between items-center pb-4 border-b border-slate-200">
@@ -1120,7 +1110,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: PANEL SUPER ADMIN */}
+        {/* PANEL SUPER ADMIN */}
         {pantalla === 'PANEL_SUPERADMIN' && sessionUser.role === 'SUPER_ADMIN' && (
           <div className="space-y-6">
             <div className="bg-purple-900 text-white p-6 rounded-2xl shadow flex justify-between items-center">
@@ -1137,7 +1127,6 @@ export default function App() {
               </button>
             </div>
 
-            {/* 1. Alta de Club */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">1. Dar de Alta Nuevo Club / Colegio</h3>
               <form onSubmit={handleCrearClub} className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -1165,7 +1154,6 @@ export default function App() {
               </form>
             </div>
 
-            {/* 2. Crear Usuario con Contraseña */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">2. Crear Usuario y Asignar Contraseña</h3>
               <form onSubmit={handleCrearUsuario} className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
@@ -1188,7 +1176,7 @@ export default function App() {
                 <input
                   type="text"
                   required
-                  placeholder="Contraseña inicial (ej: Club2026!)"
+                  placeholder="Contraseña inicial"
                   value={nuevoUserPass}
                   onChange={(e) => setNuevoUserPass(e.target.value)}
                   className="border border-slate-300 rounded-lg p-2.5 font-mono"
@@ -1221,7 +1209,6 @@ export default function App() {
               </form>
             </div>
 
-            {/* 3. Listado de Usuarios Activos */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">3. Usuarios, Contraseñas y Permisos Activos</h3>
               <table className="w-full text-left text-xs">
@@ -1259,7 +1246,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: LISTADO DE EQUIPOS */}
+        {/* LISTADO DE EQUIPOS */}
         {pantalla === 'EQUIPOS' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
             <div className="flex justify-between items-center mb-6">
@@ -1312,7 +1299,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: PLANTILLA */}
+        {/* PLANTILLA */}
         {pantalla === 'PLANTILLA' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6 space-y-6">
             <div className="flex justify-between items-center pb-4 border-b border-slate-200">
@@ -1456,7 +1443,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: PASAR LISTA */}
+        {/* PASAR LISTA */}
         {pantalla === 'PASAR_LISTA' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6 max-w-2xl mx-auto space-y-6">
             <div className="flex justify-between items-center pb-4 border-b border-slate-200">
@@ -1572,7 +1559,127 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: FORMULARIO */}
+        {/* MODAL CREAR EQUIPO */}
+        {pantalla === 'MODAL_NUEVO_EQUIPO' && sessionUser.role !== 'ENTRENADOR' && (
+          <div className="bg-white rounded-xl shadow border border-slate-200 p-6 max-w-lg mx-auto">
+            <h2 className="text-lg font-bold text-slate-900 mb-1">
+              Crear Equipo — {clubActivo.nombre}
+            </h2>
+            <p className="text-xs text-slate-500 mb-6">Temporada {clubActivo.temporada}</p>
+
+            <form onSubmit={handleCrearEquipo} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Nombre del equipo</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej: Cadete Preferente"
+                  value={nuevoNombreEquipo}
+                  onChange={(e) => setNuevoNombreEquipo(e.target.value)}
+                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Categoría / Edades</label>
+                <input
+                  type="text"
+                  placeholder="Ej: Cadete (2011-2012)"
+                  value={nuevaCatEquipo}
+                  onChange={(e) => setNuevaCatEquipo(e.target.value)}
+                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Entrenador/a asignado</label>
+                <input
+                  type="text"
+                  placeholder="Ej: Marcos López"
+                  value={nuevoEntrenador}
+                  onChange={(e) => setNuevoEntrenador(e.target.value)}
+                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setPantalla('EQUIPOS')}
+                  className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-semibold hover:bg-slate-200"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-emerald-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-emerald-700 shadow"
+                >
+                  Guardar Equipo
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* LISTA ENTRENADORES */}
+        {pantalla === 'LISTA_ENTRENADORES' && sessionUser.role !== 'ENTRENADOR' && (
+          <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">
+                  Cuerpo Técnico — {clubActivo.nombre}
+                </h2>
+                <p className="text-xs text-slate-500">Evaluación metodológica de entrenadores</p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-500 font-semibold uppercase">
+                    <th className="pb-3 px-2">Entrenador/a</th>
+                    <th className="pb-3 px-2">Equipo Asignado</th>
+                    <th className="pb-3 px-2 text-center">Ev. Inicial</th>
+                    <th className="pb-3 px-2 text-center">Ev. Media</th>
+                    <th className="pb-3 px-2 text-center">Ev. Final</th>
+                    <th className="pb-3 px-2 text-right">Acción</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {entrenadoresFiltrados.map((coach) => (
+                    <tr key={coach.id} className="hover:bg-slate-50">
+                      <td className="py-3.5 px-2 font-bold text-slate-800">{coach.nombre}</td>
+                      <td className="py-3.5 px-2 text-slate-600">{coach.equipoNombre}</td>
+                      <td className="py-3.5 px-2 text-center">{badgeStatus(coach.inicial)}</td>
+                      <td className="py-3.5 px-2 text-center">{badgeStatus(coach.media)}</td>
+                      <td className="py-3.5 px-2 text-center">{badgeStatus(coach.final)}</td>
+                      <td className="py-3.5 px-2 text-right space-x-2">
+                        <button
+                          onClick={() => {
+                            setCoachSeleccionado(coach);
+                            setPantalla('FORMULARIO');
+                          }}
+                          className="bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 font-medium"
+                        >
+                          Evaluar
+                        </button>
+                        <button
+                          onClick={() => {
+                            setCoachSeleccionado(coach);
+                            setPantalla('INFORME');
+                          }}
+                          className="bg-slate-100 text-slate-700 px-3 py-1 rounded hover:bg-slate-200 font-medium border border-slate-200"
+                        >
+                          Ficha
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* FORMULARIO */}
         {pantalla === 'FORMULARIO' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
             <div className="flex justify-between items-center pb-4 border-b border-slate-200 mb-6">
@@ -1829,7 +1936,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: INFORME OFICIAL (1 HOJA A4) */}
+        {/* INFORME OFICIAL (1 HOJA A4) */}
         {pantalla === 'INFORME' && (
           <div className="print-full-page bg-white rounded-xl shadow border border-slate-200 p-8 print:p-0 print:border-none print:shadow-none print:rounded-none">
             
@@ -1986,7 +2093,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: DOSSIER COMPLETO DE EQUIPO */}
+        {/* DOSSIER COMPLETO DE EQUIPO */}
         {pantalla === 'INFORME_EQUIPO' && (
           <div className="space-y-8 print:space-y-0">
             <div className="bg-white p-4 rounded-xl shadow border border-slate-200 flex justify-between items-center print:hidden">
