@@ -412,6 +412,7 @@ export default function App() {
     setSessionUser(null);
     setAuthEmail('');
     setAuthPass('');
+    setEditandoClub(false);
     setPantalla('EQUIPOS');
   };
 
@@ -854,18 +855,20 @@ export default function App() {
 
             <div>
               {editandoClub && sessionUser.role === 'SUPER_ADMIN' ? (
-                <div className="flex items-center flex-wrap gap-2">
+                <div className="flex items-center flex-wrap gap-2 bg-slate-800 p-1.5 rounded-lg border border-slate-700">
                   <input
                     type="text"
                     value={clubActivo.nombre}
                     onChange={(e) => setClubs(clubs.map(c => c.id === clubActivo.id ? { ...c, nombre: e.target.value } : c))}
-                    className="bg-slate-800 text-white text-xs px-2 py-1 rounded border border-slate-600 focus:outline-none"
+                    className="bg-slate-900 text-emerald-400 font-bold text-xs px-2 py-1 rounded border border-slate-600 focus:outline-none"
+                    placeholder="Nombre del club / patrocinador"
                   />
                   <input
                     type="text"
                     value={clubActivo.temporada}
                     onChange={(e) => setClubs(clubs.map(c => c.id === clubActivo.id ? { ...c, temporada: e.target.value } : c))}
-                    className="bg-slate-800 text-white text-xs px-2 py-1 w-20 rounded border border-slate-600 focus:outline-none"
+                    className="bg-slate-900 text-white text-xs px-2 py-1 w-20 rounded border border-slate-600 focus:outline-none"
+                    placeholder="2026/27"
                   />
                   <label className="bg-slate-700 hover:bg-slate-600 text-slate-200 text-[11px] px-2 py-1 rounded cursor-pointer font-medium border border-slate-600">
                     Cambiar Escudo
@@ -873,7 +876,7 @@ export default function App() {
                   </label>
                   <button
                     onClick={() => setEditandoClub(false)}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] px-2.5 py-1 rounded font-semibold"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] px-3 py-1 rounded font-bold shadow"
                   >
                     Guardar
                   </button>
@@ -893,6 +896,12 @@ export default function App() {
                           </option>
                         ))}
                       </select>
+                      <button
+                        onClick={() => setEditandoClub(true)}
+                        className="text-[10px] bg-amber-600 hover:bg-amber-500 text-white font-semibold px-2 py-1 rounded shadow"
+                      >
+                        ✏️ Renombrar
+                      </button>
                       <button
                         onClick={() => setPantalla('PANEL_SUPERADMIN')}
                         className="text-[10px] bg-purple-700 hover:bg-purple-600 text-white font-semibold px-2 py-1 rounded shadow"
@@ -1127,6 +1136,7 @@ export default function App() {
               </button>
             </div>
 
+            {/* 1. Alta de Club */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">1. Dar de Alta Nuevo Club / Colegio</h3>
               <form onSubmit={handleCrearClub} className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -1154,6 +1164,32 @@ export default function App() {
               </form>
             </div>
 
+            {/* Gestión / Edición de Clubs Registrados */}
+            <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
+              <h3 className="font-bold text-slate-900 text-sm mb-4">Clubes Activos (Modificar Nombre o Escudo)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {clubs.map(c => (
+                  <div key={c.id} className="p-4 border border-slate-200 rounded-xl bg-slate-50 flex justify-between items-center text-xs">
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-sm">{c.nombre}</h4>
+                      <p className="text-slate-500">Temporada: {c.temporada}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setClubActivoId(c.id);
+                        setEditandoClub(true);
+                        setPantalla('EQUIPOS');
+                      }}
+                      className="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-3 py-1.5 rounded-lg shadow"
+                    >
+                      ✏️ Editar Datos
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 2. Crear Usuario con Contraseña */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">2. Crear Usuario y Asignar Contraseña</h3>
               <form onSubmit={handleCrearUsuario} className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
@@ -1209,6 +1245,7 @@ export default function App() {
               </form>
             </div>
 
+            {/* 3. Listado de Usuarios Activos */}
             <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
               <h3 className="font-bold text-slate-900 text-sm mb-4">3. Usuarios, Contraseñas y Permisos Activos</h3>
               <table className="w-full text-left text-xs">
