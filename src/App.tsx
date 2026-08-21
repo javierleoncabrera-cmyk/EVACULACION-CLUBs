@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabase';
 
+type UserRole = 'ADMIN' | 'ENTRENADOR';
 type Gender = 'FEMENINO' | 'MASCULINO';
 type TargetType = 'JUGADORES' | 'ENTRENADORES';
 type Period = 'Inicial' | 'Media' | 'Final';
 type AttendanceStatus = 'PRESENTE' | 'FALTA' | 'JUSTIFICADA' | 'LESIONADO';
 type SessionType = 'ENTRENAMIENTO' | 'PARTIDO';
-type Screen =
-  | 'EQUIPOS'
-  | 'PLANTILLA'
-  | 'PASAR_LISTA'
-  | 'HISTORIAL_JUGADOR'
-  | 'LISTA_ENTRENADORES'
-  | 'FORMULARIO'
-  | 'INFORME'
-  | 'INFORME_EQUIPO'
-  | 'MODAL_NUEVO_EQUIPO'
+type Screen = 
+  | 'EQUIPOS' 
+  | 'PLANTILLA' 
+  | 'PASAR_LISTA' 
+  | 'HISTORIAL_JUGADOR' 
+  | 'LISTA_ENTRENADORES' 
+  | 'FORMULARIO' 
+  | 'INFORME' 
+  | 'INFORME_EQUIPO' 
+  | 'MODAL_NUEVO_EQUIPO' 
   | 'MODAL_NUEVO_CLUB';
 
 interface LevelOption {
@@ -84,126 +85,38 @@ interface Club {
 }
 
 const NIVELES_JUGADORES: LevelOption[] = [
-  {
-    key: 'EXCELENTE',
-    label: 'Excelente',
-    desc: 'Dominio sobresaliente y constante en competición y entrenamiento.',
-    color: '#16A34A',
-    weight: 4,
-  },
-  {
-    key: 'CONSOLIDADO',
-    label: 'Consolidado',
-    desc: 'Adquirido y ejecutado con regularidad y autonomía.',
-    color: '#22C55E',
-    weight: 3,
-  },
-  {
-    key: 'EN_DESARROLLO',
-    label: 'En desarrollo',
-    desc: 'En proceso de aprendizaje; requiere pautas o repetición.',
-    color: '#F59E0B',
-    weight: 2,
-  },
-  {
-    key: 'NECESITA_APOYO',
-    label: 'Necesita apoyo',
-    desc: 'Dificultad evidente en la comprensión o ejecución técnica.',
-    color: '#EF4444',
-    weight: 1,
-  },
-  {
-    key: 'NO_OBSERVADO',
-    label: 'No observado',
-    desc: 'Sin datos suficientes de valoración en este periodo.',
-    color: '#CBD5E1',
-    weight: 0,
-  },
+  { key: 'EXCELENTE', label: 'Excelente', desc: 'Dominio sobresaliente y constante en competición y entrenamiento.', color: '#16A34A', weight: 4 },
+  { key: 'CONSOLIDADO', label: 'Consolidado', desc: 'Adquirido y ejecutado con regularidad y autonomía.', color: '#22C55E', weight: 3 },
+  { key: 'EN_DESARROLLO', label: 'En desarrollo', desc: 'En proceso de aprendizaje; requiere pautas o repetición.', color: '#F59E0B', weight: 2 },
+  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Dificultad evidente en la comprensión o ejecución técnica.', color: '#EF4444', weight: 1 },
+  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'Sin datos suficientes de valoración en este periodo.', color: '#CBD5E1', weight: 0 },
 ];
 
 const NIVELES_ENTRENADORES: LevelOption[] = [
-  {
-    key: 'EXCELENTE',
-    label: 'Excelente',
-    desc: 'Siempre claro, metódico y adaptado al grupo.',
-    color: '#16A34A',
-    weight: 4,
-  },
-  {
-    key: 'BUENO',
-    label: 'Bueno',
-    desc: 'Generalmente adecuado y consistente en la dirección.',
-    color: '#22C55E',
-    weight: 3,
-  },
-  {
-    key: 'MEJORABLE',
-    label: 'Mejorable',
-    desc: 'Ocasionalmente inadecuado o con margen de optimización.',
-    color: '#F59E0B',
-    weight: 2,
-  },
-  {
-    key: 'NECESITA_APOYO',
-    label: 'Necesita apoyo',
-    desc: 'Frecuentemente confuso o con carencias metodológicas.',
-    color: '#EF4444',
-    weight: 1,
-  },
-  {
-    key: 'NO_OBSERVADO',
-    label: 'No observado',
-    desc: 'No evaluado durante las sesiones observadas.',
-    color: '#CBD5E1',
-    weight: 0,
-  },
+  { key: 'EXCELENTE', label: 'Excelente', desc: 'Siempre claro, metódico y adaptado al grupo.', color: '#16A34A', weight: 4 },
+  { key: 'BUENO', label: 'Bueno', desc: 'Generalmente adecuado y consistente en la dirección.', color: '#22C55E', weight: 3 },
+  { key: 'MEJORABLE', label: 'Mejorable', desc: 'Ocasionalmente inadecuado o con margen de optimización.', color: '#F59E0B', weight: 2 },
+  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Frecuentemente confuso o con carencias metodológicas.', color: '#EF4444', weight: 1 },
+  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado durante las sesiones observadas.', color: '#CBD5E1', weight: 0 },
 ];
 
 const RUBRICA_JUGADORES = [
   {
     nombre: 'Desarrollo motor',
-    items: [
-      'Coordinación',
-      'Equilibrio',
-      'Carrera',
-      'Cambios de dirección',
-      'Salto',
-    ],
+    items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto']
   },
   {
     nombre: 'Técnica individual',
-    items: [
-      'Bote',
-      'Pase',
-      'Recepción',
-      'Tiro',
-      'Entrada',
-      'Paradas',
-      'Pivotes',
-      'Mano no dominante',
-    ],
+    items: ['Bote', 'Pase', 'Recepción', 'Tiro', 'Entrada', 'Paradas', 'Pivotes', 'Mano no dominante']
   },
   {
     nombre: 'Comprensión del juego',
-    items: [
-      'Ocupación de espacios',
-      'Juego sin balón',
-      '1c1',
-      'Toma de decisiones',
-      'Lectura del juego',
-      'Juego colectivo',
-    ],
+    items: ['Ocupación de espacios', 'Juego sin balón', '1c1', 'Toma de decisiones', 'Lectura del juego', 'Juego colectivo']
   },
   {
     nombre: 'Defensa',
-    items: [
-      'Actitud defensiva',
-      'Colocación',
-      '1c1 defensivo',
-      'Ayudas',
-      'Balance defensivo',
-    ],
-  },
+    items: ['Actitud defensiva', 'Colocación', '1c1 defensivo', 'Ayudas', 'Balance defensivo']
+  }
 ];
 
 const RUBRICA_ENTRENADORES = [
@@ -216,8 +129,8 @@ const RUBRICA_ENTRENADORES = [
           EXCELENTE: 'Siempre claro y específico en sus explicaciones.',
           BUENO: 'Generalmente claro en la transmisión de conceptos.',
           MEJORABLE: 'Ocasionalmente ambiguo o extenso en las explicaciones.',
-          NECESITA_APOYO: 'Frecuentemente confuso y genera dudas en el grupo.',
-        },
+          NECESITA_APOYO: 'Frecuentemente confuso y genera dudas en el grupo.'
+        }
       },
       {
         nombre: 'Volumen de voz adecuado',
@@ -225,52 +138,39 @@ const RUBRICA_ENTRENADORES = [
           EXCELENTE: 'Tono modulado, enérgico y audible en toda la pista.',
           BUENO: 'Generalmente adecuado al entorno de trabajo.',
           MEJORABLE: 'Ocasionalmente inadecuado (demasiado bajo o gritos).',
-          NECESITA_APOYO: 'Inadecuado, no capta la atención del equipo.',
-        },
+          NECESITA_APOYO: 'Inadecuado, no capta la atención del equipo.'
+        }
       },
       {
-        nombre: 'Feedback positivo y constructivo',
+        nombre: 'Feedback constructivo',
         descs: {
-          EXCELENTE:
-            'Refuerzo constante, inmediato y con corrección constructiva.',
+          EXCELENTE: 'Refuerzo constante, inmediato y constructivo.',
           BUENO: 'Buen equilibrio entre corrección y motivación.',
-          MEJORABLE:
-            'Centrado casi exclusivamente en el error sin aportar solución.',
-          NECESITA_APOYO: 'Ausencia de feedback o comentarios desmotivadores.',
-        },
-      },
-    ],
+          MEJORABLE: 'Centrado casi exclusivamente en el error.',
+          NECESITA_APOYO: 'Ausencia de feedback pedagógico.'
+        }
+      }
+    ]
   },
   {
     nombre: 'Metodología y dinámica',
     items: [
       {
-        nombre: 'Gestión del tiempo y ritmo de sesión',
+        nombre: 'Gestión del tiempo y ritmo',
         descs: {
           EXCELENTE: 'Transiciones rápidas y máximo tiempo de práctica motriz.',
           BUENO: 'Buen aprovechamiento del tiempo de pista.',
           MEJORABLE: 'Paradas excesivamente largas para dar explicaciones.',
-          NECESITA_APOYO:
-            'Sesión desestructurada y pérdida continuada de tiempo.',
-        },
-      },
-    ],
-  },
+          NECESITA_APOYO: 'Pérdida continua de tiempo y falta de ritmo.'
+        }
+      }
+    ]
+  }
 ];
 
 const CLUBS_INICIALES: Club[] = [
-  {
-    id: 'club_doguen',
-    nombre: 'Club Doguen',
-    temporada: '2026/27',
-    logoUrl: null,
-  },
-  {
-    id: 'club_canarias',
-    nombre: 'CB San Cristóbal',
-    temporada: '2026/27',
-    logoUrl: null,
-  },
+  { id: 'club_doguen', nombre: 'Club Doguen', temporada: '2026/27', logoUrl: null },
+  { id: 'club_canarias', nombre: 'CB San Cristóbal', temporada: '2026/27', logoUrl: null }
 ];
 
 const EQUIPOS_INICIALES: Team[] = [
@@ -282,57 +182,25 @@ const EQUIPOS_INICIALES: Team[] = [
     gender: 'MASCULINO',
     entrenador: 'Carlos Santana',
     jugadores: [
-      {
-        id: 'j1',
-        nombre: 'Mateo Álvarez',
-        dorsal: 5,
-        nacimiento: 2015,
-        inicial: 'COMPLETADA',
-        media: 'PENDIENTE',
+      { 
+        id: 'j1', 
+        nombre: 'Mateo Álvarez', 
+        dorsal: 5, 
+        nacimiento: 2015, 
+        inicial: 'COMPLETADA', 
+        media: 'PENDIENTE', 
         final: 'PENDIENTE',
         historial: [
-          {
-            temporada: '2025/26',
-            categoria: 'Benjamín',
-            periodo: 'Final',
-            fecha: '28/05/2026',
-            promedioNivel: 'Consolidado',
-            fortalezas: 'Mucha velocidad y actitud.',
-            objetivos: 'Aprender tiro en suspensión.',
-          },
-        ],
+          { temporada: '2025/26', categoria: 'Benjamín', periodo: 'Final', fecha: '28/05/2026', promedioNivel: 'Consolidado', fortalezas: 'Mucha velocidad y actitud.', objetivos: 'Aprender tiro en suspensión.' }
+        ]
       },
-      {
-        id: 'j2',
-        nombre: 'Leo Batista',
-        dorsal: 55,
-        nacimiento: 2014,
-        inicial: 'COMPLETADA',
-        media: 'PENDIENTE',
-        final: 'PENDIENTE',
-        historial: [],
-      },
+      { id: 'j2', nombre: 'Leo Batista', dorsal: 55, nacimiento: 2014, inicial: 'COMPLETADA', media: 'PENDIENTE', final: 'PENDIENTE', historial: [] }
     ],
     sesiones: [
-      {
-        id: 's1',
-        fecha: '12/08/2026',
-        tipo: 'ENTRENAMIENTO',
-        asistencias: { j1: 'PRESENTE', j2: 'PRESENTE' },
-      },
-      {
-        id: 's2',
-        fecha: '14/08/2026',
-        tipo: 'ENTRENAMIENTO',
-        asistencias: { j1: 'PRESENTE', j2: 'FALTA' },
-      },
-      {
-        id: 's3',
-        fecha: '17/08/2026',
-        tipo: 'PARTIDO',
-        asistencias: { j1: 'PRESENTE', j2: 'PRESENTE' },
-      },
-    ],
+      { id: 's1', fecha: '12/08/2026', tipo: 'ENTRENAMIENTO', asistencias: { 'j1': 'PRESENTE', 'j2': 'PRESENTE' } },
+      { id: 's2', fecha: '14/08/2026', tipo: 'ENTRENAMIENTO', asistencias: { 'j1': 'PRESENTE', 'j2': 'FALTA' } },
+      { id: 's3', fecha: '17/08/2026', tipo: 'PARTIDO', asistencias: { 'j1': 'PRESENTE', 'j2': 'PRESENTE' } }
+    ]
   },
   {
     id: 't_doguen_2',
@@ -342,63 +210,26 @@ const EQUIPOS_INICIALES: Team[] = [
     gender: 'FEMENINO',
     entrenador: 'Laura Sánchez',
     jugadores: [
-      {
-        id: 'j3',
-        nombre: 'Lucía Fernández',
-        dorsal: 4,
-        nacimiento: 2015,
-        inicial: 'COMPLETADA',
-        media: 'PENDIENTE',
-        final: 'PENDIENTE',
-        historial: [],
-      },
-      {
-        id: 'j4',
-        nombre: 'Jugadora Dos',
-        dorsal: 2,
-        nacimiento: 2015,
-        inicial: 'COMPLETADA',
-        media: 'BORRADOR',
-        final: 'PENDIENTE',
-        historial: [],
-      },
+      { id: 'j3', nombre: 'Lucía Fernández', dorsal: 4, nacimiento: 2015, inicial: 'COMPLETADA', media: 'PENDIENTE', final: 'PENDIENTE', historial: [] },
+      { id: 'j4', nombre: 'Jugadora Dos', dorsal: 2, nacimiento: 2015, inicial: 'COMPLETADA', media: 'BORRADOR', final: 'PENDIENTE', historial: [] }
     ],
-    sesiones: [],
-  },
-  {
-    id: 't_canarias_1',
-    clubId: 'club_canarias',
-    nombre: 'Infantil Masculino Autonómico',
-    categoria: 'Infantil (2013-2014)',
-    gender: 'MASCULINO',
-    entrenador: 'Alejandro Ramos',
-    jugadores: [
-      {
-        id: 'j5',
-        nombre: 'Marcos Alonso',
-        dorsal: 12,
-        nacimiento: 2013,
-        inicial: 'COMPLETADA',
-        media: 'PENDIENTE',
-        final: 'PENDIENTE',
-        historial: [],
-      },
-      {
-        id: 'j6',
-        nombre: 'Pablo Suárez',
-        dorsal: 8,
-        nacimiento: 2013,
-        inicial: 'PENDIENTE',
-        media: 'PENDIENTE',
-        final: 'PENDIENTE',
-        historial: [],
-      },
-    ],
-    sesiones: [],
-  },
+    sesiones: []
+  }
 ];
 
 export default function App() {
+  // Estado de Autenticación
+  const [sessionUser, setSessionUser] = useState<any>(() => {
+    const saved = localStorage.getItem('app_auth_user');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [userRole, setUserRole] = useState<UserRole>(() => {
+    return (localStorage.getItem('app_auth_role') as UserRole) || 'ADMIN';
+  });
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPass, setAuthPass] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+
   const [clubs, setClubs] = useState<Club[]>(() => {
     const saved = localStorage.getItem('app_multi_clubs');
     return saved ? JSON.parse(saved) : CLUBS_INICIALES;
@@ -408,8 +239,7 @@ export default function App() {
     return localStorage.getItem('app_active_club_id') || CLUBS_INICIALES[0].id;
   });
 
-  const clubActivo =
-    clubs.find((c) => c.id === clubActivoId) || clubs[0] || CLUBS_INICIALES[0];
+  const clubActivo = clubs.find(c => c.id === clubActivoId) || clubs[0] || CLUBS_INICIALES[0];
 
   const [equipos, setEquipos] = useState<Team[]>(() => {
     const saved = localStorage.getItem('app_multi_teams');
@@ -422,34 +252,26 @@ export default function App() {
   const [periodo, setPeriodo] = useState<Period>('Inicial');
   const [pantalla, setPantalla] = useState<Screen>('EQUIPOS');
 
-  // Filtrar equipos del club activo
-  const equiposDelClub = equipos.filter((e) => e.clubId === clubActivo.id);
-  const equiposFiltrados = equiposDelClub.filter((e) => e.gender === genero);
+  // Filtrar equipos según rol
+  const equiposDelClub = equipos.filter(e => e.clubId === clubActivo.id);
+  const equiposFiltrados = equiposDelClub.filter(e => {
+    if (userRole === 'ENTRENADOR') {
+      return e.entrenador.toLowerCase().includes(sessionUser?.name?.toLowerCase() || 'carlos');
+    }
+    return e.gender === genero;
+  });
 
-  const [equipoSeleccionado, setEquipoSeleccionado] = useState<Team>(
-    equiposFiltrados[0] || equiposDelClub[0] || EQUIPOS_INICIALES[0]
-  );
-  const [jugadorSeleccionado, setJugadorSeleccionado] = useState<Player>(
-    equipoSeleccionado?.jugadores[0] || EQUIPOS_INICIALES[0].jugadores[0]
-  );
-  const [coachSeleccionado, setCoachSeleccionado] = useState<Coach | null>(
-    null
-  );
+  const [equipoSeleccionado, setEquipoSeleccionado] = useState<Team>(equiposFiltrados[0] || equiposDelClub[0] || EQUIPOS_INICIALES[0]);
+  const [jugadorSeleccionado, setJugadorSeleccionado] = useState<Player>(equipoSeleccionado?.jugadores[0] || EQUIPOS_INICIALES[0].jugadores[0]);
+  const [coachSeleccionado, setCoachSeleccionado] = useState<Coach | null>(null);
 
-  // Formulario nuevo club
   const [nuevoClubNombre, setNuevoClubNombre] = useState('');
   const [nuevoClubTemporada, setNuevoClubTemporada] = useState('2026/27');
 
-  // Formulario nueva sesión
-  const [sessionFecha, setSessionFecha] = useState<string>(
-    new Date().toISOString().split('T')[0]
-  );
+  const [sessionFecha, setSessionFecha] = useState<string>(new Date().toISOString().split('T')[0]);
   const [sessionTipo, setSessionTipo] = useState<SessionType>('ENTRENAMIENTO');
-  const [sessionAsistencias, setSessionAsistencias] = useState<
-    Record<string, AttendanceStatus>
-  >({});
+  const [sessionAsistencias, setSessionAsistencias] = useState<Record<string, AttendanceStatus>>({});
 
-  // Formulario nuevo equipo y jugador
   const [nuevoNombreEquipo, setNuevoNombreEquipo] = useState('');
   const [nuevaCatEquipo, setNuevaCatEquipo] = useState('');
   const [nuevoEntrenador, setNuevoEntrenador] = useState('');
@@ -458,38 +280,35 @@ export default function App() {
   const [nuevoDorsal, setNuevoDorsal] = useState('');
   const [nuevoNacimiento, setNuevoNacimiento] = useState('');
 
-  const [obsAbiertas, setObsAbiertas] = useState<Record<string, boolean>>({
-    Pase: true,
-  });
+  const [obsAbiertas, setObsAbiertas] = useState<Record<string, boolean>>({ 'Pase': true });
 
-  const [respuestas, setRespuestas] = useState<
-    Record<string, { nivel: string; obs: string }>
-  >({
-    Coordinación: { nivel: 'EN_DESARROLLO', obs: '' },
-    Bote: { nivel: 'NECESITA_APOYO', obs: '' },
-    Pase: { nivel: 'EXCELENTE', obs: 'Gran visión espacial' },
+  const [respuestas, setRespuestas] = useState<Record<string, { nivel: string; obs: string }>>({
+    'Coordinación': { nivel: 'EN_DESARROLLO', obs: '' },
+    'Bote': { nivel: 'NECESITA_APOYO', obs: '' },
+    'Pase': { nivel: 'EXCELENTE', obs: 'Gran visión de juego' },
     'Claridad en las instrucciones': { nivel: 'EXCELENTE', obs: '' },
-    'Volumen de voz adecuado': { nivel: 'BUENO', obs: '' },
+    'Volumen de voz adecuado': { nivel: 'BUENO', obs: '' }
   });
 
-  const [fortalezas, setFortalezas] = useState(
-    'Es líder, gran compromiso táctico y concentración defensiva.'
-  );
-  const [objetivos, setObjetivos] = useState(
-    'Manejo de balón con mano no dominante, mejorar templanza tras error.'
-  );
+  const [fortalezas, setFortalezas] = useState('Excelente actitud defensiva, visión espacial y liderazgo positivo.');
+  const [objetivos, setObjetivos] = useState('Manejo de mano no dominante y templanza en momentos de presión.');
   const [evaluadorNombre, setEvaluadorNombre] = useState('Dirección Técnica');
 
-  // Guardado persistente
   useEffect(() => {
     localStorage.setItem('app_multi_clubs', JSON.stringify(clubs));
     localStorage.setItem('app_multi_teams', JSON.stringify(equipos));
     localStorage.setItem('app_active_club_id', clubActivoId);
-  }, [clubs, equipos, clubActivoId]);
+    if (sessionUser) {
+      localStorage.setItem('app_auth_user', JSON.stringify(sessionUser));
+      localStorage.setItem('app_auth_role', userRole);
+    } else {
+      localStorage.removeItem('app_auth_user');
+      localStorage.removeItem('app_auth_role');
+    }
+  }, [clubs, equipos, clubActivoId, sessionUser, userRole]);
 
-  // Actualizar equipo seleccionado al cambiar de club
   useEffect(() => {
-    const teams = equipos.filter((e) => e.clubId === clubActivoId);
+    const teams = equipos.filter(e => e.clubId === clubActivoId);
     if (teams.length > 0) {
       setEquipoSeleccionado(teams[0]);
       if (teams[0].jugadores.length > 0) {
@@ -498,10 +317,42 @@ export default function App() {
     }
   }, [clubActivoId]);
 
-  const nivelesActuales =
-    tipoEvaluacion === 'JUGADORES' ? NIVELES_JUGADORES : NIVELES_ENTRENADORES;
+  // Manejadores de Login
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: authEmail,
+        password: authPass
+      });
+      if (error) throw error;
+      setSessionUser({ email: data.user.email, name: data.user.email?.split('@')[0] });
+      setUserRole('ADMIN');
+    } catch (err: any) {
+      setAuthError(err.message || 'Error al iniciar sesión');
+    }
+  };
 
-  const entrenadoresFiltrados: Coach[] = equiposFiltrados.map((eq) => ({
+  const handleDemoLogin = (role: UserRole, name: string) => {
+    setSessionUser({ email: `${role.toLowerCase()}@club.com`, name });
+    setUserRole(role);
+    setAuthError(null);
+    if (role === 'ENTRENADOR') {
+      setTipoEvaluacion('JUGADORES');
+      const coachTeam = equipos.find(e => e.entrenador.toLowerCase().includes(name.toLowerCase()));
+      if (coachTeam) setEquipoSeleccionado(coachTeam);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setSessionUser(null);
+  };
+
+  const nivelesActuales = tipoEvaluacion === 'JUGADORES' ? NIVELES_JUGADORES : NIVELES_ENTRENADORES;
+
+  const entrenadoresFiltrados: Coach[] = equiposFiltrados.map(eq => ({
     id: `c_${eq.id}`,
     nombre: eq.entrenador,
     cargo: 'Entrenador/a Principal',
@@ -509,26 +360,25 @@ export default function App() {
     gender: eq.gender,
     inicial: 'COMPLETADA',
     media: 'PENDIENTE',
-    final: 'PENDIENTE',
+    final: 'PENDIENTE'
   }));
 
   const siglasClub = clubActivo.nombre
     .split(' ')
-    .filter((w) => w.length > 0)
-    .map((w) => w[0].toUpperCase())
+    .filter(w => w.length > 0)
+    .map(w => w[0].toUpperCase())
     .slice(0, 3)
     .join('');
 
   const calcularAsistenciaJugador = (playerId: string, team: Team) => {
     const sesiones = team?.sesiones || [];
-    if (sesiones.length === 0)
-      return { pct: 100, presentes: 0, totalValidas: 0, totalSesiones: 0 };
+    if (sesiones.length === 0) return { pct: 100, presentes: 0, totalValidas: 0, totalSesiones: 0 };
 
     let presentes = 0;
     let justificadas = 0;
     let evaluadas = 0;
 
-    sesiones.forEach((s) => {
+    sesiones.forEach(s => {
       const st = s.asistencias[playerId];
       if (st) {
         evaluadas++;
@@ -538,25 +388,24 @@ export default function App() {
     });
 
     const totalValidas = evaluadas - justificadas;
-    const pct =
-      totalValidas > 0 ? Math.round((presentes / totalValidas) * 100) : 100;
+    const pct = totalValidas > 0 ? Math.round((presentes / totalValidas) * 100) : 100;
     return { pct, presentes, totalValidas, totalSesiones: sesiones.length };
   };
 
   const calcularPromedioCategoria = (categoriaNombre: string) => {
-    const cat = RUBRICA_JUGADORES.find((c) => c.nombre === categoriaNombre);
+    const cat = RUBRICA_JUGADORES.find(c => c.nombre === categoriaNombre);
     if (!cat) return 0.5;
     let suma = 0;
     let total = 0;
-    cat.items.forEach((item) => {
+    cat.items.forEach(item => {
       const lvlKey = respuestas[item]?.nivel;
-      const lvl = NIVELES_JUGADORES.find((n) => n.key === lvlKey);
+      const lvl = NIVELES_JUGADORES.find(n => n.key === lvlKey);
       if (lvl && lvl.weight > 0) {
         suma += lvl.weight;
         total++;
       }
     });
-    return total > 0 ? suma / (total * 4) : 0.6;
+    return total > 0 ? (suma / (total * 4)) : 0.6;
   };
 
   const motorVal = calcularPromedioCategoria('Desarrollo motor');
@@ -564,9 +413,7 @@ export default function App() {
   const tacticaVal = calcularPromedioCategoria('Comprensión del juego');
   const defensaVal = calcularPromedioCategoria('Defensa');
 
-  const cx = 75,
-    cy = 75,
-    r = 50;
+  const cx = 75, cy = 75, r = 50;
   const pMotor = `${cx},${cy - r * motorVal}`;
   const pTecnica = `${cx + r * tecnicaVal},${cy}`;
   const pTactica = `${cx},${cy + r * tacticaVal}`;
@@ -579,18 +426,13 @@ export default function App() {
       const reader = new FileReader();
       reader.onloadend = () => {
         const url = reader.result as string;
-        setClubs(
-          clubs.map((c) =>
-            c.id === clubActivo.id ? { ...c, logoUrl: url } : c
-          )
-        );
+        setClubs(clubs.map(c => c.id === clubActivo.id ? { ...c, logoUrl: url } : c));
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // Crear nuevo club independiente
-  const handleCrearClub = async (e: React.FormEvent) => {
+  const handleCrearClub = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevoClubNombre) return;
 
@@ -599,10 +441,9 @@ export default function App() {
       id: newClubId,
       nombre: nuevoClubNombre,
       temporada: nuevoClubTemporada || '2026/27',
-      logoUrl: null,
+      logoUrl: null
     };
 
-    // Plantilla inicial de equipos base para el nuevo club
     const equiposBase: Team[] = [
       {
         id: `t_${Date.now()}_1`,
@@ -610,20 +451,10 @@ export default function App() {
         nombre: 'Alevín Promesas',
         categoria: 'Alevín (2014-2015)',
         gender: 'MASCULINO',
-        entrenador: 'Por asignar',
+        entrenador: 'Carlos Santana',
         jugadores: [],
-        sesiones: [],
-      },
-      {
-        id: `t_${Date.now()}_2`,
-        clubId: newClubId,
-        nombre: 'Infantil Femenino',
-        categoria: 'Infantil (2012-2013)',
-        gender: 'FEMENINO',
-        entrenador: 'Por asignar',
-        jugadores: [],
-        sesiones: [],
-      },
+        sesiones: []
+      }
     ];
 
     setClubs([...clubs, nuevoClub]);
@@ -632,35 +463,27 @@ export default function App() {
     setEquipoSeleccionado(equiposBase[0]);
     setNuevoClubNombre('');
     setPantalla('EQUIPOS');
-
-    try {
-      await supabase.from('clubs').insert({
-        id: newClubId,
-        name: nuevoClubNombre,
-        season: nuevoClubTemporada,
-      });
-    } catch (_) {}
   };
 
   const handleAbrirPaseLista = () => {
     const initStatus: Record<string, AttendanceStatus> = {};
-    equipoSeleccionado.jugadores.forEach((j) => {
+    equipoSeleccionado.jugadores.forEach(j => {
       initStatus[j.id] = 'PRESENTE';
     });
     setSessionAsistencias(initStatus);
     setPantalla('PASAR_LISTA');
   };
 
-  const handleGuardarSesion = async (e: React.FormEvent) => {
+  const handleGuardarSesion = (e: React.FormEvent) => {
     e.preventDefault();
     const nuevaSesion: Session = {
       id: Date.now().toString(),
       fecha: sessionFecha,
       tipo: sessionTipo,
-      asistencias: sessionAsistencias,
+      asistencias: sessionAsistencias
     };
 
-    const actualizados = equipos.map((eq) => {
+    const actualizados = equipos.map(eq => {
       if (eq.id === equipoSeleccionado.id) {
         const ses = [...(eq.sesiones || []), nuevaSesion];
         const eqActualizado = { ...eq, sesiones: ses };
@@ -685,7 +508,7 @@ export default function App() {
       gender: genero,
       entrenador: nuevoEntrenador || 'Por asignar',
       jugadores: [],
-      sesiones: [],
+      sesiones: []
     };
 
     setEquipos([...equipos, nuevo]);
@@ -707,10 +530,10 @@ export default function App() {
       inicial: 'PENDIENTE',
       media: 'PENDIENTE',
       final: 'PENDIENTE',
-      historial: [],
+      historial: []
     };
 
-    const actualizados = equipos.map((eq) => {
+    const actualizados = equipos.map(eq => {
       if (eq.id === equipoSeleccionado.id) {
         const nuevosJugs = [...eq.jugadores, nuevoJ];
         const eqActualizado = { ...eq, jugadores: nuevosJugs };
@@ -727,50 +550,110 @@ export default function App() {
   };
 
   const handleScore = (indicador: string, levelKey: string) => {
-    setRespuestas((prev) => ({
+    setRespuestas(prev => ({
       ...prev,
-      [indicador]: { ...prev[indicador], nivel: levelKey },
+      [indicador]: { ...prev[indicador], nivel: levelKey }
     }));
   };
 
   const handleObs = (indicador: string, obs: string) => {
-    setRespuestas((prev) => ({
+    setRespuestas(prev => ({
       ...prev,
-      [indicador]: { ...prev[indicador], obs },
+      [indicador]: { ...prev[indicador], obs }
     }));
   };
 
   const toggleObs = (itemKey: string) => {
-    setObsAbiertas((prev) => ({ ...prev, [itemKey]: !prev[itemKey] }));
+    setObsAbiertas(prev => ({ ...prev, [itemKey]: !prev[itemKey] }));
   };
 
   const badgeStatus = (status: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE') => {
     switch (status) {
       case 'COMPLETADA':
-        return (
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
-            Completada
-          </span>
-        );
+        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Completada</span>;
       case 'BORRADOR':
-        return (
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
-            Borrador
-          </span>
-        );
+        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Borrador</span>;
       default:
-        return (
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500">
-            Pendiente
-          </span>
-        );
+        return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500">Pendiente</span>;
     }
   };
 
-  const asistActual = calcularAsistenciaJugador(
-    jugadorSeleccionado?.id,
-    equipoSeleccionado
-  );
+  const asistActual = calcularAsistenciaJugador(jugadorSeleccionado?.id, equipoSeleccionado);
+
+  // PANTALLA DE LOGIN
+  if (!sessionUser) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full space-y-6">
+          <div className="text-center space-y-2">
+            <div className="w-12 h-12 bg-emerald-600 rounded-xl mx-auto flex items-center justify-center text-white font-bold text-xl shadow-md">
+              ⚡
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900">Portal de Evaluación Deportiva</h2>
+            <p className="text-xs text-slate-500">Acceso a plantillas, asistencia y seguimiento técnico</p>
+          </div>
+
+          {authError && (
+            <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs p-3 rounded-lg">
+              {authError}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-4 text-xs">
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">Correo Electrónico</label>
+              <input
+                type="email"
+                required
+                placeholder="entrenador@club.com"
+                value={authEmail}
+                onChange={(e) => setAuthEmail(e.target.value)}
+                className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">Contraseña</label>
+              <input
+                type="password"
+                required
+                placeholder="••••••••"
+                value={authPass}
+                onChange={(e) => setAuthPass(e.target.value)}
+                className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-lg shadow transition"
+            >
+              Iniciar Sesión
+            </button>
+          </form>
+
+          {/* Acceso Rápido por Roles */}
+          <div className="pt-4 border-t border-slate-200 space-y-2">
+            <p className="text-[11px] font-bold uppercase text-slate-400 text-center tracking-wider">Acceso de Demostración</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => handleDemoLogin('ADMIN', 'Director Técnico')}
+                className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs py-2 rounded-lg font-semibold transition"
+              >
+                👑 Director Técnico
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDemoLogin('ENTRENADOR', 'Carlos Santana')}
+                className="bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-xs py-2 rounded-lg font-semibold transition"
+              >
+                📋 Entrenador (Carlos)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0 print:min-h-0">
@@ -808,73 +691,40 @@ export default function App() {
         }
       `}</style>
 
-      {/* Cabecera Multi-Club */}
+      {/* Cabecera Principal */}
       <header className="bg-slate-900 text-white px-6 py-3 shadow-md print:hidden">
         <div className="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-4">
+          
           <div className="flex items-center space-x-3">
-            <div
-              onClick={() =>
-                setPantalla(
-                  tipoEvaluacion === 'JUGADORES'
-                    ? 'EQUIPOS'
-                    : 'LISTA_ENTRENADORES'
-                )
-              }
+            <div 
+              onClick={() => setPantalla(tipoEvaluacion === 'JUGADORES' ? 'EQUIPOS' : 'LISTA_ENTRENADORES')}
               className="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-white text-xs cursor-pointer overflow-hidden shadow-inner"
-              title="Click para ir a inicio"
             >
               {clubActivo.logoUrl ? (
-                <img
-                  src={clubActivo.logoUrl}
-                  alt="Logo Club"
-                  className="w-full h-full object-contain p-0.5"
-                />
+                <img src={clubActivo.logoUrl} alt="Logo" className="w-full h-full object-contain p-0.5" />
               ) : (
-                <span className="font-bold text-emerald-400">
-                  {siglasClub || 'CB'}
-                </span>
+                <span className="font-bold text-emerald-400">{siglasClub || 'CB'}</span>
               )}
             </div>
 
             <div>
-              {editandoClub ? (
+              {editandoClub && userRole === 'ADMIN' ? (
                 <div className="flex items-center flex-wrap gap-2">
                   <input
                     type="text"
                     value={clubActivo.nombre}
-                    onChange={(e) =>
-                      setClubs(
-                        clubs.map((c) =>
-                          c.id === clubActivo.id
-                            ? { ...c, nombre: e.target.value }
-                            : c
-                        )
-                      )
-                    }
+                    onChange={(e) => setClubs(clubs.map(c => c.id === clubActivo.id ? { ...c, nombre: e.target.value } : c))}
                     className="bg-slate-800 text-white text-xs px-2 py-1 rounded border border-slate-600 focus:outline-none"
                   />
                   <input
                     type="text"
                     value={clubActivo.temporada}
-                    onChange={(e) =>
-                      setClubs(
-                        clubs.map((c) =>
-                          c.id === clubActivo.id
-                            ? { ...c, temporada: e.target.value }
-                            : c
-                        )
-                      )
-                    }
+                    onChange={(e) => setClubs(clubs.map(c => c.id === clubActivo.id ? { ...c, temporada: e.target.value } : c))}
                     className="bg-slate-800 text-white text-xs px-2 py-1 w-20 rounded border border-slate-600 focus:outline-none"
                   />
                   <label className="bg-slate-700 hover:bg-slate-600 text-slate-200 text-[11px] px-2 py-1 rounded cursor-pointer font-medium border border-slate-600">
                     Cambiar Escudo
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      className="hidden"
-                    />
+                    <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
                   </label>
                   <button
                     onClick={() => setEditandoClub(false)}
@@ -885,106 +735,91 @@ export default function App() {
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
-                  {/* Selector de Club Activo */}
-                  <select
-                    value={clubActivoId}
-                    onChange={(e) => setClubActivoId(e.target.value)}
-                    className="bg-slate-800 text-emerald-400 font-bold text-sm px-2.5 py-1 rounded-lg border border-slate-700 focus:outline-none cursor-pointer"
-                  >
-                    {clubs.map((c) => (
-                      <option
-                        key={c.id}
-                        value={c.id}
-                        className="text-white bg-slate-800"
+                  {userRole === 'ADMIN' ? (
+                    <>
+                      <select
+                        value={clubActivoId}
+                        onChange={(e) => setClubActivoId(e.target.value)}
+                        className="bg-slate-800 text-emerald-400 font-bold text-sm px-2.5 py-1 rounded-lg border border-slate-700 focus:outline-none cursor-pointer"
                       >
-                        {c.nombre} ({c.temporada})
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={() => setPantalla('MODAL_NUEVO_CLUB')}
-                    className="text-[10px] bg-emerald-700 hover:bg-emerald-600 text-white font-semibold px-2 py-1 rounded shadow"
-                    title="Crear un nuevo club independiente"
-                  >
-                    + Nuevo Club
-                  </button>
-                  <button
-                    onClick={() => setEditandoClub(true)}
-                    className="text-[10px] text-slate-400 hover:text-white underline ml-1"
-                  >
-                    (editar)
-                  </button>
+                        {clubs.map(c => (
+                          <option key={c.id} value={c.id} className="text-white bg-slate-800">
+                            {c.nombre} ({c.temporada})
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => setPantalla('MODAL_NUEVO_CLUB')}
+                        className="text-[10px] bg-emerald-700 hover:bg-emerald-600 text-white font-semibold px-2 py-1 rounded shadow"
+                      >
+                        + Nuevo Club
+                      </button>
+                      <button
+                        onClick={() => setEditandoClub(true)}
+                        className="text-[10px] text-slate-400 hover:text-white underline ml-1"
+                      >
+                        (editar)
+                      </button>
+                    </>
+                  ) : (
+                    <div>
+                      <h1 className="text-sm font-bold text-emerald-400">{clubActivo.nombre}</h1>
+                      <p className="text-[11px] text-slate-400">{sessionUser.name} • Rol Entrenador</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           </div>
 
           <div className="flex items-center flex-wrap gap-2.5">
-            <div className="flex bg-slate-800 p-1 rounded-lg border border-slate-700 text-xs">
-              <button
-                onClick={() => {
-                  setGenero('FEMENINO');
-                  setPantalla(
-                    tipoEvaluacion === 'JUGADORES'
-                      ? 'EQUIPOS'
-                      : 'LISTA_ENTRENADORES'
-                  );
-                }}
-                className={`px-3 py-1 rounded font-semibold transition ${
-                  genero === 'FEMENINO'
-                    ? 'bg-blue-600 text-white shadow'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Sección Femenina
-              </button>
-              <button
-                onClick={() => {
-                  setGenero('MASCULINO');
-                  setPantalla(
-                    tipoEvaluacion === 'JUGADORES'
-                      ? 'EQUIPOS'
-                      : 'LISTA_ENTRENADORES'
-                  );
-                }}
-                className={`px-3 py-1 rounded font-semibold transition ${
-                  genero === 'MASCULINO'
-                    ? 'bg-blue-600 text-white shadow'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Sección Masculina
-              </button>
-            </div>
+            {userRole === 'ADMIN' && (
+              <>
+                <div className="flex bg-slate-800 p-1 rounded-lg border border-slate-700 text-xs">
+                  <button
+                    onClick={() => {
+                      setGenero('FEMENINO');
+                      setPantalla(tipoEvaluacion === 'JUGADORES' ? 'EQUIPOS' : 'LISTA_ENTRENADORES');
+                    }}
+                    className={`px-3 py-1 rounded font-semibold transition ${
+                      genero === 'FEMENINO' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Femenino
+                  </button>
+                  <button
+                    onClick={() => {
+                      setGenero('MASCULINO');
+                      setPantalla(tipoEvaluacion === 'JUGADORES' ? 'EQUIPOS' : 'LISTA_ENTRENADORES');
+                    }}
+                    className={`px-3 py-1 rounded font-semibold transition ${
+                      genero === 'MASCULINO' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Masculino
+                  </button>
+                </div>
 
-            <div className="flex bg-slate-800 p-1 rounded-lg border border-slate-700 text-xs">
-              <button
-                onClick={() => {
-                  setTipoEvaluacion('JUGADORES');
-                  setPantalla('EQUIPOS');
-                }}
-                className={`px-3 py-1 rounded font-semibold transition ${
-                  tipoEvaluacion === 'JUGADORES'
-                    ? 'bg-slate-600 text-white'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Jugador@s
-              </button>
-              <button
-                onClick={() => {
-                  setTipoEvaluacion('ENTRENADORES');
-                  setPantalla('LISTA_ENTRENADORES');
-                }}
-                className={`px-3 py-1 rounded font-semibold transition ${
-                  tipoEvaluacion === 'ENTRENADORES'
-                    ? 'bg-slate-600 text-white'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Entrenador@s
-              </button>
-            </div>
+                <div className="flex bg-slate-800 p-1 rounded-lg border border-slate-700 text-xs">
+                  <button
+                    onClick={() => { setTipoEvaluacion('JUGADORES'); setPantalla('EQUIPOS'); }}
+                    className={`px-3 py-1 rounded font-semibold transition ${
+                      tipoEvaluacion === 'JUGADORES' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Jugador@s
+                  </button>
+                  <button
+                    onClick={() => { setTipoEvaluacion('ENTRENADORES'); setPantalla('LISTA_ENTRENADORES'); }}
+                    className={`px-3 py-1 rounded font-semibold transition ${
+                      tipoEvaluacion === 'ENTRENADORES' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Entrenador@s
+                  </button>
+                </div>
+              </>
+            )}
 
             <select
               value={periodo}
@@ -995,30 +830,32 @@ export default function App() {
               <option value="Media">Ev. Media</option>
               <option value="Final">Ev. Final</option>
             </select>
+
+            <button
+              onClick={handleLogout}
+              className="bg-rose-900/40 hover:bg-rose-800 text-rose-300 text-xs px-2.5 py-1.5 rounded-lg border border-rose-700/50 transition font-medium"
+              title="Cerrar sesión"
+            >
+              Salir
+            </button>
           </div>
         </div>
       </header>
 
       {/* Contenedor Principal */}
       <main className="max-w-4xl mx-auto mt-6 px-4 print:mt-0 print:px-0 print:max-w-full print:w-full">
-        {/* PANTALLA: MODAL / CREAR NUEVO CLUB */}
-        {pantalla === 'MODAL_NUEVO_CLUB' && (
+        
+        {/* PANTALLA: MODAL NUEVO CLUB */}
+        {pantalla === 'MODAL_NUEVO_CLUB' && userRole === 'ADMIN' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6 max-w-md mx-auto space-y-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
-                Crear Nuevo Club / Entidad
-              </h2>
-              <p className="text-xs text-slate-500">
-                Se generará una plantilla limpia e independiente para este nuevo
-                club.
-              </p>
+              <h2 className="text-lg font-bold text-slate-900">Crear Nuevo Club / Entidad</h2>
+              <p className="text-xs text-slate-500">Se generará una plantilla limpia e independiente.</p>
             </div>
 
             <form onSubmit={handleCrearClub} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Nombre del Club o Colegio
-                </label>
+                <label className="block font-semibold text-slate-700 mb-1">Nombre del Club</label>
                 <input
                   type="text"
                   required
@@ -1029,9 +866,7 @@ export default function App() {
                 />
               </div>
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Temporada Inicial
-                </label>
+                <label className="block font-semibold text-slate-700 mb-1">Temporada</label>
                 <input
                   type="text"
                   placeholder="2026/27"
@@ -1053,7 +888,7 @@ export default function App() {
                   type="submit"
                   className="bg-emerald-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-emerald-700 shadow"
                 >
-                  Crear Club y Plantilla
+                  Crear Club
                 </button>
               </div>
             </form>
@@ -1066,27 +901,23 @@ export default function App() {
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
-                  {clubActivo.nombre} — Sección{' '}
-                  {genero === 'FEMENINO' ? 'Femenina' : 'Masculina'}
+                  {userRole === 'ADMIN' ? `${clubActivo.nombre} — Equipos` : 'Mis Equipos Asignados'}
                 </h2>
-                <p className="text-xs text-slate-500">
-                  Temporada {clubActivo.temporada} • Gestión de categorías y
-                  plantillas
-                </p>
+                <p className="text-xs text-slate-500">Temporada {clubActivo.temporada} • Gestión de categorías y plantillas</p>
               </div>
-              <button
-                onClick={() => setPantalla('MODAL_NUEVO_EQUIPO')}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow-sm transition"
-              >
-                + Nuevo Equipo
-              </button>
+              {userRole === 'ADMIN' && (
+                <button
+                  onClick={() => setPantalla('MODAL_NUEVO_EQUIPO')}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow-sm transition"
+                >
+                  + Nuevo Equipo
+                </button>
+              )}
             </div>
 
             {equiposFiltrados.length === 0 ? (
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center text-xs text-slate-500">
-                No hay equipos dados de alta en la Sección{' '}
-                {genero === 'FEMENINO' ? 'Femenina' : 'Masculina'} de este club.
-                Pulsa en <strong>+ Nuevo Equipo</strong> para crearlo.
+                No hay equipos registrados en esta categoría.
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1100,24 +931,15 @@ export default function App() {
                     className="p-5 border border-slate-200 rounded-xl hover:border-emerald-500 hover:shadow-md transition cursor-pointer bg-slate-50/50"
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-slate-900 text-base">
-                        {equipo.nombre}
-                      </h3>
+                      <h3 className="font-bold text-slate-900 text-base">{equipo.nombre}</h3>
                       <span className="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-medium">
-                        {equipo.jugadores.length}{' '}
-                        {genero === 'FEMENINO' ? 'jugadoras' : 'jugadores'}
+                        {equipo.jugadores.length} jugadores
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 mb-3">
-                      {equipo.categoria}
-                    </p>
+                    <p className="text-xs text-slate-500 mb-3">{equipo.categoria}</p>
                     <div className="text-xs text-slate-600 flex items-center justify-between border-t border-slate-200/80 pt-3">
-                      <span>
-                        Entrenador/a: <strong>{equipo.entrenador}</strong>
-                      </span>
-                      <span className="text-emerald-600 font-semibold">
-                        Ver plantilla →
-                      </span>
+                      <span>Entrenador/a: <strong>{equipo.entrenador}</strong></span>
+                      <span className="text-emerald-600 font-semibold">Ver plantilla →</span>
                     </div>
                   </div>
                 ))}
@@ -1126,7 +948,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: PLANTILLA DEL EQUIPO */}
+        {/* PANTALLA: PLANTILLA */}
         {pantalla === 'PLANTILLA' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6 space-y-6">
             <div className="flex justify-between items-center pb-4 border-b border-slate-200">
@@ -1135,18 +957,11 @@ export default function App() {
                   onClick={() => setPantalla('EQUIPOS')}
                   className="text-xs text-emerald-700 font-semibold mb-1 hover:underline"
                 >
-                  ← Volver a equipos de {clubActivo.nombre}
+                  ← Volver a equipos
                 </button>
-                <h2 className="text-xl font-bold text-slate-900">
-                  {equipoSeleccionado.nombre}
-                </h2>
+                <h2 className="text-xl font-bold text-slate-900">{equipoSeleccionado.nombre}</h2>
                 <p className="text-xs text-slate-500">
-                  {equipoSeleccionado.categoria} • Entrenador/a:{' '}
-                  {equipoSeleccionado.entrenador} •{' '}
-                  <strong>
-                    {equipoSeleccionado.sesiones?.length || 0} sesiones
-                    registradas
-                  </strong>
+                  {equipoSeleccionado.categoria} • Entrenador/a: {equipoSeleccionado.entrenador} • <strong>{equipoSeleccionado.sesiones?.length || 0} sesiones</strong>
                 </p>
               </div>
 
@@ -1166,14 +981,10 @@ export default function App() {
               </div>
             </div>
 
-            <form
-              onSubmit={handleAddJugador}
-              className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs flex flex-wrap items-end gap-3"
-            >
+            {/* Añadir jugador (Entrenadores y Admins) */}
+            <form onSubmit={handleAddJugador} className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs flex flex-wrap items-end gap-3">
               <div className="flex-1 min-w-[150px]">
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Nombre y Apellidos
-                </label>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Nombre y Apellidos</label>
                 <input
                   type="text"
                   required
@@ -1184,21 +995,17 @@ export default function App() {
                 />
               </div>
               <div className="w-16">
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Dorsal
-                </label>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Dorsal</label>
                 <input
                   type="number"
-                  placeholder="Ej: 7"
+                  placeholder="7"
                   value={nuevoDorsal}
                   onChange={(e) => setNuevoDorsal(e.target.value)}
                   className="w-full border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 bg-white"
                 />
               </div>
               <div className="w-20">
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Año Nac.
-                </label>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">Año Nac.</label>
                 <input
                   type="number"
                   placeholder="2015"
@@ -1231,44 +1038,22 @@ export default function App() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {equipoSeleccionado.jugadores.map((jugador) => {
-                    const asist = calcularAsistenciaJugador(
-                      jugador.id,
-                      equipoSeleccionado
-                    );
+                    const asist = calcularAsistenciaJugador(jugador.id, equipoSeleccionado);
                     return (
                       <tr key={jugador.id} className="hover:bg-slate-50">
-                        <td className="py-3 px-2 font-bold text-slate-700">
-                          #{jugador.dorsal}
-                        </td>
-                        <td className="py-3 px-2 font-medium text-slate-900">
-                          {jugador.nombre}
-                        </td>
-                        <td className="py-3 px-2 text-slate-500">
-                          {jugador.nacimiento}
-                        </td>
+                        <td className="py-3 px-2 font-bold text-slate-700">#{jugador.dorsal}</td>
+                        <td className="py-3 px-2 font-medium text-slate-900">{jugador.nombre}</td>
+                        <td className="py-3 px-2 text-slate-500">{jugador.nacimiento}</td>
                         <td className="py-3 px-2 text-center">
-                          <span
-                            className={`inline-block font-bold px-2 py-0.5 rounded text-[11px] ${
-                              asist.pct >= 85
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : asist.pct >= 70
-                                ? 'bg-amber-100 text-amber-800'
-                                : 'bg-rose-100 text-rose-800'
-                            }`}
-                          >
-                            {asist.pct}% ({asist.presentes}/
-                            {asist.totalSesiones})
+                          <span className={`inline-block font-bold px-2 py-0.5 rounded text-[11px] ${
+                            asist.pct >= 85 ? 'bg-emerald-100 text-emerald-800' : asist.pct >= 70 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
+                          }`}>
+                            {asist.pct}% ({asist.presentes}/{asist.totalSesiones})
                           </span>
                         </td>
-                        <td className="py-3 px-2 text-center">
-                          {badgeStatus(jugador.inicial)}
-                        </td>
-                        <td className="py-3 px-2 text-center">
-                          {badgeStatus(jugador.media)}
-                        </td>
-                        <td className="py-3 px-2 text-center">
-                          {badgeStatus(jugador.final)}
-                        </td>
+                        <td className="py-3 px-2 text-center">{badgeStatus(jugador.inicial)}</td>
+                        <td className="py-3 px-2 text-center">{badgeStatus(jugador.media)}</td>
+                        <td className="py-3 px-2 text-center">{badgeStatus(jugador.final)}</td>
                         <td className="py-3 px-2 text-right space-x-1.5">
                           <button
                             onClick={() => {
@@ -1307,17 +1092,13 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: MODAL / REGISTRAR PASE DE LISTA */}
+        {/* PANTALLA: REGISTRO DE ASISTENCIA */}
         {pantalla === 'PASAR_LISTA' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6 max-w-2xl mx-auto space-y-6">
             <div className="flex justify-between items-center pb-4 border-b border-slate-200">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">
-                  Registro Diario de Asistencia
-                </h2>
-                <p className="text-xs text-slate-500">
-                  {clubActivo.nombre} • {equipoSeleccionado.nombre}
-                </p>
+                <h2 className="text-xl font-bold text-slate-900">Registro Diario de Asistencia</h2>
+                <p className="text-xs text-slate-500">{clubActivo.nombre} • {equipoSeleccionado.nombre}</p>
               </div>
               <button
                 onClick={() => setPantalla('PLANTILLA')}
@@ -1330,9 +1111,7 @@ export default function App() {
             <form onSubmit={handleGuardarSesion} className="space-y-6 text-xs">
               <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Fecha de la sesión
-                  </label>
+                  <label className="block font-semibold text-slate-700 mb-1">Fecha de la sesión</label>
                   <input
                     type="date"
                     required
@@ -1342,14 +1121,10 @@ export default function App() {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Tipo de Convocatoria
-                  </label>
+                  <label className="block font-semibold text-slate-700 mb-1">Tipo de Convocatoria</label>
                   <select
                     value={sessionTipo}
-                    onChange={(e) =>
-                      setSessionTipo(e.target.value as SessionType)
-                    }
+                    onChange={(e) => setSessionTipo(e.target.value as SessionType)}
                     className="w-full border border-slate-300 rounded p-2 bg-white focus:outline-none focus:border-emerald-500"
                   >
                     <option value="ENTRENAMIENTO">Entrenamiento Regular</option>
@@ -1359,87 +1134,50 @@ export default function App() {
               </div>
 
               <div className="space-y-2">
-                <h3 className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-                  Control de Jugador@s
-                </h3>
+                <h3 className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">Control de Jugador@s</h3>
                 <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden">
                   {equipoSeleccionado.jugadores.map((jugador) => {
                     const estado = sessionAsistencias[jugador.id] || 'PRESENTE';
                     return (
-                      <div
-                        key={jugador.id}
-                        className="flex justify-between items-center p-3 bg-white hover:bg-slate-50"
-                      >
+                      <div key={jugador.id} className="flex justify-between items-center p-3 bg-white hover:bg-slate-50">
                         <div>
-                          <span className="font-bold text-slate-900">
-                            #{jugador.dorsal} {jugador.nombre}
-                          </span>
-                          <span className="text-[11px] text-slate-400 ml-2">
-                            ({jugador.nacimiento})
-                          </span>
+                          <span className="font-bold text-slate-900">#{jugador.dorsal} {jugador.nombre}</span>
+                          <span className="text-[11px] text-slate-400 ml-2">({jugador.nacimiento})</span>
                         </div>
 
                         <div className="flex items-center space-x-1.5">
                           <button
                             type="button"
-                            onClick={() =>
-                              setSessionAsistencias({
-                                ...sessionAsistencias,
-                                [jugador.id]: 'PRESENTE',
-                              })
-                            }
+                            onClick={() => setSessionAsistencias({ ...sessionAsistencias, [jugador.id]: 'PRESENTE' })}
                             className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
-                              estado === 'PRESENTE'
-                                ? 'bg-emerald-600 text-white shadow'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              estado === 'PRESENTE' ? 'bg-emerald-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                             }`}
                           >
                             ✅ Presente
                           </button>
                           <button
                             type="button"
-                            onClick={() =>
-                              setSessionAsistencias({
-                                ...sessionAsistencias,
-                                [jugador.id]: 'FALTA',
-                              })
-                            }
+                            onClick={() => setSessionAsistencias({ ...sessionAsistencias, [jugador.id]: 'FALTA' })}
                             className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
-                              estado === 'FALTA'
-                                ? 'bg-rose-600 text-white shadow'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              estado === 'FALTA' ? 'bg-rose-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                             }`}
                           >
                             ❌ Falta
                           </button>
                           <button
                             type="button"
-                            onClick={() =>
-                              setSessionAsistencias({
-                                ...sessionAsistencias,
-                                [jugador.id]: 'JUSTIFICADA',
-                              })
-                            }
+                            onClick={() => setSessionAsistencias({ ...sessionAsistencias, [jugador.id]: 'JUSTIFICADA' })}
                             className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
-                              estado === 'JUSTIFICADA'
-                                ? 'bg-amber-600 text-white shadow'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              estado === 'JUSTIFICADA' ? 'bg-amber-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                             }`}
                           >
                             📝 Justificada
                           </button>
                           <button
                             type="button"
-                            onClick={() =>
-                              setSessionAsistencias({
-                                ...sessionAsistencias,
-                                [jugador.id]: 'LESIONADO',
-                              })
-                            }
+                            onClick={() => setSessionAsistencias({ ...sessionAsistencias, [jugador.id]: 'LESIONADO' })}
                             className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
-                              estado === 'LESIONADO'
-                                ? 'bg-blue-600 text-white shadow'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              estado === 'LESIONADO' ? 'bg-blue-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                             }`}
                           >
                             🩹 Lesión
@@ -1481,13 +1219,9 @@ export default function App() {
                 >
                   ← Volver a plantilla
                 </button>
-                <h2 className="text-xl font-bold text-slate-900">
-                  Historial y Progresión Multitemporada
-                </h2>
+                <h2 className="text-xl font-bold text-slate-900">Historial y Progresión Multitemporada</h2>
                 <p className="text-xs text-slate-500">
-                  {jugadorSeleccionado.nombre} • Nacimiento:{' '}
-                  {jugadorSeleccionado.nacimiento} • ID:{' '}
-                  {jugadorSeleccionado.id}
+                  {jugadorSeleccionado.nombre} • Nacimiento: {jugadorSeleccionado.nacimiento}
                 </p>
               </div>
               <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
@@ -1496,56 +1230,21 @@ export default function App() {
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
-                Línea de Tiempo de Evaluaciones
-              </h3>
-              {jugadorSeleccionado.historial &&
-              jugadorSeleccionado.historial.length > 0 ? (
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Línea de Tiempo de Evaluaciones</h3>
+              {jugadorSeleccionado.historial && jugadorSeleccionado.historial.length > 0 ? (
                 <div className="border-l-2 border-emerald-500 ml-3 pl-4 space-y-6">
                   {jugadorSeleccionado.historial.map((rec, idx) => (
-                    <div
-                      key={idx}
-                      className="relative bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs"
-                    >
+                    <div key={idx} className="relative bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs">
                       <div className="absolute -left-[23px] top-4 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
                       <div className="flex justify-between items-center mb-2">
-                        <span className="font-bold text-slate-900 text-sm">
-                          {rec.temporada} — {rec.categoria}
-                        </span>
-                        <span className="text-slate-500">
-                          {rec.periodo} ({rec.fecha})
-                        </span>
+                        <span className="font-bold text-slate-900 text-sm">{rec.temporada} — {rec.categoria}</span>
+                        <span className="text-slate-500">{rec.periodo} ({rec.fecha})</span>
                       </div>
-                      <p className="mb-1 text-slate-700">
-                        <strong>Nivel predominante:</strong>{' '}
-                        <span className="text-emerald-700 font-semibold">
-                          {rec.promedioNivel}
-                        </span>
-                      </p>
-                      <p className="mb-1 text-slate-700">
-                        <strong>Fortalezas:</strong> {rec.fortalezas}
-                      </p>
-                      <p className="text-slate-700">
-                        <strong>Objetivos trabajados:</strong> {rec.objetivos}
-                      </p>
+                      <p className="mb-1 text-slate-700"><strong>Nivel predominante:</strong> <span className="text-emerald-700 font-semibold">{rec.promedioNivel}</span></p>
+                      <p className="mb-1 text-slate-700"><strong>Fortalezas:</strong> {rec.fortalezas}</p>
+                      <p className="text-slate-700"><strong>Objetivos trabajados:</strong> {rec.objetivos}</p>
                     </div>
                   ))}
-                  <div className="relative bg-blue-50 border border-blue-200 rounded-lg p-4 text-xs">
-                    <div className="absolute -left-[23px] top-4 w-3 h-3 rounded-full bg-blue-600 border-2 border-white" />
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-bold text-blue-900 text-sm">
-                        Temporada {clubActivo.temporada} (Actual) —{' '}
-                        {equipoSeleccionado.categoria}
-                      </span>
-                      <span className="text-blue-700 font-semibold">
-                        En curso
-                      </span>
-                    </div>
-                    <p className="text-slate-700">
-                      Evaluación Inicial registrada. El sistema acumulará
-                      automáticamente la progresión técnica.
-                    </p>
-                  </div>
                 </div>
               ) : (
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 text-center text-xs text-slate-500">
@@ -1556,18 +1255,15 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: LISTA ENTRENADORES */}
-        {pantalla === 'LISTA_ENTRENADORES' && (
+        {/* PANTALLA: LISTA ENTRENADORES (SOLO ADMIN) */}
+        {pantalla === 'LISTA_ENTRENADORES' && userRole === 'ADMIN' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
-                  Cuerpo Técnico — {clubActivo.nombre} (
-                  {genero === 'FEMENINO' ? 'Femenino' : 'Masculino'})
+                  Cuerpo Técnico — {clubActivo.nombre}
                 </h2>
-                <p className="text-xs text-slate-500">
-                  Evaluación del cuerpo técnico y metodología de trabajo
-                </p>
+                <p className="text-xs text-slate-500">Evaluación del cuerpo técnico y metodología de trabajo</p>
               </div>
             </div>
 
@@ -1586,21 +1282,11 @@ export default function App() {
                 <tbody className="divide-y divide-slate-100">
                   {entrenadoresFiltrados.map((coach) => (
                     <tr key={coach.id} className="hover:bg-slate-50">
-                      <td className="py-3.5 px-2 font-bold text-slate-800">
-                        {coach.nombre}
-                      </td>
-                      <td className="py-3.5 px-2 text-slate-600">
-                        {coach.equipoNombre}
-                      </td>
-                      <td className="py-3.5 px-2 text-center">
-                        {badgeStatus(coach.inicial)}
-                      </td>
-                      <td className="py-3.5 px-2 text-center">
-                        {badgeStatus(coach.media)}
-                      </td>
-                      <td className="py-3.5 px-2 text-center">
-                        {badgeStatus(coach.final)}
-                      </td>
+                      <td className="py-3.5 px-2 font-bold text-slate-800">{coach.nombre}</td>
+                      <td className="py-3.5 px-2 text-slate-600">{coach.equipoNombre}</td>
+                      <td className="py-3.5 px-2 text-center">{badgeStatus(coach.inicial)}</td>
+                      <td className="py-3.5 px-2 text-center">{badgeStatus(coach.media)}</td>
+                      <td className="py-3.5 px-2 text-center">{badgeStatus(coach.final)}</td>
                       <td className="py-3.5 px-2 text-right space-x-2">
                         <button
                           onClick={() => {
@@ -1629,23 +1315,17 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: CREAR EQUIPO */}
-        {pantalla === 'MODAL_NUEVO_EQUIPO' && (
+        {/* PANTALLA: CREAR EQUIPO (SOLO ADMIN) */}
+        {pantalla === 'MODAL_NUEVO_EQUIPO' && userRole === 'ADMIN' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6 max-w-lg mx-auto">
             <h2 className="text-lg font-bold text-slate-900 mb-1">
-              Crear Equipo — {clubActivo.nombre} (
-              {genero === 'FEMENINO' ? 'Femenina' : 'Masculina'})
+              Crear Equipo — {clubActivo.nombre}
             </h2>
-            <p className="text-xs text-slate-500 mb-6">
-              Introduce los datos del nuevo equipo para la temporada{' '}
-              {clubActivo.temporada}
-            </p>
+            <p className="text-xs text-slate-500 mb-6">Temporada {clubActivo.temporada}</p>
 
             <form onSubmit={handleCrearEquipo} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Nombre del equipo
-                </label>
+                <label className="block font-semibold text-slate-700 mb-1">Nombre del equipo</label>
                 <input
                   type="text"
                   required
@@ -1656,9 +1336,7 @@ export default function App() {
                 />
               </div>
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Categoría / Edades
-                </label>
+                <label className="block font-semibold text-slate-700 mb-1">Categoría / Edades</label>
                 <input
                   type="text"
                   placeholder="Ej: Cadete (2011-2012)"
@@ -1668,9 +1346,7 @@ export default function App() {
                 />
               </div>
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Entrenador/a asignado/a
-                </label>
+                <label className="block font-semibold text-slate-700 mb-1">Entrenador/a</label>
                 <input
                   type="text"
                   placeholder="Ej: Marcos López"
@@ -1699,31 +1375,23 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA 3: FORMULARIO */}
+        {/* PANTALLA: FORMULARIO */}
         {pantalla === 'FORMULARIO' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
             <div className="flex justify-between items-center pb-4 border-b border-slate-200 mb-6">
               <div>
                 <button
-                  onClick={() =>
-                    setPantalla(
-                      tipoEvaluacion === 'JUGADORES'
-                        ? 'PLANTILLA'
-                        : 'LISTA_ENTRENADORES'
-                    )
-                  }
+                  onClick={() => setPantalla(tipoEvaluacion === 'JUGADORES' ? 'PLANTILLA' : 'LISTA_ENTRENADORES')}
                   className="text-xs text-emerald-700 font-semibold mb-1 hover:underline"
                 >
                   ← Volver
                 </button>
                 <h2 className="text-xl font-bold text-slate-900">
-                  {tipoEvaluacion === 'JUGADORES'
-                    ? jugadorSeleccionado.nombre
-                    : coachSeleccionado?.nombre}
+                  {tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}
                 </h2>
                 <p className="text-xs text-slate-500">
-                  {tipoEvaluacion === 'JUGADORES'
-                    ? `${clubActivo.nombre} • ${equipoSeleccionado.nombre} • dorsal ${jugadorSeleccionado.dorsal}`
+                  {tipoEvaluacion === 'JUGADORES' 
+                    ? `${clubActivo.nombre} • ${equipoSeleccionado.nombre} • dorsal ${jugadorSeleccionado.dorsal}` 
                     : `${clubActivo.nombre} • ${coachSeleccionado?.equipoNombre} • Entrenador/a`}
                 </p>
               </div>
@@ -1763,18 +1431,14 @@ export default function App() {
                       {cat.items.map((item) => {
                         const sel = respuestas[item]?.nivel;
                         const obs = respuestas[item]?.obs || '';
-                        const activeLevel = nivelesActuales.find(
-                          (l) => l.key === sel
-                        );
+                        const activeLevel = nivelesActuales.find((l) => l.key === sel);
                         const isObsOpen = obsAbiertas[item] || obs.length > 0;
 
                         return (
                           <div key={item} className="py-3.5">
                             <div className="flex items-center justify-between gap-4">
                               <div className="flex items-center space-x-2">
-                                <span className="font-medium text-slate-800 text-sm">
-                                  {item}
-                                </span>
+                                <span className="font-medium text-slate-800 text-sm">{item}</span>
                                 {!isObsOpen && (
                                   <button
                                     type="button"
@@ -1793,15 +1457,11 @@ export default function App() {
                                     type="button"
                                     onClick={() => handleScore(item, lvl.key)}
                                     className={`w-6 h-6 rounded-full border-2 transition-all ${
-                                      sel === lvl.key
-                                        ? 'scale-110 shadow-sm'
-                                        : 'border-slate-300 bg-white hover:border-slate-400'
+                                      sel === lvl.key ? 'scale-110 shadow-sm' : 'border-slate-300 bg-white hover:border-slate-400'
                                     }`}
                                     style={{
-                                      backgroundColor:
-                                        sel === lvl.key ? lvl.color : '#ffffff',
-                                      borderColor:
-                                        sel === lvl.key ? lvl.color : '#cbd5e1',
+                                      backgroundColor: sel === lvl.key ? lvl.color : '#ffffff',
+                                      borderColor: sel === lvl.key ? lvl.color : '#cbd5e1'
                                     }}
                                     title={lvl.label}
                                   />
@@ -1809,15 +1469,12 @@ export default function App() {
                               </div>
                             </div>
 
-                            {activeLevel &&
-                              activeLevel.key !== 'NO_OBSERVADO' && (
-                                <div className="bg-slate-50 border border-slate-200 rounded-md p-2.5 my-2 text-xs text-slate-700">
-                                  <strong className="font-semibold">
-                                    {activeLevel.label}:{' '}
-                                  </strong>
-                                  {activeLevel.desc}
-                                </div>
-                              )}
+                            {activeLevel && activeLevel.key !== 'NO_OBSERVADO' && (
+                              <div className="bg-slate-50 border border-slate-200 rounded-md p-2.5 my-2 text-xs text-slate-700">
+                                <strong className="font-semibold">{activeLevel.label}: </strong>
+                                {activeLevel.desc}
+                              </div>
+                            )}
 
                             {isObsOpen && (
                               <div className="mt-2 flex items-center gap-2">
@@ -1825,9 +1482,7 @@ export default function App() {
                                   type="text"
                                   placeholder="Observación cualitativa..."
                                   value={obs}
-                                  onChange={(e) =>
-                                    handleObs(item, e.target.value)
-                                  }
+                                  onChange={(e) => handleObs(item, e.target.value)}
                                   className="w-full text-xs border border-slate-200 rounded px-3 py-1.5 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
                                 />
                                 <button
@@ -1848,9 +1503,7 @@ export default function App() {
 
                 <div className="pt-6 border-t border-slate-200 space-y-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
-                      Fortalezas
-                    </label>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Fortalezas</label>
                     <textarea
                       value={fortalezas}
                       onChange={(e) => setFortalezas(e.target.value)}
@@ -1859,9 +1512,7 @@ export default function App() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
-                      Objetivos de mejora
-                    </label>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Objetivos de mejora</label>
                     <textarea
                       value={objetivos}
                       onChange={(e) => setObjetivos(e.target.value)}
@@ -1870,9 +1521,7 @@ export default function App() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
-                      Nombre del Evaluador/a
-                    </label>
+                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">Nombre del Evaluador/a</label>
                     <input
                       type="text"
                       value={evaluadorNombre}
@@ -1893,22 +1542,15 @@ export default function App() {
                       {cat.items.map((item) => {
                         const sel = respuestas[item.nombre]?.nivel;
                         const obs = respuestas[item.nombre]?.obs || '';
-                        const activeLevel = nivelesActuales.find(
-                          (l) => l.key === sel
-                        );
-                        const dynamicDesc =
-                          (item.descs as Record<string, string>)[sel || ''] ||
-                          activeLevel?.desc;
-                        const isObsOpen =
-                          obsAbiertas[item.nombre] || obs.length > 0;
+                        const activeLevel = nivelesActuales.find((l) => l.key === sel);
+                        const dynamicDesc = (item.descs as Record<string, string>)[sel || ''] || activeLevel?.desc;
+                        const isObsOpen = obsAbiertas[item.nombre] || obs.length > 0;
 
                         return (
                           <div key={item.nombre} className="py-3.5">
                             <div className="flex items-center justify-between gap-4">
                               <div className="flex items-center space-x-2">
-                                <span className="font-medium text-slate-800 text-sm">
-                                  {item.nombre}
-                                </span>
+                                <span className="font-medium text-slate-800 text-sm">{item.nombre}</span>
                                 {!isObsOpen && (
                                   <button
                                     type="button"
@@ -1925,19 +1567,13 @@ export default function App() {
                                   <button
                                     key={lvl.key}
                                     type="button"
-                                    onClick={() =>
-                                      handleScore(item.nombre, lvl.key)
-                                    }
+                                    onClick={() => handleScore(item.nombre, lvl.key)}
                                     className={`w-6 h-6 rounded-full border-2 transition-all ${
-                                      sel === lvl.key
-                                        ? 'scale-110 shadow-sm'
-                                        : 'border-slate-300 bg-white hover:border-slate-400'
+                                      sel === lvl.key ? 'scale-110 shadow-sm' : 'border-slate-300 bg-white hover:border-slate-400'
                                     }`}
                                     style={{
-                                      backgroundColor:
-                                        sel === lvl.key ? lvl.color : '#ffffff',
-                                      borderColor:
-                                        sel === lvl.key ? lvl.color : '#cbd5e1',
+                                      backgroundColor: sel === lvl.key ? lvl.color : '#ffffff',
+                                      borderColor: sel === lvl.key ? lvl.color : '#cbd5e1'
                                     }}
                                     title={lvl.label}
                                   />
@@ -1945,15 +1581,12 @@ export default function App() {
                               </div>
                             </div>
 
-                            {activeLevel &&
-                              activeLevel.key !== 'NO_OBSERVADO' && (
-                                <div className="bg-slate-50 border border-slate-200 rounded-md p-2.5 my-2 text-xs text-slate-700">
-                                  <strong className="font-semibold">
-                                    {activeLevel.label}:{' '}
-                                  </strong>
-                                  {dynamicDesc}
-                                </div>
-                              )}
+                            {activeLevel && activeLevel.key !== 'NO_OBSERVADO' && (
+                              <div className="bg-slate-50 border border-slate-200 rounded-md p-2.5 my-2 text-xs text-slate-700">
+                                <strong className="font-semibold">{activeLevel.label}: </strong>
+                                {dynamicDesc}
+                              </div>
+                            )}
 
                             {isObsOpen && (
                               <div className="mt-2 flex items-center gap-2">
@@ -1961,9 +1594,7 @@ export default function App() {
                                   type="text"
                                   placeholder="Observación cualitativa..."
                                   value={obs}
-                                  onChange={(e) =>
-                                    handleObs(item.nombre, e.target.value)
-                                  }
+                                  onChange={(e) => handleObs(item.nombre, e.target.value)}
                                   className="w-full text-xs border border-slate-200 rounded px-3 py-1.5 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
                                 />
                                 <button
@@ -1986,13 +1617,7 @@ export default function App() {
 
             <div className="mt-8 flex justify-between items-center border-t border-slate-200 pt-4">
               <button
-                onClick={() =>
-                  setPantalla(
-                    tipoEvaluacion === 'JUGADORES'
-                      ? 'PLANTILLA'
-                      : 'LISTA_ENTRENADORES'
-                  )
-                }
+                onClick={() => setPantalla(tipoEvaluacion === 'JUGADORES' ? 'PLANTILLA' : 'LISTA_ENTRENADORES')}
                 className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-4 py-2 rounded"
               >
                 Guardar borrador
@@ -2007,62 +1632,41 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA 4: INFORME OFICIAL (REESTRUCTURADO 100% HOJA A4) */}
+        {/* PANTALLA: INFORME OFICIAL (REESTRUCTURADO 100% HOJA A4) */}
         {pantalla === 'INFORME' && (
           <div className="print-full-page bg-white rounded-xl shadow border border-slate-200 p-8 print:p-0 print:border-none print:shadow-none print:rounded-none">
-            {/* Cabecera Oficial */}
+            
             <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3">
               <div className="flex items-center space-x-4">
                 <div className="w-14 h-14 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center p-1 overflow-hidden">
                   {clubActivo.logoUrl ? (
-                    <img
-                      src={clubActivo.logoUrl}
-                      alt="Escudo"
-                      className="w-full h-full object-contain"
-                    />
+                    <img src={clubActivo.logoUrl} alt="Escudo" className="w-full h-full object-contain" />
                   ) : (
-                    <span className="font-bold text-slate-800 text-xl">
-                      {siglasClub || 'CB'}
-                    </span>
+                    <span className="font-bold text-slate-800 text-xl">{siglasClub || 'CB'}</span>
                   )}
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
-                    {tipoEvaluacion === 'JUGADORES'
-                      ? jugadorSeleccionado.nombre
-                      : coachSeleccionado?.nombre}
+                    {tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}
                   </h2>
                   <p className="text-xs text-slate-600 font-medium">
-                    {clubActivo.nombre} •{' '}
-                    {tipoEvaluacion === 'JUGADORES'
-                      ? equipoSeleccionado.nombre
-                      : coachSeleccionado?.equipoNombre}
-                    {tipoEvaluacion === 'JUGADORES'
-                      ? ` • Dorsal ${jugadorSeleccionado.dorsal} • Nacimiento: ${jugadorSeleccionado.nacimiento}`
-                      : ' • Entrenador/a Principal'}
+                    {clubActivo.nombre} • {tipoEvaluacion === 'JUGADORES' ? equipoSeleccionado.nombre : coachSeleccionado?.equipoNombre}
+                    {tipoEvaluacion === 'JUGADORES' ? ` • Dorsal ${jugadorSeleccionado.dorsal} • Nacimiento: ${jugadorSeleccionado.nacimiento}` : ' • Entrenador/a Principal'}
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                  Temporada {clubActivo.temporada}
-                </p>
-                <p className="text-xs text-slate-500">
-                  Evaluación {periodo} •{' '}
-                  {new Date().toLocaleDateString('es-ES')}
-                </p>
+                <p className="text-xs font-bold text-slate-800 uppercase tracking-wider">Temporada {clubActivo.temporada}</p>
+                <p className="text-xs text-slate-500">Evaluación {periodo} • {new Date().toLocaleDateString('es-ES')}</p>
                 {tipoEvaluacion === 'JUGADORES' && (
                   <span className="inline-block mt-1 text-[11px] bg-slate-100 text-slate-800 px-2.5 py-0.5 rounded font-semibold border border-slate-200">
-                    Asistencia: {asistActual.pct}% ({asistActual.presentes}/
-                    {asistActual.totalSesiones} ses.)
+                    Asistencia: {asistActual.pct}% ({asistActual.presentes}/{asistActual.totalSesiones} ses.)
                   </span>
                 )}
               </div>
             </div>
 
-            {/* 2 Columnas de Categorías */}
             <div className="grid grid-cols-2 gap-8 my-4 text-xs">
-              {/* Columna Izquierda */}
               <div className="space-y-4">
                 <div>
                   <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
@@ -2071,31 +1675,15 @@ export default function App() {
                   <div className="space-y-1">
                     {RUBRICA_JUGADORES[0].items.map((item) => {
                       const lvlKey = respuestas[item]?.nivel;
-                      const level = nivelesActuales.find(
-                        (l) => l.key === lvlKey
-                      );
+                      const level = nivelesActuales.find((l) => l.key === lvlKey);
                       return (
-                        <div
-                          key={item}
-                          className="flex justify-between items-center py-0.5 px-1 bg-white"
-                        >
-                          <span className="text-slate-800 font-medium text-[11.5px]">
-                            {item}
-                          </span>
-                          <span
+                        <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
+                          <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
+                          <span 
                             className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
-                            style={{
+                            style={{ 
                               color: level?.color || '#64748B',
-                              backgroundColor:
-                                level?.key === 'EXCELENTE'
-                                  ? '#F0FDF4'
-                                  : level?.key === 'CONSOLIDADO'
-                                  ? '#F0FDF4'
-                                  : level?.key === 'EN_DESARROLLO'
-                                  ? '#FFFBEB'
-                                  : level?.key === 'NECESITA_APOYO'
-                                  ? '#FEF2F2'
-                                  : '#F8FAFC',
+                              backgroundColor: level?.key === 'EXCELENTE' ? '#F0FDF4' : level?.key === 'CONSOLIDADO' ? '#F0FDF4' : level?.key === 'EN_DESARROLLO' ? '#FFFBEB' : level?.key === 'NECESITA_APOYO' ? '#FEF2F2' : '#F8FAFC'
                             }}
                           >
                             {level ? level.label : 'Sin evaluar'}
@@ -2113,31 +1701,15 @@ export default function App() {
                   <div className="space-y-1">
                     {RUBRICA_JUGADORES[1].items.map((item) => {
                       const lvlKey = respuestas[item]?.nivel;
-                      const level = nivelesActuales.find(
-                        (l) => l.key === lvlKey
-                      );
+                      const level = nivelesActuales.find((l) => l.key === lvlKey);
                       return (
-                        <div
-                          key={item}
-                          className="flex justify-between items-center py-0.5 px-1 bg-white"
-                        >
-                          <span className="text-slate-800 font-medium text-[11.5px]">
-                            {item}
-                          </span>
-                          <span
+                        <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
+                          <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
+                          <span 
                             className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
-                            style={{
+                            style={{ 
                               color: level?.color || '#64748B',
-                              backgroundColor:
-                                level?.key === 'EXCELENTE'
-                                  ? '#F0FDF4'
-                                  : level?.key === 'CONSOLIDADO'
-                                  ? '#F0FDF4'
-                                  : level?.key === 'EN_DESARROLLO'
-                                  ? '#FFFBEB'
-                                  : level?.key === 'NECESITA_APOYO'
-                                  ? '#FEF2F2'
-                                  : '#F8FAFC',
+                              backgroundColor: level?.key === 'EXCELENTE' ? '#F0FDF4' : level?.key === 'CONSOLIDADO' ? '#F0FDF4' : level?.key === 'EN_DESARROLLO' ? '#FFFBEB' : level?.key === 'NECESITA_APOYO' ? '#FEF2F2' : '#F8FAFC'
                             }}
                           >
                             {level ? level.label : 'Sin evaluar'}
@@ -2149,7 +1721,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Columna Derecha */}
               <div className="space-y-4">
                 <div>
                   <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
@@ -2158,31 +1729,15 @@ export default function App() {
                   <div className="space-y-1">
                     {RUBRICA_JUGADORES[2].items.map((item) => {
                       const lvlKey = respuestas[item]?.nivel;
-                      const level = nivelesActuales.find(
-                        (l) => l.key === lvlKey
-                      );
+                      const level = nivelesActuales.find((l) => l.key === lvlKey);
                       return (
-                        <div
-                          key={item}
-                          className="flex justify-between items-center py-0.5 px-1 bg-white"
-                        >
-                          <span className="text-slate-800 font-medium text-[11.5px]">
-                            {item}
-                          </span>
-                          <span
+                        <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
+                          <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
+                          <span 
                             className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
-                            style={{
+                            style={{ 
                               color: level?.color || '#64748B',
-                              backgroundColor:
-                                level?.key === 'EXCELENTE'
-                                  ? '#F0FDF4'
-                                  : level?.key === 'CONSOLIDADO'
-                                  ? '#F0FDF4'
-                                  : level?.key === 'EN_DESARROLLO'
-                                  ? '#FFFBEB'
-                                  : level?.key === 'NECESITA_APOYO'
-                                  ? '#FEF2F2'
-                                  : '#F8FAFC',
+                              backgroundColor: level?.key === 'EXCELENTE' ? '#F0FDF4' : level?.key === 'CONSOLIDADO' ? '#F0FDF4' : level?.key === 'EN_DESARROLLO' ? '#FFFBEB' : level?.key === 'NECESITA_APOYO' ? '#FEF2F2' : '#F8FAFC'
                             }}
                           >
                             {level ? level.label : 'Sin evaluar'}
@@ -2200,31 +1755,15 @@ export default function App() {
                   <div className="space-y-1">
                     {RUBRICA_JUGADORES[3].items.map((item) => {
                       const lvlKey = respuestas[item]?.nivel;
-                      const level = nivelesActuales.find(
-                        (l) => l.key === lvlKey
-                      );
+                      const level = nivelesActuales.find((l) => l.key === lvlKey);
                       return (
-                        <div
-                          key={item}
-                          className="flex justify-between items-center py-0.5 px-1 bg-white"
-                        >
-                          <span className="text-slate-800 font-medium text-[11.5px]">
-                            {item}
-                          </span>
-                          <span
+                        <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
+                          <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
+                          <span 
                             className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
-                            style={{
+                            style={{ 
                               color: level?.color || '#64748B',
-                              backgroundColor:
-                                level?.key === 'EXCELENTE'
-                                  ? '#F0FDF4'
-                                  : level?.key === 'CONSOLIDADO'
-                                  ? '#F0FDF4'
-                                  : level?.key === 'EN_DESARROLLO'
-                                  ? '#FFFBEB'
-                                  : level?.key === 'NECESITA_APOYO'
-                                  ? '#FEF2F2'
-                                  : '#F8FAFC',
+                              backgroundColor: level?.key === 'EXCELENTE' ? '#F0FDF4' : level?.key === 'CONSOLIDADO' ? '#F0FDF4' : level?.key === 'EN_DESARROLLO' ? '#FFFBEB' : level?.key === 'NECESITA_APOYO' ? '#FEF2F2' : '#F8FAFC'
                             }}
                           >
                             {level ? level.label : 'Sin evaluar'}
@@ -2237,143 +1776,49 @@ export default function App() {
               </div>
             </div>
 
-            {/* Radar + Fortalezas/Objetivos */}
             <div className="grid grid-cols-12 gap-6 pt-3 border-t border-slate-200 items-center">
               <div className="col-span-4 flex flex-col items-center justify-center">
-                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Perfil de Rendimiento
-                </span>
-                <svg
-                  width="150"
-                  height="150"
-                  viewBox="0 0 150 150"
-                  className="overflow-visible"
-                >
-                  <polygon
-                    points="75,25 125,75 75,125 25,75"
-                    fill="none"
-                    stroke="#E2E8F0"
-                    strokeWidth="1.5"
-                  />
-                  <polygon
-                    points="75,50 100,75 75,100 50,75"
-                    fill="none"
-                    stroke="#E2E8F0"
-                    strokeWidth="1"
-                  />
-                  <line
-                    x1="75"
-                    y1="25"
-                    x2="75"
-                    y2="125"
-                    stroke="#CBD5E1"
-                    strokeWidth="1"
-                    strokeDasharray="2,2"
-                  />
-                  <line
-                    x1="25"
-                    y1="75"
-                    x2="125"
-                    y2="75"
-                    stroke="#CBD5E1"
-                    strokeWidth="1"
-                    strokeDasharray="2,2"
-                  />
+                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">Perfil de Rendimiento</span>
+                <svg width="150" height="150" viewBox="0 0 150 150" className="overflow-visible">
+                  <polygon points="75,25 125,75 75,125 25,75" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
+                  <polygon points="75,50 100,75 75,100 50,75" fill="none" stroke="#E2E8F0" strokeWidth="1" />
+                  <line x1="75" y1="25" x2="75" y2="125" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
+                  <line x1="25" y1="75" x2="125" y2="75" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
 
-                  <polygon
-                    points={radarPoints}
-                    fill="rgba(22, 163, 74, 0.25)"
-                    stroke="#16A34A"
-                    strokeWidth="2.5"
-                  />
+                  <polygon points={radarPoints} fill="rgba(22, 163, 74, 0.25)" stroke="#16A34A" strokeWidth="2.5" />
 
-                  <text
-                    x="75"
-                    y="17"
-                    textAnchor="middle"
-                    className="text-[8px] font-bold fill-slate-700"
-                  >
-                    MOTOR
-                  </text>
-                  <text
-                    x="132"
-                    y="78"
-                    textAnchor="start"
-                    className="text-[8px] font-bold fill-slate-700"
-                  >
-                    TÉCNICA
-                  </text>
-                  <text
-                    x="75"
-                    y="137"
-                    textAnchor="middle"
-                    className="text-[8px] font-bold fill-slate-700"
-                  >
-                    TÁCTICA
-                  </text>
-                  <text
-                    x="18"
-                    y="78"
-                    textAnchor="end"
-                    className="text-[8px] font-bold fill-slate-700"
-                  >
-                    DEFENSA
-                  </text>
+                  <text x="75" y="17" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">MOTOR</text>
+                  <text x="132" y="78" textAnchor="start" className="text-[8px] font-bold fill-slate-700">TÉCNICA</text>
+                  <text x="75" y="137" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">TÁCTICA</text>
+                  <text x="18" y="78" textAnchor="end" className="text-[8px] font-bold fill-slate-700">DEFENSA</text>
                 </svg>
               </div>
 
               <div className="col-span-8 space-y-2.5 text-xs">
                 <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                  <h5 className="font-bold text-slate-900 mb-0.5 text-[10.5px] uppercase tracking-wider">
-                    Fortalezas Destacadas
-                  </h5>
-                  <p className="text-slate-700 leading-relaxed text-[11px]">
-                    {fortalezas || 'Sin observaciones registradas.'}
-                  </p>
+                  <h5 className="font-bold text-slate-900 mb-0.5 text-[10.5px] uppercase tracking-wider">Fortalezas Destacadas</h5>
+                  <p className="text-slate-700 leading-relaxed text-[11px]">{fortalezas || 'Sin observaciones registradas.'}</p>
                 </div>
                 <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                  <h5 className="font-bold text-slate-900 mb-0.5 text-[10.5px] uppercase tracking-wider">
-                    Objetivos de Mejora
-                  </h5>
-                  <p className="text-slate-700 leading-relaxed text-[11px]">
-                    {objetivos || 'Sin objetivos registrados.'}
-                  </p>
+                  <h5 className="font-bold text-slate-900 mb-0.5 text-[10.5px] uppercase tracking-wider">Objetivos de Mejora</h5>
+                  <p className="text-slate-700 leading-relaxed text-[11px]">{objetivos || 'Sin objetivos registrados.'}</p>
                 </div>
               </div>
             </div>
 
-            {/* Pie de Informe */}
             <div className="pt-3 border-t border-slate-200 flex justify-between items-center text-[9.5px] text-slate-500 font-medium">
               <div className="flex items-center space-x-3">
-                <span className="font-bold text-slate-700 uppercase">
-                  Criterios:
-                </span>
-                <span className="flex items-center space-x-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600" />
-                  <span>Excelente</span>
-                </span>
-                <span className="flex items-center space-x-1">
-                  <span className="w-2 h-2 rounded-full bg-green-500" />
-                  <span>Consolidado</span>
-                </span>
-                <span className="flex items-center space-x-1">
-                  <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  <span>En desarrollo</span>
-                </span>
-                <span className="flex items-center space-x-1">
-                  <span className="w-2 h-2 rounded-full bg-rose-500" />
-                  <span>Necesita apoyo</span>
-                </span>
+                <span className="font-bold text-slate-700 uppercase">Criterios:</span>
+                <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-emerald-600" /><span>Excelente</span></span>
+                <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-green-500" /><span>Consolidado</span></span>
+                <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-amber-500" /><span>En desarrollo</span></span>
+                <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-rose-500" /><span>Necesita apoyo</span></span>
               </div>
               <div>
-                <span>
-                  Evaluador: <strong>{evaluadorNombre}</strong> •{' '}
-                  {clubActivo.nombre}
-                </span>
+                <span>Evaluador: <strong>{evaluadorNombre}</strong> • {clubActivo.nombre}</span>
               </div>
             </div>
 
-            {/* Botones de acción */}
             <div className="mt-4 flex justify-between items-center pt-3 border-t border-slate-100 print:hidden">
               <button
                 onClick={() => setPantalla('FORMULARIO')}
@@ -2388,21 +1833,17 @@ export default function App() {
                 Imprimir o guardar en PDF
               </button>
             </div>
+
           </div>
         )}
 
-        {/* PANTALLA 5: INFORME DE EQUIPO COMPLETO (BULK PRINT) */}
+        {/* PANTALLA: INFORME DE EQUIPO COMPLETO */}
         {pantalla === 'INFORME_EQUIPO' && (
           <div className="space-y-8 print:space-y-0">
             <div className="bg-white p-4 rounded-xl shadow border border-slate-200 flex justify-between items-center print:hidden">
               <div>
-                <h3 className="font-bold text-slate-900">
-                  Dossier Completo de {equipoSeleccionado.nombre}
-                </h3>
-                <p className="text-xs text-slate-500">
-                  {clubActivo.nombre} • {equipoSeleccionado.jugadores.length}{' '}
-                  fichas individuales.
-                </p>
+                <h3 className="font-bold text-slate-900">Dossier Completo de {equipoSeleccionado.nombre}</h3>
+                <p className="text-xs text-slate-500">{clubActivo.nombre} • {equipoSeleccionado.jugadores.length} fichas individuales.</p>
               </div>
               <div className="space-x-2">
                 <button
@@ -2421,48 +1862,29 @@ export default function App() {
             </div>
 
             {equipoSeleccionado.jugadores.map((jugador) => {
-              const asist = calcularAsistenciaJugador(
-                jugador.id,
-                equipoSeleccionado
-              );
+              const asist = calcularAsistenciaJugador(jugador.id, equipoSeleccionado);
               return (
-                <div
-                  key={jugador.id}
-                  className="print-full-page bg-white rounded-xl shadow border border-slate-200 p-8 page-break print:p-0 print:border-none print:shadow-none print:rounded-none"
-                >
+                <div key={jugador.id} className="print-full-page bg-white rounded-xl shadow border border-slate-200 p-8 page-break print:p-0 print:border-none print:shadow-none print:rounded-none">
+                  
                   <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3">
                     <div className="flex items-center space-x-4">
                       <div className="w-14 h-14 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center p-1 overflow-hidden">
                         {clubActivo.logoUrl ? (
-                          <img
-                            src={clubActivo.logoUrl}
-                            alt="Escudo"
-                            className="w-full h-full object-contain"
-                          />
+                          <img src={clubActivo.logoUrl} alt="Escudo" className="w-full h-full object-contain" />
                         ) : (
-                          <span className="font-bold text-slate-800 text-xl">
-                            {siglasClub || 'CB'}
-                          </span>
+                          <span className="font-bold text-slate-800 text-xl">{siglasClub || 'CB'}</span>
                         )}
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold text-slate-900">
-                          {jugador.nombre}
-                        </h2>
+                        <h2 className="text-2xl font-bold text-slate-900">{jugador.nombre}</h2>
                         <p className="text-xs text-slate-600 font-medium">
-                          {clubActivo.nombre} • {equipoSeleccionado.nombre} •
-                          Dorsal {jugador.dorsal} • {jugador.nacimiento}
+                          {clubActivo.nombre} • {equipoSeleccionado.nombre} • Dorsal {jugador.dorsal} • {jugador.nacimiento}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                        Temporada {clubActivo.temporada}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        Evaluación {periodo} • Asistencia: {asist.pct}% (
-                        {asist.presentes}/{asist.totalSesiones} ses.)
-                      </p>
+                      <p className="text-xs font-bold text-slate-800 uppercase tracking-wider">Temporada {clubActivo.temporada}</p>
+                      <p className="text-xs text-slate-500">Evaluación {periodo} • Asistencia: {asist.pct}% ({asist.presentes}/{asist.totalSesiones} ses.)</p>
                     </div>
                   </div>
 
@@ -2474,16 +1896,9 @@ export default function App() {
                         </div>
                         <div className="space-y-1">
                           {RUBRICA_JUGADORES[0].items.map((item) => (
-                            <div
-                              key={item}
-                              className="flex justify-between items-center py-0.5 px-1 bg-white"
-                            >
-                              <span className="text-slate-800 font-medium text-[11.5px]">
-                                {item}
-                              </span>
-                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">
-                                Consolidado
-                              </span>
+                            <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
+                              <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
+                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">Consolidado</span>
                             </div>
                           ))}
                         </div>
@@ -2495,16 +1910,9 @@ export default function App() {
                         </div>
                         <div className="space-y-1">
                           {RUBRICA_JUGADORES[1].items.map((item) => (
-                            <div
-                              key={item}
-                              className="flex justify-between items-center py-0.5 px-1 bg-white"
-                            >
-                              <span className="text-slate-800 font-medium text-[11.5px]">
-                                {item}
-                              </span>
-                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">
-                                Consolidado
-                              </span>
+                            <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
+                              <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
+                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">Consolidado</span>
                             </div>
                           ))}
                         </div>
@@ -2518,16 +1926,9 @@ export default function App() {
                         </div>
                         <div className="space-y-1">
                           {RUBRICA_JUGADORES[2].items.map((item) => (
-                            <div
-                              key={item}
-                              className="flex justify-between items-center py-0.5 px-1 bg-white"
-                            >
-                              <span className="text-slate-800 font-medium text-[11.5px]">
-                                {item}
-                              </span>
-                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">
-                                Consolidado
-                              </span>
+                            <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
+                              <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
+                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">Consolidado</span>
                             </div>
                           ))}
                         </div>
@@ -2539,16 +1940,9 @@ export default function App() {
                         </div>
                         <div className="space-y-1">
                           {RUBRICA_JUGADORES[3].items.map((item) => (
-                            <div
-                              key={item}
-                              className="flex justify-between items-center py-0.5 px-1 bg-white"
-                            >
-                              <span className="text-slate-800 font-medium text-[11.5px]">
-                                {item}
-                              </span>
-                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">
-                                Consolidado
-                              </span>
+                            <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
+                              <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
+                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">Consolidado</span>
                             </div>
                           ))}
                         </div>
@@ -2558,30 +1952,15 @@ export default function App() {
 
                   <div className="pt-3 border-t border-slate-200 flex justify-between items-center text-[9.5px] text-slate-500 font-medium">
                     <div className="flex items-center space-x-3">
-                      <span className="font-bold text-slate-700 uppercase">
-                        Criterios:
-                      </span>
-                      <span className="flex items-center space-x-1">
-                        <span className="w-2 h-2 rounded-full bg-emerald-600" />
-                        <span>Excelente</span>
-                      </span>
-                      <span className="flex items-center space-x-1">
-                        <span className="w-2 h-2 rounded-full bg-green-500" />
-                        <span>Consolidado</span>
-                      </span>
-                      <span className="flex items-center space-x-1">
-                        <span className="w-2 h-2 rounded-full bg-amber-500" />
-                        <span>En desarrollo</span>
-                      </span>
-                      <span className="flex items-center space-x-1">
-                        <span className="w-2 h-2 rounded-full bg-rose-500" />
-                        <span>Necesita apoyo</span>
-                      </span>
+                      <span className="font-bold text-slate-700 uppercase">Criterios:</span>
+                      <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-emerald-600" /><span>Excelente</span></span>
+                      <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-green-500" /><span>Consolidado</span></span>
+                      <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-amber-500" /><span>En desarrollo</span></span>
+                      <span className="flex items-center space-x-1"><span className="w-2 h-2 rounded-full bg-rose-500" /><span>Necesita apoyo</span></span>
                     </div>
-                    <span>
-                      Evaluador: {evaluadorNombre} • {clubActivo.nombre}
-                    </span>
+                    <span>Evaluador: {evaluadorNombre} • {clubActivo.nombre}</span>
                   </div>
+
                 </div>
               );
             })}
