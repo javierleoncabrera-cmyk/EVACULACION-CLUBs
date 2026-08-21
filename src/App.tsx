@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabase';
 
-type UserRole = 'ADMIN' | 'ENTRENADOR';
+type UserRole = 'SUPER_ADMIN' | 'DIRECTOR' | 'ENTRENADOR';
 type Gender = 'FEMENINO' | 'MASCULINO';
 type TargetType = 'JUGADORES' | 'ENTRENADORES';
 type Period = 'Inicial' | 'Media' | 'Final';
@@ -13,6 +13,9 @@ type Screen =
   | 'PASAR_LISTA' 
   | 'HISTORIAL_JUGADOR' 
   | 'LISTA_ENTRENADORES' 
+  | 'PANEL_SUPERADMIN'
+  | 'EDITOR_RUBRICAS'
+  | 'MODAL_QR'
   | 'FORMULARIO' 
   | 'INFORME' 
   | 'INFORME_EQUIPO' 
@@ -42,6 +45,7 @@ interface Player {
   nombre: string;
   dorsal: number;
   nacimiento: number;
+  tokenPublico: string;
   inicial: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
   media: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
   final: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
@@ -84,6 +88,22 @@ interface Club {
   logoUrl: string | null;
 }
 
+interface AppUser {
+  id: string;
+  email: string;
+  pass: string;
+  name: string;
+  role: UserRole;
+  clubId?: string;
+  teamId?: string;
+}
+
+interface RubricCategory {
+  id: string;
+  nombre: string;
+  items: string[];
+}
+
 const NIVELES_JUGADORES: LevelOption[] = [
   { key: 'EXCELENTE', label: 'Excelente', desc: 'Dominio sobresaliente y constante en competición y entrenamiento.', color: '#16A34A', weight: 4 },
   { key: 'CONSOLIDADO', label: 'Consolidado', desc: 'Adquirido y ejecutado con regularidad y autonomía.', color: '#22C55E', weight: 3 },
@@ -100,20 +120,24 @@ const NIVELES_ENTRENADORES: LevelOption[] = [
   { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado durante las sesiones observadas.', color: '#CBD5E1', weight: 0 },
 ];
 
-const RUBRICA_JUGADORES = [
+const RUBRICA_INICIAL: RubricCategory[] = [
   {
+    id: 'cat_motor',
     nombre: 'Desarrollo motor',
     items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto']
   },
   {
+    id: 'cat_tecnica',
     nombre: 'Técnica individual',
     items: ['Bote', 'Pase', 'Recepción', 'Tiro', 'Entrada', 'Paradas', 'Pivotes', 'Mano no dominante']
   },
   {
+    id: 'cat_tactica',
     nombre: 'Comprensión del juego',
     items: ['Ocupación de espacios', 'Juego sin balón', '1c1', 'Toma de decisiones', 'Lectura del juego', 'Juego colectivo']
   },
   {
+    id: 'cat_defensa',
     nombre: 'Defensa',
     items: ['Actitud defensiva', 'Colocación', '1c1 defensivo', 'Ayudas', 'Balance defensivo']
   }
@@ -187,6 +211,7 @@ const EQUIPOS_INICIALES: Team[] = [
         nombre: 'Mateo Álvarez', 
         dorsal: 5, 
         nacimiento: 2015, 
+        tokenPublico: 'mat-alv-2015',
         inicial: 'COMPLETADA', 
         media: 'PENDIENTE', 
         final: 'PENDIENTE',
@@ -194,7 +219,7 @@ const EQUIPOS_INICIALES: Team[] = [
           { temporada: '2025/26', categoria: 'Benjamín', periodo: 'Final', fecha: '28/05/2026', promedioNivel: 'Consolidado', fortalezas: 'Mucha velocidad y actitud.', objetivos: 'Aprender tiro en suspensión.' }
         ]
       },
-      { id: 'j2', nombre: 'Leo Batista', dorsal: 55, nacimiento: 2014, inicial: 'COMPLETADA', media: 'PENDIENTE', final: 'PENDIENTE', historial: [] }
+      { id: 'j2', nombre: 'Leo Batista', dorsal: 55, nacimiento: 2014, tokenPublico: 'leo-bat-2014', inicial: 'COMPLETADA', media: 'PENDIENTE', final: 'PENDIENTE', historial: [] }
     ],
     sesiones: [
       { id: 's1', fecha: '12/08/2026', tipo: 'ENTRENAMIENTO', asistencias: { 'j1': 'PRESENTE', 'j2': 'PRESENTE' } },
@@ -210,36 +235,43 @@ const EQUIPOS_INICIALES: Team[] = [
     gender: 'FEMENINO',
     entrenador: 'Laura Sánchez',
     jugadores: [
-      { id: 'j3', nombre: 'Lucía Fernández', dorsal: 4, nacimiento: 2015, inicial: 'COMPLETADA', media: 'PENDIENTE', final: 'PENDIENTE', historial: [] },
-      { id: 'j4', nombre: 'Jugadora Dos', dorsal: 2, nacimiento: 2015, inicial: 'COMPLETADA', media: 'BORRADOR', final: 'PENDIENTE', historial: [] }
+      { id: 'j3', nombre: 'Lucía Fernández', dorsal: 4, nacimiento: 2015, tokenPublico: 'luc-fer-2015', inicial: 'COMPLETADA', media: 'PENDIENTE', final: 'PENDIENTE', historial: [] },
+      { id: 'j4', nombre: 'Jugadora Dos', dorsal: 2, nacimiento: 2015, tokenPublico: 'jug-dos-2015', inicial: 'COMPLETADA', media: 'BORRADOR', final: 'PENDIENTE', historial: [] }
     ],
     sesiones: []
   }
 ];
 
+const USUARIOS_INICIALES: AppUser[] = [
+  { id: 'u1', email: 'admin@plataforma.com', pass: 'admin123', name: 'Administrador Master', role: 'SUPER_ADMIN' },
+  { id: 'u2', email: 'director@doguen.com', pass: 'doguen2026', name: 'Dirección Técnica Doguen', role: 'DIRECTOR', clubId: 'club_doguen' },
+  { id: 'u3', email: 'carlos@doguen.com', pass: 'carlos123', name: 'Carlos Santana', role: 'ENTRENADOR', clubId: 'club_doguen', teamId: 't_doguen_1' }
+];
+
 export default function App() {
-  // Estado de Autenticación
-  const [sessionUser, setSessionUser] = useState<any>(() => {
+  const [sessionUser, setSessionUser] = useState<AppUser | null>(() => {
     const saved = localStorage.getItem('app_auth_user');
     return saved ? JSON.parse(saved) : null;
   });
-  const [userRole, setUserRole] = useState<UserRole>(() => {
-    return (localStorage.getItem('app_auth_role') as UserRole) || 'ADMIN';
-  });
-  const [authEmail, setAuthEmail] = useState('');
-  const [authPass, setAuthPass] = useState('');
-  const [authError, setAuthError] = useState<string | null>(null);
 
   const [clubs, setClubs] = useState<Club[]>(() => {
     const saved = localStorage.getItem('app_multi_clubs');
     return saved ? JSON.parse(saved) : CLUBS_INICIALES;
   });
 
+  const [usuarios, setUsuarios] = useState<AppUser[]>(() => {
+    const saved = localStorage.getItem('app_users_list');
+    return saved ? JSON.parse(saved) : USUARIOS_INICIALES;
+  });
+
+  const [rubricas, setRubricas] = useState<RubricCategory[]>(() => {
+    const saved = localStorage.getItem('app_rubricas_jugadores');
+    return saved ? JSON.parse(saved) : RUBRICA_INICIAL;
+  });
+
   const [clubActivoId, setClubActivoId] = useState<string>(() => {
     return localStorage.getItem('app_active_club_id') || CLUBS_INICIALES[0].id;
   });
-
-  const clubActivo = clubs.find(c => c.id === clubActivoId) || clubs[0] || CLUBS_INICIALES[0];
 
   const [equipos, setEquipos] = useState<Team[]>(() => {
     const saved = localStorage.getItem('app_multi_teams');
@@ -252,26 +284,27 @@ export default function App() {
   const [periodo, setPeriodo] = useState<Period>('Inicial');
   const [pantalla, setPantalla] = useState<Screen>('EQUIPOS');
 
-  // Filtrar equipos según rol
-  const equiposDelClub = equipos.filter(e => e.clubId === clubActivo.id);
-  const equiposFiltrados = equiposDelClub.filter(e => {
-    if (userRole === 'ENTRENADOR') {
-      return e.entrenador.toLowerCase().includes(sessionUser?.name?.toLowerCase() || 'carlos');
-    }
-    return e.gender === genero;
-  });
+  // Formulario Auth & SuperAdmin
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPass, setAuthPass] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
 
-  const [equipoSeleccionado, setEquipoSeleccionado] = useState<Team>(equiposFiltrados[0] || equiposDelClub[0] || EQUIPOS_INICIALES[0]);
-  const [jugadorSeleccionado, setJugadorSeleccionado] = useState<Player>(equipoSeleccionado?.jugadores[0] || EQUIPOS_INICIALES[0].jugadores[0]);
-  const [coachSeleccionado, setCoachSeleccionado] = useState<Coach | null>(null);
+  const [nuevoUserEmail, setNuevoUserEmail] = useState('');
+  const [nuevoUserPass, setNuevoUserPass] = useState('');
+  const [nuevoUserNombre, setNuevoUserNombre] = useState('');
+  const [nuevoUserRol, setNuevoUserRol] = useState<UserRole>('DIRECTOR');
+  const [nuevoUserClubId, setNuevoUserClubId] = useState<string>(CLUBS_INICIALES[0].id);
 
+  // Formulario nuevo club
   const [nuevoClubNombre, setNuevoClubNombre] = useState('');
   const [nuevoClubTemporada, setNuevoClubTemporada] = useState('2026/27');
 
+  // Formulario asistencias
   const [sessionFecha, setSessionFecha] = useState<string>(new Date().toISOString().split('T')[0]);
   const [sessionTipo, setSessionTipo] = useState<SessionType>('ENTRENAMIENTO');
   const [sessionAsistencias, setSessionAsistencias] = useState<Record<string, AttendanceStatus>>({});
 
+  // Formulario equipos y jugadores
   const [nuevoNombreEquipo, setNuevoNombreEquipo] = useState('');
   const [nuevaCatEquipo, setNuevaCatEquipo] = useState('');
   const [nuevoEntrenador, setNuevoEntrenador] = useState('');
@@ -280,12 +313,16 @@ export default function App() {
   const [nuevoDorsal, setNuevoDorsal] = useState('');
   const [nuevoNacimiento, setNuevoNacimiento] = useState('');
 
+  // Formulario editor rubricas (SUPER_ADMIN ONLY)
+  const [nuevaCatNombre, setNuevaCatNombre] = useState('');
+  const [nuevoItemTexto, setNuevoItemTexto] = useState<Record<string, string>>({});
+
   const [obsAbiertas, setObsAbiertas] = useState<Record<string, boolean>>({ 'Pase': true });
 
   const [respuestas, setRespuestas] = useState<Record<string, { nivel: string; obs: string }>>({
     'Coordinación': { nivel: 'EN_DESARROLLO', obs: '' },
     'Bote': { nivel: 'NECESITA_APOYO', obs: '' },
-    'Pase': { nivel: 'EXCELENTE', obs: 'Gran visión de juego' },
+    'Pase': { nivel: 'EXCELENTE', obs: 'Gran visión espacial' },
     'Claridad en las instrucciones': { nivel: 'EXCELENTE', obs: '' },
     'Volumen de voz adecuado': { nivel: 'BUENO', obs: '' }
   });
@@ -294,60 +331,198 @@ export default function App() {
   const [objetivos, setObjetivos] = useState('Manejo de mano no dominante y templanza en momentos de presión.');
   const [evaluadorNombre, setEvaluadorNombre] = useState('Dirección Técnica');
 
+  // Club Activo según Rol
+  const effectiveClubId = sessionUser?.role === 'DIRECTOR' || sessionUser?.role === 'ENTRENADOR'
+    ? (sessionUser.clubId || clubActivoId)
+    : clubActivoId;
+
+  const clubActivo = clubs.find(c => c.id === effectiveClubId) || clubs[0] || CLUBS_INICIALES[0];
+
+  // Filtrado de Equipos
+  const equiposDelClub = equipos.filter(e => e.clubId === clubActivo.id);
+  const equiposFiltrados = equiposDelClub.filter(e => {
+    if (sessionUser?.role === 'ENTRENADOR') {
+      return e.entrenador.toLowerCase().includes(sessionUser.name.toLowerCase()) || (sessionUser.teamId && e.id === sessionUser.teamId);
+    }
+    return e.gender === genero;
+  });
+
+  const [equipoSeleccionado, setEquipoSeleccionado] = useState<Team>(equiposFiltrados[0] || equiposDelClub[0] || EQUIPOS_INICIALES[0]);
+  const [jugadorSeleccionado, setJugadorSeleccionado] = useState<Player>(equipoSeleccionado?.jugadores?.[0] || EQUIPOS_INICIALES[0].jugadores[0]);
+  const [coachSeleccionado, setCoachSeleccionado] = useState<Coach | null>(null);
+
+  // Persistencia
   useEffect(() => {
     localStorage.setItem('app_multi_clubs', JSON.stringify(clubs));
     localStorage.setItem('app_multi_teams', JSON.stringify(equipos));
+    localStorage.setItem('app_users_list', JSON.stringify(usuarios));
+    localStorage.setItem('app_rubricas_jugadores', JSON.stringify(rubricas));
     localStorage.setItem('app_active_club_id', clubActivoId);
     if (sessionUser) {
       localStorage.setItem('app_auth_user', JSON.stringify(sessionUser));
-      localStorage.setItem('app_auth_role', userRole);
     } else {
       localStorage.removeItem('app_auth_user');
-      localStorage.removeItem('app_auth_role');
     }
-  }, [clubs, equipos, clubActivoId, sessionUser, userRole]);
+  }, [clubs, equipos, usuarios, rubricas, clubActivoId, sessionUser]);
 
   useEffect(() => {
-    const teams = equipos.filter(e => e.clubId === clubActivoId);
+    const teams = equipos.filter(e => e.clubId === effectiveClubId);
     if (teams.length > 0) {
       setEquipoSeleccionado(teams[0]);
       if (teams[0].jugadores.length > 0) {
         setJugadorSeleccionado(teams[0].jugadores[0]);
       }
     }
-  }, [clubActivoId]);
+  }, [effectiveClubId]);
 
-  // Manejadores de Login
-  const handleLogin = async (e: React.FormEvent) => {
+  // Manejador de Login con validación de contraseña
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: authEmail,
-        password: authPass
-      });
-      if (error) throw error;
-      setSessionUser({ email: data.user.email, name: data.user.email?.split('@')[0] });
-      setUserRole('ADMIN');
-    } catch (err: any) {
-      setAuthError(err.message || 'Error al iniciar sesión');
+    const found = usuarios.find(u => u.email.toLowerCase() === authEmail.trim().toLowerCase());
+    
+    if (!found) {
+      setAuthError('El correo electrónico introducido no existe.');
+      return;
     }
+
+    if (found.pass !== authPass) {
+      setAuthError('Contraseña incorrecta. Compruébala o solicita una nueva.');
+      return;
+    }
+
+    setSessionUser(found);
+    if (found.clubId) setClubActivoId(found.clubId);
+    setPantalla(found.role === 'SUPER_ADMIN' ? 'PANEL_SUPERADMIN' : 'EQUIPOS');
   };
 
-  const handleDemoLogin = (role: UserRole, name: string) => {
-    setSessionUser({ email: `${role.toLowerCase()}@club.com`, name });
-    setUserRole(role);
-    setAuthError(null);
-    if (role === 'ENTRENADOR') {
+  const handleDemoLogin = (role: UserRole) => {
+    let demoUser: AppUser;
+    if (role === 'SUPER_ADMIN') {
+      demoUser = usuarios[0];
+      setSessionUser(demoUser);
+      setPantalla('PANEL_SUPERADMIN');
+    } else if (role === 'DIRECTOR') {
+      demoUser = usuarios[1];
+      setSessionUser(demoUser);
+      setClubActivoId(demoUser.clubId || CLUBS_INICIALES[0].id);
+      setPantalla('EQUIPOS');
+    } else {
+      demoUser = usuarios[2];
+      setSessionUser(demoUser);
+      setClubActivoId(demoUser.clubId || CLUBS_INICIALES[0].id);
       setTipoEvaluacion('JUGADORES');
-      const coachTeam = equipos.find(e => e.entrenador.toLowerCase().includes(name.toLowerCase()));
+      const coachTeam = equipos.find(e => e.entrenador.toLowerCase().includes(demoUser.name.toLowerCase()));
       if (coachTeam) setEquipoSeleccionado(coachTeam);
+      setPantalla('PLANTILLA');
     }
+    setAuthError(null);
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
     setSessionUser(null);
+    setAuthEmail('');
+    setAuthPass('');
+    setPantalla('EQUIPOS');
+  };
+
+  // Crear Usuario con Contraseña
+  const handleCrearUsuario = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevoUserEmail || !nuevoUserNombre || !nuevoUserPass) {
+      alert('Por favor, rellena todos los campos incluyendo la contraseña.');
+      return;
+    }
+
+    const nuevoU: AppUser = {
+      id: `u_${Date.now()}`,
+      email: nuevoUserEmail.trim(),
+      pass: nuevoUserPass.trim(),
+      name: nuevoUserNombre.trim(),
+      role: nuevoUserRol,
+      clubId: nuevoUserRol !== 'SUPER_ADMIN' ? nuevoUserClubId : undefined
+    };
+
+    setUsuarios([...usuarios, nuevoU]);
+    setNuevoUserEmail('');
+    setNuevoUserPass('');
+    setNuevoUserNombre('');
+    alert(`¡Usuario creado!\n\nEmail: ${nuevoU.email}\nClave: ${nuevoU.pass}\nRol: ${nuevoU.role}`);
+  };
+
+  const handleCrearClub = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevoClubNombre) return;
+
+    const newClubId = `club_${Date.now()}`;
+    const nuevoClub: Club = {
+      id: newClubId,
+      nombre: nuevoClubNombre,
+      temporada: nuevoClubTemporada || '2026/27',
+      logoUrl: null
+    };
+
+    const equiposBase: Team[] = [
+      {
+        id: `t_${Date.now()}_1`,
+        clubId: newClubId,
+        nombre: 'Alevín A',
+        categoria: 'Alevín (2014-2015)',
+        gender: 'MASCULINO',
+        entrenador: 'Por asignar',
+        jugadores: [],
+        sesiones: []
+      }
+    ];
+
+    setClubs([...clubs, nuevoClub]);
+    setEquipos([...equipos, ...equiposBase]);
+    setClubActivoId(newClubId);
+    setEquipoSeleccionado(equiposBase[0]);
+    setNuevoClubNombre('');
+    setPantalla('EQUIPOS');
+  };
+
+  // Métodos Editor de Rúbricas (Super Admin Only)
+  const handleAddCategory = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevaCatNombre) return;
+    const nueva: RubricCategory = {
+      id: `cat_${Date.now()}`,
+      nombre: nuevaCatNombre,
+      items: []
+    };
+    setRubricas([...rubricas, nueva]);
+    setNuevaCatNombre('');
+  };
+
+  const handleAddItemToCategory = (catId: string) => {
+    const texto = nuevoItemTexto[catId];
+    if (!texto) return;
+    setRubricas(rubricas.map(cat => {
+      if (cat.id === catId) {
+        return { ...cat, items: [...cat.items, texto] };
+      }
+      return cat;
+    }));
+    setNuevoItemTexto({ ...nuevoItemTexto, [catId]: '' });
+  };
+
+  const handleRemoveItem = (catId: string, itemIdx: number) => {
+    setRubricas(rubricas.map(cat => {
+      if (cat.id === catId) {
+        const items = [...cat.items];
+        items.splice(itemIdx, 1);
+        return { ...cat, items };
+      }
+      return cat;
+    }));
+  };
+
+  const handleRemoveCategory = (catId: string) => {
+    if (confirm('¿Eliminar esta categoría y todos sus criterios?')) {
+      setRubricas(rubricas.filter(c => c.id !== catId));
+    }
   };
 
   const nivelesActuales = tipoEvaluacion === 'JUGADORES' ? NIVELES_JUGADORES : NIVELES_ENTRENADORES;
@@ -393,8 +568,8 @@ export default function App() {
   };
 
   const calcularPromedioCategoria = (categoriaNombre: string) => {
-    const cat = RUBRICA_JUGADORES.find(c => c.nombre === categoriaNombre);
-    if (!cat) return 0.5;
+    const cat = rubricas.find(c => c.nombre.toLowerCase().includes(categoriaNombre.toLowerCase()));
+    if (!cat || cat.items.length === 0) return 0.6;
     let suma = 0;
     let total = 0;
     cat.items.forEach(item => {
@@ -408,10 +583,10 @@ export default function App() {
     return total > 0 ? (suma / (total * 4)) : 0.6;
   };
 
-  const motorVal = calcularPromedioCategoria('Desarrollo motor');
-  const tecnicaVal = calcularPromedioCategoria('Técnica individual');
-  const tacticaVal = calcularPromedioCategoria('Comprensión del juego');
-  const defensaVal = calcularPromedioCategoria('Defensa');
+  const motorVal = calcularPromedioCategoria('motor');
+  const tecnicaVal = calcularPromedioCategoria('técnica');
+  const tacticaVal = calcularPromedioCategoria('juego');
+  const defensaVal = calcularPromedioCategoria('defensa');
 
   const cx = 75, cy = 75, r = 50;
   const pMotor = `${cx},${cy - r * motorVal}`;
@@ -430,39 +605,6 @@ export default function App() {
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const handleCrearClub = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!nuevoClubNombre) return;
-
-    const newClubId = `club_${Date.now()}`;
-    const nuevoClub: Club = {
-      id: newClubId,
-      nombre: nuevoClubNombre,
-      temporada: nuevoClubTemporada || '2026/27',
-      logoUrl: null
-    };
-
-    const equiposBase: Team[] = [
-      {
-        id: `t_${Date.now()}_1`,
-        clubId: newClubId,
-        nombre: 'Alevín Promesas',
-        categoria: 'Alevín (2014-2015)',
-        gender: 'MASCULINO',
-        entrenador: 'Carlos Santana',
-        jugadores: [],
-        sesiones: []
-      }
-    ];
-
-    setClubs([...clubs, nuevoClub]);
-    setEquipos([...equipos, ...equiposBase]);
-    setClubActivoId(newClubId);
-    setEquipoSeleccionado(equiposBase[0]);
-    setNuevoClubNombre('');
-    setPantalla('EQUIPOS');
   };
 
   const handleAbrirPaseLista = () => {
@@ -522,11 +664,13 @@ export default function App() {
   const handleAddJugador = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nuevoNombreJugador) return;
+    const cleanToken = nuevoNombreJugador.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + (nuevoNacimiento || '2015');
     const nuevoJ: Player = {
       id: `j_${Date.now()}`,
       nombre: nuevoNombreJugador,
       dorsal: parseInt(nuevoDorsal) || 0,
       nacimiento: parseInt(nuevoNacimiento) || 2015,
+      tokenPublico: cleanToken,
       inicial: 'PENDIENTE',
       media: 'PENDIENTE',
       final: 'PENDIENTE',
@@ -579,8 +723,10 @@ export default function App() {
   };
 
   const asistActual = calcularAsistenciaJugador(jugadorSeleccionado?.id, equipoSeleccionado);
+  const publicFamilyUrl = `https://evaculacion-clu-bs.vercel.app/?token=${jugadorSeleccionado?.tokenPublico || 'alumno'}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(publicFamilyUrl)}`;
 
-  // PANTALLA DE LOGIN
+  // PANTALLA: LOGIN
   if (!sessionUser) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 font-sans">
@@ -590,7 +736,7 @@ export default function App() {
               ⚡
             </div>
             <h2 className="text-2xl font-bold text-slate-900">Portal de Evaluación Deportiva</h2>
-            <p className="text-xs text-slate-500">Acceso a plantillas, asistencia y seguimiento técnico</p>
+            <p className="text-xs text-slate-500">Plataforma Multiclub • Gestión y Seguimiento Técnico</p>
           </div>
 
           {authError && (
@@ -605,7 +751,7 @@ export default function App() {
               <input
                 type="email"
                 required
-                placeholder="entrenador@club.com"
+                placeholder="ejemplo@club.com"
                 value={authEmail}
                 onChange={(e) => setAuthEmail(e.target.value)}
                 className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
@@ -630,23 +776,32 @@ export default function App() {
             </button>
           </form>
 
-          {/* Acceso Rápido por Roles */}
           <div className="pt-4 border-t border-slate-200 space-y-2">
-            <p className="text-[11px] font-bold uppercase text-slate-400 text-center tracking-wider">Acceso de Demostración</p>
-            <div className="grid grid-cols-2 gap-2">
+            <p className="text-[11px] font-bold uppercase text-slate-400 text-center tracking-wider">Demostración Rápida (1 Clic)</p>
+            <div className="space-y-2">
               <button
                 type="button"
-                onClick={() => handleDemoLogin('ADMIN', 'Director Técnico')}
-                className="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs py-2 rounded-lg font-semibold transition"
+                onClick={() => handleDemoLogin('SUPER_ADMIN')}
+                className="w-full bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 text-xs py-2 rounded-lg font-semibold flex items-center justify-between px-3 transition"
               >
-                👑 Director Técnico
+                <span>👑 Super Administrador (Tú)</span>
+                <span className="text-[10px] text-purple-600 font-normal">Crear clubes y accesos →</span>
               </button>
               <button
                 type="button"
-                onClick={() => handleDemoLogin('ENTRENADOR', 'Carlos Santana')}
-                className="bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-xs py-2 rounded-lg font-semibold transition"
+                onClick={() => handleDemoLogin('DIRECTOR')}
+                className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-xs py-2 rounded-lg font-semibold flex items-center justify-between px-3 transition"
               >
-                📋 Entrenador (Carlos)
+                <span>🏢 Director Técnico (Doguen)</span>
+                <span className="text-[10px] text-emerald-600 font-normal">Equipos y entrenadores →</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDemoLogin('ENTRENADOR')}
+                className="w-full bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-xs py-2 rounded-lg font-semibold flex items-center justify-between px-3 transition"
+              >
+                <span>📋 Entrenador (Carlos Santana)</span>
+                <span className="text-[10px] text-blue-600 font-normal">Pase de lista y notas →</span>
               </button>
             </div>
           </div>
@@ -697,7 +852,7 @@ export default function App() {
           
           <div className="flex items-center space-x-3">
             <div 
-              onClick={() => setPantalla(tipoEvaluacion === 'JUGADORES' ? 'EQUIPOS' : 'LISTA_ENTRENADORES')}
+              onClick={() => setPantalla(sessionUser.role === 'SUPER_ADMIN' ? 'PANEL_SUPERADMIN' : 'EQUIPOS')}
               className="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-white text-xs cursor-pointer overflow-hidden shadow-inner"
             >
               {clubActivo.logoUrl ? (
@@ -708,7 +863,7 @@ export default function App() {
             </div>
 
             <div>
-              {editandoClub && userRole === 'ADMIN' ? (
+              {editandoClub && sessionUser.role === 'SUPER_ADMIN' ? (
                 <div className="flex items-center flex-wrap gap-2">
                   <input
                     type="text"
@@ -735,7 +890,7 @@ export default function App() {
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
-                  {userRole === 'ADMIN' ? (
+                  {sessionUser.role === 'SUPER_ADMIN' ? (
                     <>
                       <select
                         value={clubActivoId}
@@ -749,22 +904,22 @@ export default function App() {
                         ))}
                       </select>
                       <button
-                        onClick={() => setPantalla('MODAL_NUEVO_CLUB')}
-                        className="text-[10px] bg-emerald-700 hover:bg-emerald-600 text-white font-semibold px-2 py-1 rounded shadow"
+                        onClick={() => setPantalla('PANEL_SUPERADMIN')}
+                        className="text-[10px] bg-purple-700 hover:bg-purple-600 text-white font-semibold px-2 py-1 rounded shadow"
                       >
-                        + Nuevo Club
+                        Panel Master
                       </button>
                       <button
-                        onClick={() => setEditandoClub(true)}
-                        className="text-[10px] text-slate-400 hover:text-white underline ml-1"
+                        onClick={() => setPantalla('EDITOR_RUBRICAS')}
+                        className="text-[10px] bg-blue-700 hover:bg-blue-600 text-white font-semibold px-2 py-1 rounded shadow"
                       >
-                        (editar)
+                        ⚙️ Rúbricas
                       </button>
                     </>
                   ) : (
                     <div>
                       <h1 className="text-sm font-bold text-emerald-400">{clubActivo.nombre}</h1>
-                      <p className="text-[11px] text-slate-400">{sessionUser.name} • Rol Entrenador</p>
+                      <p className="text-[11px] text-slate-400">{sessionUser.name} • {sessionUser.role === 'DIRECTOR' ? 'Director/a Técnico' : 'Entrenador/a'}</p>
                     </div>
                   )}
                 </div>
@@ -773,7 +928,7 @@ export default function App() {
           </div>
 
           <div className="flex items-center flex-wrap gap-2.5">
-            {userRole === 'ADMIN' && (
+            {sessionUser.role !== 'ENTRENADOR' && (
               <>
                 <div className="flex bg-slate-800 p-1 rounded-lg border border-slate-700 text-xs">
                   <button
@@ -834,7 +989,6 @@ export default function App() {
             <button
               onClick={handleLogout}
               className="bg-rose-900/40 hover:bg-rose-800 text-rose-300 text-xs px-2.5 py-1.5 rounded-lg border border-rose-700/50 transition font-medium"
-              title="Cerrar sesión"
             >
               Salir
             </button>
@@ -845,67 +999,277 @@ export default function App() {
       {/* Contenedor Principal */}
       <main className="max-w-4xl mx-auto mt-6 px-4 print:mt-0 print:px-0 print:max-w-full print:w-full">
         
-        {/* PANTALLA: MODAL NUEVO CLUB */}
-        {pantalla === 'MODAL_NUEVO_CLUB' && userRole === 'ADMIN' && (
-          <div className="bg-white rounded-xl shadow border border-slate-200 p-6 max-w-md mx-auto space-y-4">
+        {/* PANTALLA: MODAL QR FAMILIAS */}
+        {pantalla === 'MODAL_QR' && (
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 max-w-sm mx-auto text-center space-y-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Crear Nuevo Club / Entidad</h2>
-              <p className="text-xs text-slate-500">Se generará una plantilla limpia e independiente.</p>
+              <span className="text-[10px] uppercase font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                Acceso Público Familias
+              </span>
+              <h2 className="text-lg font-bold text-slate-900 mt-2">{jugadorSeleccionado.nombre}</h2>
+              <p className="text-xs text-slate-500">Dorsal #{jugadorSeleccionado.dorsal} • {equipoSeleccionado.nombre}</p>
             </div>
 
-            <form onSubmit={handleCrearClub} className="space-y-4 text-xs">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Nombre del Club</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej: CB Juventud Laguna"
-                  value={nuevoClubNombre}
-                  onChange={(e) => setNuevoClubNombre(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Temporada</label>
-                <input
-                  type="text"
-                  placeholder="2026/27"
-                  value={nuevoClubTemporada}
-                  onChange={(e) => setNuevoClubTemporada(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
+            <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-inner inline-block mx-auto">
+              <img src={qrCodeUrl} alt="QR Ficha Deportista" className="w-48 h-48 mx-auto" />
+            </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => setPantalla('EQUIPOS')}
-                  className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-semibold hover:bg-slate-200"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="bg-emerald-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-emerald-700 shadow"
-                >
-                  Crear Club
-                </button>
-              </div>
-            </form>
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              Los padres y tutores pueden escanear este código con la cámara del móvil para consultar las evaluaciones y asistencia actualizadas en tiempo real.
+            </p>
+
+            <div className="space-y-2 pt-2 border-t border-slate-100">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(publicFamilyUrl);
+                  alert('¡Enlace de consulta copiado al portapapeles!');
+                }}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2 rounded-lg shadow"
+              >
+                📋 Copiar Enlace para WhatsApp
+              </button>
+              <button
+                onClick={() => setPantalla('PLANTILLA')}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs py-2 rounded-lg"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         )}
 
-        {/* PANTALLA 1: LISTADO DE EQUIPOS */}
+        {/* PANTALLA: EDITOR DE RÚBRICAS (SUPER ADMIN EXCLUSIVE) */}
+        {pantalla === 'EDITOR_RUBRICAS' && sessionUser.role === 'SUPER_ADMIN' && (
+          <div className="bg-white rounded-xl shadow border border-slate-200 p-6 space-y-6">
+            <div className="flex justify-between items-center pb-4 border-b border-slate-200">
+              <div>
+                <button
+                  onClick={() => setPantalla('EQUIPOS')}
+                  className="text-xs text-blue-600 font-semibold mb-1 hover:underline"
+                >
+                  ← Volver a equipos
+                </button>
+                <h2 className="text-xl font-bold text-slate-900">Editor Maestro de Rúbricas Técnicas</h2>
+                <p className="text-xs text-slate-500">Solo visible para Super Administrador. Define los criterios evaluativos para todos los clubes.</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleAddCategory} className="flex gap-2 text-xs">
+              <input
+                type="text"
+                required
+                placeholder="Nombre de la nueva categoría (ej: Preparación Física)"
+                value={nuevaCatNombre}
+                onChange={(e) => setNuevaCatNombre(e.target.value)}
+                className="flex-1 border border-slate-300 rounded-lg p-2.5"
+              />
+              <button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 rounded-lg shadow"
+              >
+                + Añadir Categoría
+              </button>
+            </form>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {rubricas.map((cat) => (
+                <div key={cat.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                  <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                    <h3 className="font-bold text-slate-900 text-sm uppercase">{cat.nombre}</h3>
+                    <button
+                      onClick={() => handleRemoveCategory(cat.id)}
+                      className="text-rose-600 hover:text-rose-800 text-xs font-semibold"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {cat.items.map((item, idx) => (
+                      <div key={idx} className="flex justify-between items-center bg-white p-2 rounded border border-slate-200 text-xs">
+                        <span className="font-medium text-slate-800">{item}</span>
+                        <button
+                          onClick={() => handleRemoveItem(cat.id, idx)}
+                          className="text-slate-400 hover:text-rose-600 font-bold px-1"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-1.5 pt-2">
+                    <input
+                      type="text"
+                      placeholder="Nuevo criterio..."
+                      value={nuevoItemTexto[cat.id] || ''}
+                      onChange={(e) => setNuevoItemTexto({ ...nuevoItemTexto, [cat.id]: e.target.value })}
+                      className="flex-1 text-xs border border-slate-300 rounded p-1.5 bg-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleAddItemToCategory(cat.id)}
+                      className="bg-slate-800 text-white text-xs px-3 rounded font-medium hover:bg-slate-700"
+                    >
+                      + Ítem
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* PANTALLA: PANEL SUPER ADMIN */}
+        {pantalla === 'PANEL_SUPERADMIN' && sessionUser.role === 'SUPER_ADMIN' && (
+          <div className="space-y-6">
+            <div className="bg-purple-900 text-white p-6 rounded-2xl shadow flex justify-between items-center">
+              <div>
+                <span className="text-xs uppercase tracking-wider font-bold text-purple-300">Panel Maestro de la Plataforma</span>
+                <h2 className="text-2xl font-bold">Gestión de Clubes y Cuentas de Acceso</h2>
+                <p className="text-xs text-purple-200 mt-1">Crea nuevos clubes y asigna directores técnicos o entrenadores con contraseña.</p>
+              </div>
+              <button
+                onClick={() => setPantalla('EQUIPOS')}
+                className="bg-white text-purple-900 font-bold text-xs px-4 py-2 rounded-lg hover:bg-purple-50 shadow"
+              >
+                Ver App como Club →
+              </button>
+            </div>
+
+            {/* 1. Alta de Club */}
+            <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
+              <h3 className="font-bold text-slate-900 text-sm mb-4">1. Dar de Alta Nuevo Club / Colegio</h3>
+              <form onSubmit={handleCrearClub} className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <input
+                  type="text"
+                  required
+                  placeholder="Nombre del Club (ej: CB Juventud)"
+                  value={nuevoClubNombre}
+                  onChange={(e) => setNuevoClubNombre(e.target.value)}
+                  className="border border-slate-300 rounded-lg p-2.5"
+                />
+                <input
+                  type="text"
+                  placeholder="Temporada (ej: 2026/27)"
+                  value={nuevoClubTemporada}
+                  onChange={(e) => setNuevoClubTemporada(e.target.value)}
+                  className="border border-slate-300 rounded-lg p-2.5"
+                />
+                <button
+                  type="submit"
+                  className="bg-purple-700 hover:bg-purple-800 text-white font-semibold rounded-lg p-2.5 shadow"
+                >
+                  + Crear Club
+                </button>
+              </form>
+            </div>
+
+            {/* 2. Crear Usuario con Contraseña */}
+            <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
+              <h3 className="font-bold text-slate-900 text-sm mb-4">2. Crear Usuario y Asignar Contraseña</h3>
+              <form onSubmit={handleCrearUsuario} className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
+                <input
+                  type="text"
+                  required
+                  placeholder="Nombre completo"
+                  value={nuevoUserNombre}
+                  onChange={(e) => setNuevoUserNombre(e.target.value)}
+                  className="border border-slate-300 rounded-lg p-2.5"
+                />
+                <input
+                  type="email"
+                  required
+                  placeholder="correo@club.com"
+                  value={nuevoUserEmail}
+                  onChange={(e) => setNuevoUserEmail(e.target.value)}
+                  className="border border-slate-300 rounded-lg p-2.5"
+                />
+                <input
+                  type="text"
+                  required
+                  placeholder="Contraseña inicial (ej: Club2026!)"
+                  value={nuevoUserPass}
+                  onChange={(e) => setNuevoUserPass(e.target.value)}
+                  className="border border-slate-300 rounded-lg p-2.5 font-mono"
+                />
+                <select
+                  value={nuevoUserRol}
+                  onChange={(e) => setNuevoUserRol(e.target.value as UserRole)}
+                  className="border border-slate-300 rounded-lg p-2.5"
+                >
+                  <option value="DIRECTOR">Director Técnico (Club)</option>
+                  <option value="ENTRENADOR">Entrenador (Equipo)</option>
+                </select>
+                <select
+                  value={nuevoUserClubId}
+                  onChange={(e) => setNuevoUserClubId(e.target.value)}
+                  className="border border-slate-300 rounded-lg p-2.5"
+                >
+                  {clubs.map(c => (
+                    <option key={c.id} value={c.id}>{c.nombre}</option>
+                  ))}
+                </select>
+                <div className="md:col-span-5 flex justify-end">
+                  <button
+                    type="submit"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2 rounded-lg shadow"
+                  >
+                    Crear y Asignar Credenciales
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* 3. Listado de Usuarios Activos */}
+            <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
+              <h3 className="font-bold text-slate-900 text-sm mb-4">3. Usuarios, Contraseñas y Permisos Activos</h3>
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-500 uppercase font-semibold">
+                    <th className="pb-2">Nombre</th>
+                    <th className="pb-2">Correo</th>
+                    <th className="pb-2">Contraseña</th>
+                    <th className="pb-2">Rol Asignado</th>
+                    <th className="pb-2">Club Vinculado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {usuarios.map(u => {
+                    const userClub = clubs.find(c => c.id === u.clubId);
+                    return (
+                      <tr key={u.id} className="hover:bg-slate-50">
+                        <td className="py-2.5 font-bold text-slate-900">{u.name}</td>
+                        <td className="py-2.5 text-slate-600">{u.email}</td>
+                        <td className="py-2.5 font-mono text-slate-500">{u.pass}</td>
+                        <td className="py-2.5">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            u.role === 'SUPER_ADMIN' ? 'bg-purple-100 text-purple-800' : u.role === 'DIRECTOR' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {u.role}
+                          </span>
+                        </td>
+                        <td className="py-2.5 text-slate-700">{userClub ? userClub.nombre : 'Plataforma Global'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* PANTALLA: LISTADO DE EQUIPOS */}
         {pantalla === 'EQUIPOS' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
             <div className="flex justify-between items-center mb-6">
               <div>
                 <h2 className="text-xl font-bold text-slate-900">
-                  {userRole === 'ADMIN' ? `${clubActivo.nombre} — Equipos` : 'Mis Equipos Asignados'}
+                  {sessionUser.role !== 'ENTRENADOR' ? `${clubActivo.nombre} — Sección ${genero === 'FEMENINO' ? 'Femenina' : 'Masculina'}` : 'Mis Equipos Asignados'}
                 </h2>
                 <p className="text-xs text-slate-500">Temporada {clubActivo.temporada} • Gestión de categorías y plantillas</p>
               </div>
-              {userRole === 'ADMIN' && (
+              {sessionUser.role !== 'ENTRENADOR' && (
                 <button
                   onClick={() => setPantalla('MODAL_NUEVO_EQUIPO')}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow-sm transition"
@@ -957,7 +1321,7 @@ export default function App() {
                   onClick={() => setPantalla('EQUIPOS')}
                   className="text-xs text-emerald-700 font-semibold mb-1 hover:underline"
                 >
-                  ← Volver a equipos
+                  ← Volver a equipos de {clubActivo.nombre}
                 </button>
                 <h2 className="text-xl font-bold text-slate-900">{equipoSeleccionado.nombre}</h2>
                 <p className="text-xs text-slate-500">
@@ -981,7 +1345,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Añadir jugador (Entrenadores y Admins) */}
             <form onSubmit={handleAddJugador} className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs flex flex-wrap items-end gap-3">
               <div className="flex-1 min-w-[150px]">
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">Nombre y Apellidos</label>
@@ -1076,11 +1439,12 @@ export default function App() {
                           <button
                             onClick={() => {
                               setJugadorSeleccionado(jugador);
-                              setPantalla('HISTORIAL_JUGADOR');
+                              setPantalla('MODAL_QR');
                             }}
-                            className="bg-blue-50 text-blue-700 px-2 py-1 rounded hover:bg-blue-100 font-medium border border-blue-200"
+                            className="bg-purple-50 text-purple-700 px-2 py-1 rounded hover:bg-purple-100 font-medium border border-purple-200"
+                            title="Código QR para padres"
                           >
-                            Historial
+                            📱 QR
                           </button>
                         </td>
                       </tr>
@@ -1092,7 +1456,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: REGISTRO DE ASISTENCIA */}
+        {/* PANTALLA: PASAR LISTA */}
         {pantalla === 'PASAR_LISTA' && (
           <div className="bg-white rounded-xl shadow border border-slate-200 p-6 max-w-2xl mx-auto space-y-6">
             <div className="flex justify-between items-center pb-4 border-b border-slate-200">
@@ -1201,174 +1565,7 @@ export default function App() {
                   type="submit"
                   className="bg-emerald-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-emerald-700 shadow"
                 >
-                  Guardar Sesión y Calcular Asistencias
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* PANTALLA: HISTORIAL */}
-        {pantalla === 'HISTORIAL_JUGADOR' && (
-          <div className="bg-white rounded-xl shadow border border-slate-200 p-6 space-y-6">
-            <div className="flex justify-between items-start pb-4 border-b border-slate-200">
-              <div>
-                <button
-                  onClick={() => setPantalla('PLANTILLA')}
-                  className="text-xs text-emerald-700 font-semibold mb-1 hover:underline"
-                >
-                  ← Volver a plantilla
-                </button>
-                <h2 className="text-xl font-bold text-slate-900">Historial y Progresión Multitemporada</h2>
-                <p className="text-xs text-slate-500">
-                  {jugadorSeleccionado.nombre} • Nacimiento: {jugadorSeleccionado.nacimiento}
-                </p>
-              </div>
-              <span className="text-xs font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-                Seguimiento Longitudinal Activo
-              </span>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Línea de Tiempo de Evaluaciones</h3>
-              {jugadorSeleccionado.historial && jugadorSeleccionado.historial.length > 0 ? (
-                <div className="border-l-2 border-emerald-500 ml-3 pl-4 space-y-6">
-                  {jugadorSeleccionado.historial.map((rec, idx) => (
-                    <div key={idx} className="relative bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs">
-                      <div className="absolute -left-[23px] top-4 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-bold text-slate-900 text-sm">{rec.temporada} — {rec.categoria}</span>
-                        <span className="text-slate-500">{rec.periodo} ({rec.fecha})</span>
-                      </div>
-                      <p className="mb-1 text-slate-700"><strong>Nivel predominante:</strong> <span className="text-emerald-700 font-semibold">{rec.promedioNivel}</span></p>
-                      <p className="mb-1 text-slate-700"><strong>Fortalezas:</strong> {rec.fortalezas}</p>
-                      <p className="text-slate-700"><strong>Objetivos trabajados:</strong> {rec.objetivos}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 text-center text-xs text-slate-500">
-                  Este deportista no tiene registros anteriores cargados.
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* PANTALLA: LISTA ENTRENADORES (SOLO ADMIN) */}
-        {pantalla === 'LISTA_ENTRENADORES' && userRole === 'ADMIN' && (
-          <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">
-                  Cuerpo Técnico — {clubActivo.nombre}
-                </h2>
-                <p className="text-xs text-slate-500">Evaluación del cuerpo técnico y metodología de trabajo</p>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 font-semibold uppercase">
-                    <th className="pb-3 px-2">Entrenador/a</th>
-                    <th className="pb-3 px-2">Equipo Asignado</th>
-                    <th className="pb-3 px-2 text-center">Ev. Inicial</th>
-                    <th className="pb-3 px-2 text-center">Ev. Media</th>
-                    <th className="pb-3 px-2 text-center">Ev. Final</th>
-                    <th className="pb-3 px-2 text-right">Acción</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {entrenadoresFiltrados.map((coach) => (
-                    <tr key={coach.id} className="hover:bg-slate-50">
-                      <td className="py-3.5 px-2 font-bold text-slate-800">{coach.nombre}</td>
-                      <td className="py-3.5 px-2 text-slate-600">{coach.equipoNombre}</td>
-                      <td className="py-3.5 px-2 text-center">{badgeStatus(coach.inicial)}</td>
-                      <td className="py-3.5 px-2 text-center">{badgeStatus(coach.media)}</td>
-                      <td className="py-3.5 px-2 text-center">{badgeStatus(coach.final)}</td>
-                      <td className="py-3.5 px-2 text-right space-x-2">
-                        <button
-                          onClick={() => {
-                            setCoachSeleccionado(coach);
-                            setPantalla('FORMULARIO');
-                          }}
-                          className="bg-emerald-600 text-white px-3 py-1 rounded hover:bg-emerald-700 font-medium"
-                        >
-                          Evaluar
-                        </button>
-                        <button
-                          onClick={() => {
-                            setCoachSeleccionado(coach);
-                            setPantalla('INFORME');
-                          }}
-                          className="bg-slate-100 text-slate-700 px-3 py-1 rounded hover:bg-slate-200 font-medium border border-slate-200"
-                        >
-                          Ficha
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* PANTALLA: CREAR EQUIPO (SOLO ADMIN) */}
-        {pantalla === 'MODAL_NUEVO_EQUIPO' && userRole === 'ADMIN' && (
-          <div className="bg-white rounded-xl shadow border border-slate-200 p-6 max-w-lg mx-auto">
-            <h2 className="text-lg font-bold text-slate-900 mb-1">
-              Crear Equipo — {clubActivo.nombre}
-            </h2>
-            <p className="text-xs text-slate-500 mb-6">Temporada {clubActivo.temporada}</p>
-
-            <form onSubmit={handleCrearEquipo} className="space-y-4 text-xs">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Nombre del equipo</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej: Cadete Preferente"
-                  value={nuevoNombreEquipo}
-                  onChange={(e) => setNuevoNombreEquipo(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Categoría / Edades</label>
-                <input
-                  type="text"
-                  placeholder="Ej: Cadete (2011-2012)"
-                  value={nuevaCatEquipo}
-                  onChange={(e) => setNuevaCatEquipo(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Entrenador/a</label>
-                <input
-                  type="text"
-                  placeholder="Ej: Marcos López"
-                  value={nuevoEntrenador}
-                  onChange={(e) => setNuevoEntrenador(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => setPantalla('EQUIPOS')}
-                  className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-semibold hover:bg-slate-200"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="bg-emerald-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-emerald-700 shadow"
-                >
-                  Guardar Equipo
+                  Guardar Sesión
                 </button>
               </div>
             </form>
@@ -1422,8 +1619,8 @@ export default function App() {
 
             {tipoEvaluacion === 'JUGADORES' ? (
               <div className="space-y-8">
-                {RUBRICA_JUGADORES.map((cat) => (
-                  <div key={cat.nombre}>
+                {rubricas.map((cat) => (
+                  <div key={cat.id}>
                     <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 mb-4 border-b-2 border-slate-900 pb-1">
                       {cat.nombre}
                     </h3>
@@ -1632,7 +1829,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: INFORME OFICIAL (REESTRUCTURADO 100% HOJA A4) */}
+        {/* PANTALLA: INFORME OFICIAL (1 HOJA A4) */}
         {pantalla === 'INFORME' && (
           <div className="print-full-page bg-white rounded-xl shadow border border-slate-200 p-8 print:p-0 print:border-none print:shadow-none print:rounded-none">
             
@@ -1668,111 +1865,63 @@ export default function App() {
 
             <div className="grid grid-cols-2 gap-8 my-4 text-xs">
               <div className="space-y-4">
-                <div>
-                  <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
-                    Desarrollo Motor
+                {rubricas.slice(0, 2).map((cat) => (
+                  <div key={cat.id}>
+                    <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
+                      {cat.nombre}
+                    </div>
+                    <div className="space-y-1">
+                      {cat.items.map((item) => {
+                        const lvlKey = respuestas[item]?.nivel;
+                        const level = nivelesActuales.find((l) => l.key === lvlKey);
+                        return (
+                          <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
+                            <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
+                            <span 
+                              className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
+                              style={{ 
+                                color: level?.color || '#64748B',
+                                backgroundColor: level?.key === 'EXCELENTE' ? '#F0FDF4' : level?.key === 'CONSOLIDADO' ? '#F0FDF4' : level?.key === 'EN_DESARROLLO' ? '#FFFBEB' : level?.key === 'NECESITA_APOYO' ? '#FEF2F2' : '#F8FAFC'
+                              }}
+                            >
+                              {level ? level.label : 'Sin evaluar'}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    {RUBRICA_JUGADORES[0].items.map((item) => {
-                      const lvlKey = respuestas[item]?.nivel;
-                      const level = nivelesActuales.find((l) => l.key === lvlKey);
-                      return (
-                        <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
-                          <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
-                          <span 
-                            className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
-                            style={{ 
-                              color: level?.color || '#64748B',
-                              backgroundColor: level?.key === 'EXCELENTE' ? '#F0FDF4' : level?.key === 'CONSOLIDADO' ? '#F0FDF4' : level?.key === 'EN_DESARROLLO' ? '#FFFBEB' : level?.key === 'NECESITA_APOYO' ? '#FEF2F2' : '#F8FAFC'
-                            }}
-                          >
-                            {level ? level.label : 'Sin evaluar'}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
-                    Técnica Individual
-                  </div>
-                  <div className="space-y-1">
-                    {RUBRICA_JUGADORES[1].items.map((item) => {
-                      const lvlKey = respuestas[item]?.nivel;
-                      const level = nivelesActuales.find((l) => l.key === lvlKey);
-                      return (
-                        <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
-                          <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
-                          <span 
-                            className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
-                            style={{ 
-                              color: level?.color || '#64748B',
-                              backgroundColor: level?.key === 'EXCELENTE' ? '#F0FDF4' : level?.key === 'CONSOLIDADO' ? '#F0FDF4' : level?.key === 'EN_DESARROLLO' ? '#FFFBEB' : level?.key === 'NECESITA_APOYO' ? '#FEF2F2' : '#F8FAFC'
-                            }}
-                          >
-                            {level ? level.label : 'Sin evaluar'}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                ))}
               </div>
 
               <div className="space-y-4">
-                <div>
-                  <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
-                    Comprensión del Juego
+                {rubricas.slice(2, 4).map((cat) => (
+                  <div key={cat.id}>
+                    <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
+                      {cat.nombre}
+                    </div>
+                    <div className="space-y-1">
+                      {cat.items.map((item) => {
+                        const lvlKey = respuestas[item]?.nivel;
+                        const level = nivelesActuales.find((l) => l.key === lvlKey);
+                        return (
+                          <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
+                            <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
+                            <span 
+                              className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
+                              style={{ 
+                                color: level?.color || '#64748B',
+                                backgroundColor: level?.key === 'EXCELENTE' ? '#F0FDF4' : level?.key === 'CONSOLIDADO' ? '#F0FDF4' : level?.key === 'EN_DESARROLLO' ? '#FFFBEB' : level?.key === 'NECESITA_APOYO' ? '#FEF2F2' : '#F8FAFC'
+                              }}
+                            >
+                              {level ? level.label : 'Sin evaluar'}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    {RUBRICA_JUGADORES[2].items.map((item) => {
-                      const lvlKey = respuestas[item]?.nivel;
-                      const level = nivelesActuales.find((l) => l.key === lvlKey);
-                      return (
-                        <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
-                          <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
-                          <span 
-                            className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
-                            style={{ 
-                              color: level?.color || '#64748B',
-                              backgroundColor: level?.key === 'EXCELENTE' ? '#F0FDF4' : level?.key === 'CONSOLIDADO' ? '#F0FDF4' : level?.key === 'EN_DESARROLLO' ? '#FFFBEB' : level?.key === 'NECESITA_APOYO' ? '#FEF2F2' : '#F8FAFC'
-                            }}
-                          >
-                            {level ? level.label : 'Sin evaluar'}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
-                    Defensa
-                  </div>
-                  <div className="space-y-1">
-                    {RUBRICA_JUGADORES[3].items.map((item) => {
-                      const lvlKey = respuestas[item]?.nivel;
-                      const level = nivelesActuales.find((l) => l.key === lvlKey);
-                      return (
-                        <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
-                          <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
-                          <span 
-                            className="font-semibold px-2.5 py-0.5 rounded text-[10.5px]"
-                            style={{ 
-                              color: level?.color || '#64748B',
-                              backgroundColor: level?.key === 'EXCELENTE' ? '#F0FDF4' : level?.key === 'CONSOLIDADO' ? '#F0FDF4' : level?.key === 'EN_DESARROLLO' ? '#FFFBEB' : level?.key === 'NECESITA_APOYO' ? '#FEF2F2' : '#F8FAFC'
-                            }}
-                          >
-                            {level ? level.label : 'Sin evaluar'}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -1837,7 +1986,7 @@ export default function App() {
           </div>
         )}
 
-        {/* PANTALLA: INFORME DE EQUIPO COMPLETO */}
+        {/* PANTALLA: DOSSIER COMPLETO DE EQUIPO */}
         {pantalla === 'INFORME_EQUIPO' && (
           <div className="space-y-8 print:space-y-0">
             <div className="bg-white p-4 rounded-xl shadow border border-slate-200 flex justify-between items-center print:hidden">
@@ -1890,63 +2039,39 @@ export default function App() {
 
                   <div className="grid grid-cols-2 gap-8 my-4 text-xs">
                     <div className="space-y-4">
-                      <div>
-                        <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
-                          Desarrollo Motor
+                      {rubricas.slice(0, 2).map((cat) => (
+                        <div key={cat.id}>
+                          <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
+                            {cat.nombre}
+                          </div>
+                          <div className="space-y-1">
+                            {cat.items.map((item) => (
+                              <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
+                                <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
+                                <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">Consolidado</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div className="space-y-1">
-                          {RUBRICA_JUGADORES[0].items.map((item) => (
-                            <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
-                              <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
-                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">Consolidado</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
-                          Técnica Individual
-                        </div>
-                        <div className="space-y-1">
-                          {RUBRICA_JUGADORES[1].items.map((item) => (
-                            <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
-                              <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
-                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">Consolidado</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                      ))}
                     </div>
 
                     <div className="space-y-4">
-                      <div>
-                        <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
-                          Comprensión del Juego
+                      {rubricas.slice(2, 4).map((cat) => (
+                        <div key={cat.id}>
+                          <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
+                            {cat.nombre}
+                          </div>
+                          <div className="space-y-1">
+                            {cat.items.map((item) => (
+                              <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
+                                <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
+                                <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">Consolidado</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div className="space-y-1">
-                          {RUBRICA_JUGADORES[2].items.map((item) => (
-                            <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
-                              <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
-                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">Consolidado</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded text-[11px] uppercase tracking-wider mb-2">
-                          Defensa
-                        </div>
-                        <div className="space-y-1">
-                          {RUBRICA_JUGADORES[3].items.map((item) => (
-                            <div key={item} className="flex justify-between items-center py-0.5 px-1 bg-white">
-                              <span className="text-slate-800 font-medium text-[11.5px]">{item}</span>
-                              <span className="font-semibold px-2.5 py-0.5 rounded text-[10.5px] text-emerald-700 bg-emerald-50">Consolidado</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
 
