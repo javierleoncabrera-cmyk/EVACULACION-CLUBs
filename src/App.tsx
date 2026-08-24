@@ -611,7 +611,7 @@ export default function App() {
   );
 
   // ==========================================
-  // VISTA PÚBLICA FAMILIAS (QR 100% FLUIDA PARA MÓVIL)
+  // VISTA PÚBLICA FAMILIAS (QR 100% FLUIDO Y DINÁMICO QUE LEE LAS RESPUESTAS REALES)
   // ==========================================
   if (publicToken) {
     const jugadorPublico = equipos.flatMap(e => e.jugadores).find(p => p.tokenPublico === publicToken || p.id === publicToken) || EQUIPOS_INICIALES[0].jugadores[0];
@@ -643,12 +643,18 @@ export default function App() {
             {rubricasJugadores.map(cat => (
               <div key={cat.id} className="bg-slate-50 p-3 rounded-xl border space-y-1.5">
                 <h3 className="font-bold text-slate-900 uppercase text-[10px]">{cat.nombre}</h3>
-                {cat.items.map(item => (
-                  <div key={item} className="flex justify-between bg-white p-2 rounded border text-[11px]">
-                    <span className="text-slate-800">{item}</span>
-                    <span className="font-bold text-emerald-700">Consolidado</span>
-                  </div>
-                ))}
+                {cat.items.map(item => {
+                  const nivelKey = respuestas[item]?.nivel || 'CONSOLIDADO';
+                  const nivelObj = NIVELES_JUGADORES.find(n => n.key === nivelKey);
+                  return (
+                    <div key={item} className="flex justify-between items-center bg-white p-2 rounded border text-[11px]">
+                      <span className="text-slate-800">{item}</span>
+                      <span className="font-bold px-2 py-0.5 rounded text-[10px]" style={{ color: nivelObj?.color || '#059669', backgroundColor: `${nivelObj?.color || '#059669'}15` }}>
+                        {nivelObj ? nivelObj.label : 'Consolidado'}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
@@ -793,7 +799,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL ABSOLUTO Y SIMÉTRICO)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL ESTRICTO Y SIMÉTRICO)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
@@ -1273,9 +1279,9 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL ESTRICTO (CON LA FUNCIÓN handlePrintPDF DECLARADA PERFECTAMENTE Y CERO ERRORES DE TIPO) */}
+        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL ESTRICTO (CON CONTENEDOR DE 210x297mm FIJO Y CERO MÁRGENES FANTASMAS) */}
         {pantalla === 'INFORME' && (
-          <div className="print-portrait-page bg-white rounded-none shadow-none border-0 p-4 space-y-2.5" style={{ width: '210mm', height: '297mm', position: 'relative', overflow: 'hidden' }}>
+          <div className="print-portrait-page bg-white p-4 space-y-2.5" style={{ width: '210mm', height: '297mm', position: 'relative', overflow: 'hidden' }}>
             
             {/* Cabecera A4 Real */}
             <div className="border-b-2 border-slate-900 pb-2.5 flex justify-between items-center w-full">
