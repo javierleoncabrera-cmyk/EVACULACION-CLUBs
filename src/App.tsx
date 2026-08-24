@@ -772,7 +772,7 @@ export default function App() {
       <style>{`
         @media print {
           @page { size: A4 portrait; margin: 4mm; }
-          html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 9.5px !important; }
+          html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 9px !important; }
           .print-full-page { height: 280mm !important; max-height: 280mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 1mm !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
@@ -1032,7 +1032,6 @@ export default function App() {
           </div>
         )}
 
-        {/* PASAR LISTA CON LOS 4 APARTADOS RESTAURADOS */}
         {pantalla === 'PASAR_LISTA' && (
           <div className="bg-white rounded-xl shadow border p-4 sm:p-6 max-w-2xl mx-auto space-y-6">
             <div className="flex justify-between items-center border-b pb-4">
@@ -1245,42 +1244,79 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL REDISEÑADO (COMPACTO Y ARMONIOSO EN UNA SOLA HOJA A4) */}
+        {/* INFORME PROFESIONAL REDISEÑADO (ROMBO, FORTALEZAS Y OBJETIVOS BAJO EL NOMBRE) */}
         {pantalla === 'INFORME' && (
-          <div className="print-full-page bg-white rounded-2xl shadow-xl border border-slate-200 p-6 sm:p-8 space-y-5">
-            <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-lg bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-sm">
-                  {siglasClub}
+          <div className="print-full-page bg-white rounded-2xl shadow-xl border border-slate-200 p-5 sm:p-7 space-y-4">
+            
+            {/* 1. Cabecera y Resumen Ejecutivo (Rombo + Fortalezas + Objetivos bajo el nombre) */}
+            <div className="border-b-2 border-slate-900 pb-3 space-y-3">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-sm">
+                    {siglasClub}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900">{tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}</h2>
+                    <p className="text-[11px] text-slate-500 font-medium">{clubActivo.nombre} • Dossier de Evaluación 360° ({periodo})</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold text-slate-900">{tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}</h2>
-                  <p className="text-[11px] text-slate-500 font-medium">{clubActivo.nombre} • Dossier de Evaluación 360° ({periodo})</p>
+                <div className="text-right">
+                  <span className="text-xs font-bold bg-slate-100 text-slate-800 px-3 py-1 rounded-lg border border-slate-200">
+                    Asistencia: {asistActual.pct}%
+                  </span>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <span className="text-xs font-bold bg-slate-100 text-slate-800 px-3 py-1 rounded-lg border border-slate-200">
-                  Asistencia: {asistActual.pct}%
-                </span>
-                <p className="text-[10px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
+
+              {/* Bloque superior con Rombo a la izquierda y Fortalezas/Objetivos a la derecha */}
+              <div className="grid grid-cols-12 gap-4 items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <div className="col-span-4 flex flex-col items-center justify-center border-r border-slate-200 pr-2">
+                  <span className="text-[9px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Perfil de Rendimiento
+                  </span>
+                  <svg width="105" height="105" viewBox="0 0 150 150" className="overflow-visible">
+                    <polygon points="75,25 125,75 75,125 25,75" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
+                    <polygon points="75,50 100,75 75,100 50,75" fill="none" stroke="#E2E8F0" strokeWidth="1" />
+                    <line x1="75" y1="25" x2="75" y2="125" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
+                    <line x1="25" y1="75" x2="125" y2="75" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
+
+                    <polygon points={radarPoints} fill="rgba(5, 150, 105, 0.2)" stroke="#059669" strokeWidth="2.5" />
+
+                    <text x="75" y="15" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">MOTOR</text>
+                    <text x="135" y="78" textAnchor="start" className="text-[8px] font-bold fill-slate-700">TÉCNICA</text>
+                    <text x="75" y="140" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">TÁCTICA</text>
+                    <text x="15" y="78" textAnchor="end" className="text-[8px] font-bold fill-slate-700">DEFENSA</text>
+                  </svg>
+                </div>
+
+                <div className="col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
+                  <div className="bg-white p-2.5 rounded-lg border border-emerald-200/80 shadow-sm">
+                    <strong className="block font-bold text-emerald-950 uppercase text-[9.5px] tracking-wider mb-0.5">Fortalezas:</strong>
+                    <p className="text-emerald-900 leading-relaxed line-clamp-3">{fortalezas}</p>
+                  </div>
+                  <div className="bg-white p-2.5 rounded-lg border border-amber-200/80 shadow-sm">
+                    <strong className="block font-bold text-amber-950 uppercase text-[9.5px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
+                    <p className="text-amber-900 leading-relaxed line-clamp-3">{objetivos}</p>
+                  </div>
+                </div>
               </div>
             </div>
-            
-            {/* Secciones de Rúbricas en Grid de 2 columnas de aspecto profesional */}
-            <div className="grid grid-cols-2 gap-4 text-[11px]">
+
+            {/* 2. Secciones de Rúbricas compactas en Grid de 2 columnas */}
+            <div className="grid grid-cols-2 gap-3 text-[10.5px]">
               {rubricasActivas.map(cat => (
-                <div key={cat.id} className="space-y-1.5 bg-slate-50/60 p-3 rounded-xl border border-slate-200/80">
-                  <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider">
+                <div key={cat.id} className="space-y-1 bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/80">
+                  <div className="bg-slate-900 text-white font-bold px-2 py-0.5 rounded text-[9.5px] uppercase tracking-wider">
                     {cat.nombre}
                   </div>
-                  <div className="space-y-1 pt-0.5">
+                  <div className="space-y-0.5">
                     {cat.items.map(item => {
                       const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
                       const lvlObj = nivelesActuales.find(l => l.key === selKey);
                       return (
-                        <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/70">
+                        <div key={item} className="flex justify-between items-center py-0.5 px-2 bg-white rounded border border-slate-200/60">
                           <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                          <span className="font-bold px-2 py-0.5 rounded text-[10px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                          <span className="font-bold px-1.5 py-0.5 rounded text-[9.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
                             {lvlObj ? lvlObj.label : 'Consolidado'}
                           </span>
                         </div>
@@ -1291,40 +1327,7 @@ export default function App() {
               ))}
             </div>
 
-            {/* Bloque inferior: Gráfico de Radar + Fortalezas y Objetivos en perfecta armonía */}
-            <div className="grid grid-cols-12 gap-5 items-center pt-3 border-t border-slate-200">
-              <div className="col-span-4 flex flex-col items-center justify-center bg-slate-50 p-3 rounded-xl border border-slate-200">
-                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Perfil de Rendimiento
-                </span>
-                <svg width="120" height="120" viewBox="0 0 150 150" className="overflow-visible">
-                  <polygon points="75,25 125,75 75,125 25,75" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
-                  <polygon points="75,50 100,75 75,100 50,75" fill="none" stroke="#E2E8F0" strokeWidth="1" />
-                  <line x1="75" y1="25" x2="75" y2="125" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
-                  <line x1="25" y1="75" x2="125" y2="75" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
-
-                  <polygon points={radarPoints} fill="rgba(5, 150, 105, 0.2)" stroke="#059669" strokeWidth="2.5" />
-
-                  <text x="75" y="15" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">MOTOR</text>
-                  <text x="135" y="78" textAnchor="start" className="text-[8px] font-bold fill-slate-700">TÉCNICA</text>
-                  <text x="75" y="140" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">TÁCTICA</text>
-                  <text x="15" y="78" textAnchor="end" className="text-[8px] font-bold fill-slate-700">DEFENSA</text>
-                </svg>
-              </div>
-
-              <div className="col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px]">
-                <div className="bg-emerald-50/40 p-3 rounded-xl border border-emerald-200/80">
-                  <strong className="block font-bold text-emerald-950 uppercase text-[10px] tracking-wider mb-1">Fortalezas:</strong>
-                  <p className="text-emerald-900 leading-relaxed">{fortalezas}</p>
-                </div>
-                <div className="bg-amber-50/40 p-3 rounded-xl border border-amber-200/80">
-                  <strong className="block font-bold text-amber-950 uppercase text-[10px] tracking-wider mb-1">Objetivos de Mejora:</strong>
-                  <p className="text-amber-900 leading-relaxed">{objetivos}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t flex justify-between items-center text-xs text-slate-500 print:hidden">
+            <div className="pt-2 border-t flex justify-between items-center text-xs text-slate-500 print:hidden">
               <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-semibold hover:underline">← Volver a editar ficha</button>
               <button onClick={() => window.print()} className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-semibold shadow transition">
                 🖨️ Imprimir o Guardar en PDF
