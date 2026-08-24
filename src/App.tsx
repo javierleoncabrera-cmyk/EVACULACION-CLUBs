@@ -698,7 +698,7 @@ export default function App() {
                     <span>Portal QR Familias</span>
                   </div>
                   <p className="text-slate-400 text-[11px] leading-relaxed">
-                    Fichas en tiempo real para padres con token seguro y estricto cumplimiento RGPD.
+                    Fichas in real-time para padres con token seguro y estricto cumplimiento RGPD.
                   </p>
                 </div>
 
@@ -776,15 +776,15 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME VERTICAL A4 IDEAL)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL FLUIDO Y SIN HUECOS)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
       <style>{`
         @media print {
-          @page { size: A4 portrait; margin: 3mm; }
-          html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 8.5px !important; }
-          .print-portrait-page { width: 100% !important; height: 100% !important; min-height: 275mm !important; max-height: 280mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 2mm !important; margin: 0 auto !important; }
+          @page { size: A4 portrait; margin: 4mm; }
+          html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 9px !important; }
+          .print-portrait-page { width: 100% !important; max-width: 100% !important; min-height: 275mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 0px !important; margin: 0 !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
         }
@@ -1255,40 +1255,40 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL COMPACTO (LLENADO TOTAL DE LA HOJA SIN HUECOS) */}
+        {/* INFORME PROFESIONAL MAESTRO FLUIDO A4 VERTICAL (OCUPACIÓN DEL 100% DE LA HOJA SIN HUECOS) */}
         {pantalla === 'INFORME' && (
-          <div className="print-portrait-page bg-white rounded-xl shadow-xl border border-slate-200 p-3 space-y-2">
+          <div className="print-portrait-page bg-white rounded-xl shadow-xl border border-slate-200 p-4 space-y-3">
             
-            {/* Cabecera Ultra Compacta y Robusta */}
-            <div className="border-b-2 border-slate-900 pb-1.5 flex justify-between items-center">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-lg bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+            {/* 1. Cabecera Fluida 100% de Ancho */}
+            <div className="border-b-2 border-slate-900 pb-2 flex justify-between items-center w-full">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-lg bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 shadow">
                   {siglasClub}
                 </div>
                 <div>
-                  <h2 className="text-sm font-extrabold text-slate-900 leading-tight">
+                  <h2 className="text-base font-extrabold text-slate-900 leading-tight">
                     {tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}
                   </h2>
-                  <p className="text-[8.5px] text-slate-500 font-medium">
+                  <p className="text-[10px] text-slate-500 font-medium">
                     {clubActivo.nombre} • Dossier Técnico 360° ({periodo}) • Equipo: {equipoSeleccionado.nombre} {tipoEvaluacion === 'JUGADORES' ? `• Dorsal #${jugadorSeleccionado.dorsal}` : ''}
                   </p>
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <span className="text-[9.5px] font-bold bg-slate-100 text-slate-800 px-2 py-0.5 rounded border border-slate-200">
+                <span className="text-[11px] font-bold bg-slate-100 text-slate-800 px-2.5 py-1 rounded border border-slate-200">
                   Asistencia: {asistActual.pct}%
                 </span>
-                <p className="text-[8px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
+                <p className="text-[9px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
               </div>
             </div>
 
-            {/* Resumen Ejecutivo Superior (Rombo + Fortalezas & Objetivos en bloque único y simétrico) */}
-            <div className="grid grid-cols-12 gap-2 items-center bg-slate-50 p-2 rounded-lg border border-slate-200">
-              <div className="col-span-3 flex flex-col items-center justify-center border-r border-slate-200 pr-1">
-                <span className="text-[7.5px] font-bold text-slate-700 uppercase tracking-wider mb-0.5">
+            {/* 2. Resumen Ejecutivo de Ancho Completo (Rombo centrado a la izquierda + Textos distribuidos a lo ancho) */}
+            <div className="grid grid-cols-12 gap-3 items-center bg-slate-50 p-3 rounded-xl border border-slate-200 w-full">
+              <div className="col-span-3 flex flex-col items-center justify-center border-r border-slate-200 pr-2">
+                <span className="text-[8.5px] font-bold text-slate-700 uppercase tracking-wider mb-1">
                   Rendimiento
                 </span>
-                <svg width="65" height="65" viewBox="0 0 150 150" className="overflow-visible">
+                <svg width="85" height="85" viewBox="0 0 150 150" className="overflow-visible">
                   <polygon points="75,25 125,75 75,125 25,75" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
                   <polygon points="75,50 100,75 75,100 50,75" fill="none" stroke="#E2E8F0" strokeWidth="1" />
                   <line x1="75" y1="25" x2="75" y2="125" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
@@ -1296,40 +1296,40 @@ export default function App() {
 
                   <polygon points={radarPoints} fill="rgba(5, 150, 105, 0.2)" stroke="#059669" strokeWidth="2.5" />
 
-                  <text x="75" y="15" textAnchor="middle" className="text-[7.5px] font-bold fill-slate-700">MOTOR</text>
-                  <text x="135" y="78" textAnchor="start" className="text-[7.5px] font-bold fill-slate-700">TÉCNICA</text>
-                  <text x="75" y="140" textAnchor="middle" className="text-[7.5px] font-bold fill-slate-700">TÁCTICA</text>
-                  <text x="15" y="78" textAnchor="end" className="text-[7.5px] font-bold fill-slate-700">DEFENSA</text>
+                  <text x="75" y="15" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">MOTOR</text>
+                  <text x="135" y="78" textAnchor="start" className="text-[8px] font-bold fill-slate-700">TÉCNICA</text>
+                  <text x="75" y="140" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">TÁCTICA</text>
+                  <text x="15" y="78" textAnchor="end" className="text-[8px] font-bold fill-slate-700">DEFENSA</text>
                 </svg>
               </div>
 
-              <div className="col-span-9 grid grid-cols-2 gap-1.5 text-[8.5px]">
-                <div className="bg-white p-1.5 rounded border border-emerald-200 shadow-2xs">
-                  <strong className="block font-bold text-emerald-950 uppercase text-[8px] tracking-wider mb-0.5">Fortalezas:</strong>
-                  <p className="text-emerald-900 leading-tight line-clamp-2">{fortalezas}</p>
+              <div className="col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
+                <div className="bg-white p-2.5 rounded-lg border border-emerald-200 shadow-2xs">
+                  <strong className="block font-bold text-emerald-950 uppercase text-[9px] tracking-wider mb-0.5">Fortalezas:</strong>
+                  <p className="text-emerald-900 leading-normal line-clamp-3">{fortalezas}</p>
                 </div>
-                <div className="bg-white p-1.5 rounded border border-amber-200 shadow-2xs">
-                  <strong className="block font-bold text-amber-950 uppercase text-[8px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
-                  <p className="text-amber-900 leading-tight line-clamp-2">{objetivos}</p>
+                <div className="bg-white p-2.5 rounded-lg border border-amber-200 shadow-2xs">
+                  <strong className="block font-bold text-amber-950 uppercase text-[9px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
+                  <p className="text-amber-900 leading-normal line-clamp-3">{objetivos}</p>
                 </div>
               </div>
             </div>
 
-            {/* Secciones de Rúbricas Técnicas en 2 columnas verticales compactas */}
-            <div className="grid grid-cols-2 gap-2 text-[8.5px]">
+            {/* 3. Secciones de Rúbricas en Grid de 2 Columnas de Ancho Completo (Elimina cualquier hueco lateral o vertical) */}
+            <div className="grid grid-cols-2 gap-3 text-[10px] w-full">
               {rubricasActivas.map(cat => (
-                <div key={cat.id} className="space-y-0.5 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                  <div className="bg-slate-900 text-white font-bold px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider">
+                <div key={cat.id} className="space-y-1 bg-slate-50/70 p-2.5 rounded-xl border border-slate-200">
+                  <div className="bg-slate-900 text-white font-bold px-2 py-1 rounded text-[9.5px] uppercase tracking-wider">
                     {cat.nombre}
                   </div>
-                  <div className="space-y-0.5 pt-0.5">
+                  <div className="space-y-1 pt-0.5">
                     {cat.items.map(item => {
                       const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
                       const lvlObj = nivelesActuales.find(l => l.key === selKey);
                       return (
-                        <div key={item} className="flex justify-between items-center py-0.3 px-1 bg-white rounded border border-slate-200/70">
-                          <span className="font-medium text-slate-800 truncate pr-1">{item}</span>
-                          <span className="font-bold px-1 py-0.1 rounded text-[8px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                        <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/80 shadow-2xs">
+                          <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
+                          <span className="font-bold px-2 py-0.5 rounded text-[9.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
                             {lvlObj ? lvlObj.label : 'Consolidado'}
                           </span>
                         </div>
@@ -1340,15 +1340,15 @@ export default function App() {
               ))}
             </div>
 
-            {/* Pie Institucional de Firma y Validación Técnica */}
-            <div className="pt-1.5 border-t border-slate-200 flex justify-between items-center text-[8.5px] text-slate-500">
-              <div className="flex items-center gap-4">
-                <span>Director Técnico / Entrenador: _________________</span>
-                <span>Firma: _______________</span>
+            {/* 4. Pie Institucional de Firma y Validación Técnica */}
+            <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-500 w-full">
+              <div className="flex items-center gap-6">
+                <span>Director Técnico / Entrenador: ___________________________________</span>
+                <span>Firma: _____________________</span>
               </div>
-              <div className="no-print space-x-1.5">
+              <div className="no-print space-x-2">
                 <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-semibold hover:underline">← Editar</button>
-                <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-3 py-1 rounded-md font-semibold shadow transition text-[9px]">
+                <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 rounded-lg font-semibold shadow transition text-[10px]">
                   🖨️ Guardar PDF
                 </button>
               </div>
@@ -1365,7 +1365,7 @@ export default function App() {
                 <button onClick={() => window.print()} className="bg-slate-900 text-white text-xs px-5 py-2 rounded font-medium">Imprimir Todo</button>
               </div>
             </div>
-            {equipoSeleccionado.jugadores.map(jugador => (
+            {equipoSeleccionado.jugadores.log.map?.((jugador: Player) => (
               <div key={jugador.id} className="print-portrait-page bg-white rounded-xl shadow border p-8 page-break">
                 <h2 className="text-xl font-bold mb-2">{jugador.nombre}</h2>
                 <p className="text-xs text-slate-600">Dorsal #{jugador.dorsal} • {clubActivo.nombre}</p>
