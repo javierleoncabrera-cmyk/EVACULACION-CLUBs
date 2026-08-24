@@ -776,15 +776,15 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL MAGISTRAL Y ALTURA EXPANDIDA)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL SIN MÁRGENES FANTASMAS)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
       <style>{`
         @media print {
           @page { size: A4 portrait; margin: 0; }
-          html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 9px !important; }
-          .print-portrait-page { width: 100% !important; height: 100% !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 6mm 8mm !important; margin: 0 !important; }
+          html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 9.5px !important; }
+          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 10mm 12mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
         }
@@ -1255,12 +1255,12 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL MAGISTRAL EXPANDIDO (LLENADO TOTAL DE LA HOJA DIN A4 SIN ESPACIOS MUERTOS) */}
+        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL EXPANDIDO A PÁGINA COMPLETA (SIN MARGENES FANTASMAS) */}
         {pantalla === 'INFORME' && (
-          <div className="print-portrait-page bg-white rounded-xl shadow-xl border border-slate-200 p-5 space-y-4">
+          <div className="print-portrait-page bg-white rounded-xl shadow-xl border border-slate-200 p-6 space-y-4">
             
-            {/* Cabecera A4 Real */}
-            <div className="border-b-2 border-slate-900 pb-3 flex justify-between items-center w-full">
+            {/* 1. Cabecera A4 Real */}
+            <div className="border-b-2 border-slate-900 pb-3.5 flex justify-between items-center w-full">
               <div className="flex items-center space-x-3.5">
                 <div className="w-12 h-12 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-extrabold text-base shadow shrink-0">
                   {siglasClub}
@@ -1275,22 +1275,20 @@ export default function App() {
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <span className="text-xs font-bold bg-slate-100 text-slate-800 px-3 py-1.5 rounded-md border border-slate-200">
+                <span className="text-xs font-bold bg-slate-100 text-slate-800 px-3.5 py-1.5 rounded-md border border-slate-200">
                   Asistencia: {asistActual.pct}%
                 </span>
                 <p className="text-[10px] text-slate-400 mt-1">Temporada {clubActivo.temporada}</p>
               </div>
             </div>
 
-            {/* Resumen Ejecutivo Superior con ROMBO AMPLIADO Y ALTURA EXPANDIDA */}
-            <div className="grid grid-cols-12 gap-4 items-center bg-slate-50 p-4 rounded-2xl border border-slate-200 w-full">
-              
-              {/* Rombo Ampliado y Proporcionado (cx=95, cy=95, r=70) */}
-              <div className="col-span-5 flex flex-col items-center justify-center border-r border-slate-200 pr-3">
-                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            {/* 2. Resumen Ejecutivo Superior con Rombo Ampliado y Altura Cómoda */}
+            <div className="grid grid-cols-12 gap-4 items-center bg-slate-50 p-5 rounded-2xl border border-slate-200 w-full">
+              <div className="col-span-5 flex flex-col items-center justify-center border-r border-slate-200 pr-4">
+                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-2">
                   Perfil de Rendimiento
                 </span>
-                <svg width="135" height="135" viewBox="0 0 190 190" className="overflow-visible">
+                <svg width="140" height="140" viewBox="0 0 190 190" className="overflow-visible">
                   <polygon points="95,20 170,95 95,170 20,95" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
                   <polygon points="95,55 135,95 95,135 55,95" fill="none" stroke="#E2E8F0" strokeWidth="1" />
                   <line x1="95" y1="20" x2="95" y2="170" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
@@ -1305,32 +1303,31 @@ export default function App() {
                 </svg>
               </div>
 
-              {/* Bloques de Fortalezas y Objetivos con mas espacio y presencia */}
-              <div className="col-span-7 grid grid-cols-1 gap-2.5 text-[10.5px]">
-                <div className="bg-white p-3 rounded-xl border border-emerald-200 shadow-2xs">
-                  <strong className="block font-bold text-emerald-950 uppercase text-[9.5px] tracking-wider mb-1">Fortalezas:</strong>
+              <div className="col-span-7 grid grid-cols-1 gap-3 text-[11px]">
+                <div className="bg-white p-3.5 rounded-xl border border-emerald-200 shadow-2xs">
+                  <strong className="block font-bold text-emerald-950 uppercase text-[10px] tracking-wider mb-1">Fortalezas:</strong>
                   <p className="text-emerald-900 leading-relaxed">{fortalezas}</p>
                 </div>
-                <div className="bg-white p-3 rounded-xl border border-amber-200 shadow-2xs">
-                  <strong className="block font-bold text-amber-950 uppercase text-[9.5px] tracking-wider mb-1">Objetivos de Mejora:</strong>
+                <div className="bg-white p-3.5 rounded-xl border border-amber-200 shadow-2xs">
+                  <strong className="block font-bold text-amber-950 uppercase text-[10px] tracking-wider mb-1">Objetivos de Mejora:</strong>
                   <p className="text-amber-900 leading-relaxed">{objetivos}</p>
                 </div>
               </div>
             </div>
 
-            {/* Secciones de Rúbricas Técnicas expandidas en Altura y Ancho Completo */}
-            <div className="grid grid-cols-2 gap-3.5 text-[10.5px] w-full">
+            {/* 3. Secciones de Rúbricas Técnicas expandidas verticalmente para ocupar toda la página */}
+            <div className="grid grid-cols-2 gap-4 text-[10.5px] w-full">
               {rubricasActivas.map(cat => (
-                <div key={cat.id} className="space-y-1.5 bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200">
-                  <div className="bg-slate-900 text-white font-bold px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-wider">
+                <div key={cat.id} className="space-y-2 bg-slate-50/85 p-4 rounded-2xl border border-slate-200 flex flex-col justify-between">
+                  <div className="bg-slate-900 text-white font-bold px-3 py-1.5 rounded-lg text-[10.5px] uppercase tracking-wider">
                     {cat.nombre}
                   </div>
-                  <div className="space-y-1 pt-1">
+                  <div className="space-y-1.5 pt-1">
                     {cat.items.map(item => {
                       const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
                       const lvlObj = nivelesActuales.find(l => l.key === selKey);
                       return (
-                        <div key={item} className="flex justify-between items-center py-1.5 px-2.5 bg-white rounded-lg border border-slate-200/80 shadow-2xs">
+                        <div key={item} className="flex justify-between items-center py-2 px-3 bg-white rounded-lg border border-slate-200/90 shadow-2xs">
                           <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
                           <span className="font-bold px-2.5 py-0.5 rounded text-[10px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
                             {lvlObj ? lvlObj.label : 'Consolidado'}
@@ -1343,15 +1340,15 @@ export default function App() {
               ))}
             </div>
 
-            {/* Pie Institucional de Firma y Validación Técnica */}
-            <div className="pt-3 border-t-2 border-slate-200 flex justify-between items-center text-[10px] text-slate-600 w-full">
+            {/* 4. Pie Institucional de Firma y Validación Técnica */}
+            <div className="pt-3.5 border-t-2 border-slate-200 flex justify-between items-center text-[10px] text-slate-600 w-full">
               <div className="flex items-center gap-6">
                 <span>Director Técnico / Entrenador: ___________________________________</span>
                 <span>Firma: _____________________</span>
               </div>
               <div className="no-print space-x-2">
                 <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-semibold hover:underline">← Editar</button>
-                <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl font-semibold shadow transition text-xs">
+                <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-xl font-semibold shadow transition text-xs">
                   🖨️ Guardar PDF
                 </button>
               </div>
