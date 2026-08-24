@@ -101,26 +101,6 @@ interface RubricCategory {
   items: string[];
 }
 
-const PLANTILLAS_FORTALEZAS = [
-  "Buena predisposición al trabajo diario, mostrando constancia, atención y una actitud muy receptiva ante las correcciones del cuerpo técnico.",
-  "Evolución favorable en la coordinación y el esquema corporal, destacando por su entrega física e implicación constante en las tareas de equipo.",
-  "Cumplimiento riguroso de las tareas asignadas, destacando por su disciplina táctica básica, concentración y solidez en los fundamentos individuales.",
-  "Alta intensidad defensiva y generosidad en el juego sin balón; un jugador de equipo que prioriza el esfuerzo colectivo y la solidez defensiva.",
-  "Dominio fluido de los fundamentos técnicos básicos bajo presión, mostrando claridad en la toma de decisiones y regularidad en los partidos.",
-  "Excelente lectura táctica de las ventajas ofensivas, capacidad de liderazgo silencioso en pista y alta eficacia en situaciones de 1c1.",
-  "Perfil de rendimiento excelente; destaca por su inteligencia táctica, liderazgo positivo, técnica depurada y capacidad constante para marcar diferencias."
-];
-
-const PLANTILLAS_OBJETIVOS = [
-  "Consolidar los patrones básicos de coordinación dinámica, equilibrio y atención sostenida durante las explicaciones y dinámicas de grupo.",
-  "Mejorar la postura corporal básica y automatizar la correcta ejecución técnica en los desplazamientos sin balón y en la postura defensiva.",
-  "Incrementar la confianza y el uso fluido de la mano no dominante, así como el control del ritmo de ejecución en acciones de bote y pase.",
-  "Acelerar la velocidad en la toma de decisiones durante situaciones reales de juego, mejorando la ocupación de espacios y la lectura de ventajas en superioridad.",
-  "Optimizar la eficacia en la mecánica de finalización y el timing en la lectura y ejecución de bloqueos directos e indirectos.",
-  "Ampliar el repertorio táctico individual, mejorando las ayudas defensivas complejas, la comunicación en pista y la polivalencia en distintas posiciones.",
-  "Mantener el pico de máxima concentración e intensidad competitiva durante los 40 minutos, ejerciendo como referente de exigencia y liderazgo en el equipo."
-];
-
 const NIVELES_JUGADORES: LevelOption[] = [
   { key: 'EXCELENTE', label: 'Excelente', desc: 'Dominio sobresaliente y constante de la habilidad.', color: '#059669', weight: 4 },
   { key: 'CONSOLIDADO', label: 'Consolidado', desc: 'Adquirido y ejecutado de forma autónoma en situaciones reales.', color: '#0EA5E9', weight: 3 },
@@ -149,6 +129,26 @@ const RUBRICA_ENTRENADORES_DEF: RubricCategory[] = [
   { id: 'cat_coach_metodologia', nombre: 'Metodología y Dinámica de Sesión', items: ['Aprovechamiento del tiempo útil (sin filas)', 'Diseño de tareas acorde a la edad', 'Capacidad de corrección sobre la marcha', 'Ritmo e intensidad de entrenamiento'] },
   { id: 'cat_coach_direccion', nombre: 'Dirección de Partido y Competición', items: ['Gestión equitativa de minutos/rotaciones', 'Serenidad y control emocional en el banco', 'Instrucciones claras en tiempos muertos', 'Respeto al estamento arbitral y rivales'] },
   { id: 'cat_coach_compromiso', nombre: 'Compromiso y Valores de Club', items: ['Puntualidad y preparación de material', 'Alineación con la Dirección Técnica', 'Trato profesional con las familias', 'Cuidado y recogida de instalaciones'] }
+];
+
+const PLANTILLAS_FORTALEZAS = [
+  "Buena predisposición al trabajo diario, mostrando constancia, atención y una actitud muy receptiva ante las correcciones del cuerpo técnico.",
+  "Evolución favorable en la coordinación y el esquema corporal, destacando por su entrega física e implicación constante en las tareas de equipo.",
+  "Cumplimiento riguroso de las tareas asignadas, destacando por su disciplina táctica básica, concentración y solidez en los fundamentos individuales.",
+  "Alta intensidad defensiva y generosidad en el juego sin balón; un jugador de equipo que prioriza el esfuerzo colectivo y la solidez defensiva.",
+  "Dominio fluido de los fundamentos técnicos básicos bajo presión, mostrando claridad en la toma de decisiones y regularidad en los partidos.",
+  "Excelente lectura táctica de las ventajas ofensivas, capacidad de liderazgo silencioso en pista y alta eficacia en situaciones de 1c1.",
+  "Perfil de rendimiento excelente; destaca por su inteligencia táctica, liderazgo positivo, técnica depurada y capacidad constante para marcar diferencias."
+];
+
+const PLANTILLAS_OBJETIVOS = [
+  "Consolidar los patrones básicos de coordinación dinámica, equilibrio y atención sostenida durante las explicaciones y dinámicas de grupo.",
+  "Mejorar la postura corporal básica y automatizar la correcta ejecución técnica en los desplazamientos sin balón y en la postura defensiva.",
+  "Incrementar la confianza y el uso fluido de la mano no dominante, así como el control del ritmo de ejecución en acciones de bote y pase.",
+  "Acelerar la velocidad en la toma de decisiones durante situaciones reales de juego, mejorando la ocupación de espacios y la lectura de ventajas en superioridad.",
+  "Optimizar la eficacia en la mecánica de finalización y el timing en la lectura y ejecución de bloqueos directos e indirectos.",
+  "Ampliar el repertorio táctico individual, mejorando las ayudas defensivas complejas, la comunicación en pista y la polivalencia en distintas posiciones.",
+  "Mantener el pico de máxima concentración e intensidad competitiva durante los 40 minutos, ejerciendo como referente de exigencia y liderazgo en el equipo."
 ];
 
 const CLUBS_INICIALES: Club[] = [
@@ -1032,10 +1032,11 @@ export default function App() {
           </div>
         )}
 
+        {/* PASAR LISTA CON LOS 4 APARTADOS RESTAURADOS */}
         {pantalla === 'PASAR_LISTA' && (
           <div className="bg-white rounded-xl shadow border p-4 sm:p-6 max-w-2xl mx-auto space-y-6">
             <div className="flex justify-between items-center border-b pb-4">
-              <h2 className="text-lg font-bold">Pasar Lista</h2>
+              <h2 className="text-lg font-bold">Pasar Lista (Control Detallado)</h2>
               <button onClick={() => setPantalla('PLANTILLA')} className="text-xs text-slate-500">✕ Cancelar</button>
             </div>
             <form onSubmit={handleGuardarSesion} className="space-y-4 text-xs">
@@ -1047,11 +1048,13 @@ export default function App() {
                 {equipoSeleccionado.jugadores.map(jugador => {
                   const estado = sessionAsistencias[jugador.id] || 'PRESENTE';
                   return (
-                    <div key={jugador.id} className="flex justify-between items-center p-3 bg-white gap-2">
+                    <div key={jugador.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-white gap-2">
                       <span className="font-medium text-xs sm:text-sm">#{jugador.dorsal} {jugador.nombre}</span>
-                      <div className="flex space-x-1">
-                        <button type="button" onClick={() => setSessionAsistencias({ ...sessionAsistencias, [jugador.id]: 'PRESENTE' })} className={`px-2 py-1 rounded text-xs ${estado === 'PRESENTE' ? 'bg-emerald-600 text-white' : 'bg-slate-100'}`}>✅</button>
-                        <button type="button" onClick={() => setSessionAsistencias({ ...sessionAsistencias, [jugador.id]: 'FALTA' })} className={`px-2 py-1 rounded text-xs ${estado === 'FALTA' ? 'bg-rose-600 text-white' : 'bg-slate-100'}`}>❌</button>
+                      <div className="flex flex-wrap gap-1">
+                        <button type="button" onClick={() => setSessionAsistencias({ ...sessionAsistencias, [jugador.id]: 'PRESENTE' })} className={`px-2 py-1 rounded text-[11px] font-semibold transition ${estado === 'PRESENTE' ? 'bg-emerald-600 text-white shadow' : 'bg-slate-100 text-slate-600'}`}>✅ Presente</button>
+                        <button type="button" onClick={() => setSessionAsistencias({ ...sessionAsistencias, [jugador.id]: 'FALTA' })} className={`px-2 py-1 rounded text-[11px] font-semibold transition ${estado === 'FALTA' ? 'bg-rose-600 text-white shadow' : 'bg-slate-100 text-slate-600'}`}>❌ Falta</button>
+                        <button type="button" onClick={() => setSessionAsistencias({ ...sessionAsistencias, [jugador.id]: 'JUSTIFICADA' })} className={`px-2 py-1 rounded text-[11px] font-semibold transition ${estado === 'JUSTIFICADA' ? 'bg-amber-600 text-white shadow' : 'bg-slate-100 text-slate-600'}`}>📝 Justificada</button>
+                        <button type="button" onClick={() => setSessionAsistencias({ ...sessionAsistencias, [jugador.id]: 'LESIONADO' })} className={`px-2 py-1 rounded text-[11px] font-semibold transition ${estado === 'LESIONADO' ? 'bg-blue-600 text-white shadow' : 'bg-slate-100 text-slate-600'}`}>🩹 Lesión</button>
                       </div>
                     </div>
                   );
@@ -1117,7 +1120,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* Guía de colores */}
               <div className="bg-slate-50 border p-3 rounded-lg flex flex-wrap gap-4 text-xs text-slate-700">
                 {nivelesActuales.map(n => (
                   <div key={n.key} className="flex items-center space-x-1.5">
@@ -1127,7 +1129,6 @@ export default function App() {
                 ))}
               </div>
 
-              {/* Selectores Rápidos de Plantillas Automatizadas */}
               {!isLocked && (
                 <div className="bg-emerald-50/60 border border-emerald-200 p-3.5 rounded-xl space-y-3 text-xs">
                   <span className="font-bold text-emerald-900 uppercase tracking-wider text-[10px]">✨ Plantillas Automatizadas de Apoyo</span>
@@ -1205,7 +1206,6 @@ export default function App() {
                 ))}
               </div>
 
-              {/* Campos de Fortalezas y Objetivos Editables */}
               <div className="space-y-4 pt-4 border-t">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Fortalezas Destacadas:</label>
@@ -1245,72 +1245,90 @@ export default function App() {
           );
         })()}
 
+        {/* INFORME PROFESIONAL REDISEÑADO (COMPACTO Y ARMONIOSO EN UNA SOLA HOJA A4) */}
         {pantalla === 'INFORME' && (
-          <div className="print-full-page bg-white rounded-xl shadow border p-4 sm:p-8 space-y-4">
-            <div className="flex justify-between items-center border-b-2 border-slate-900 pb-2">
-              <div>
-                <h2 className="text-lg sm:text-xl font-bold">{tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}</h2>
-                <p className="text-[11px] text-slate-600">{clubActivo.nombre} • Evaluación 360° ({periodo})</p>
+          <div className="print-full-page bg-white rounded-2xl shadow-xl border border-slate-200 p-6 sm:p-8 space-y-5">
+            <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-lg bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-sm">
+                  {siglasClub}
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">{tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}</h2>
+                  <p className="text-[11px] text-slate-500 font-medium">{clubActivo.nombre} • Dossier de Evaluación 360° ({periodo})</p>
+                </div>
               </div>
-              <span className="text-xs font-bold bg-slate-100 px-2.5 py-1 rounded">Asistencia: {asistActual.pct}%</span>
+              <div className="text-right">
+                <span className="text-xs font-bold bg-slate-100 text-slate-800 px-3 py-1 rounded-lg border border-slate-200">
+                  Asistencia: {asistActual.pct}%
+                </span>
+                <p className="text-[10px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
+              </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-3 my-2 text-[10px]">
+            {/* Secciones de Rúbricas en Grid de 2 columnas de aspecto profesional */}
+            <div className="grid grid-cols-2 gap-4 text-[11px]">
               {rubricasActivas.map(cat => (
-                <div key={cat.id} className="space-y-1">
-                  <div className="bg-slate-900 text-white font-semibold px-2 py-0.5 rounded text-[9.5px] uppercase">{cat.nombre}</div>
-                  {cat.items.map(item => {
-                    const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
-                    const lvlObj = nivelesActuales.find(l => l.key === selKey);
-                    return (
-                      <div key={item} className="flex justify-between py-0.5 px-1 bg-slate-50 rounded border border-slate-100">
-                        <span className="truncate pr-2">{item}</span>
-                        <span className="font-semibold shrink-0" style={{ color: lvlObj?.color || '#059669' }}>
-                          {lvlObj ? lvlObj.label : 'Consolidado'}
-                        </span>
-                      </div>
-                    );
-                  })}
+                <div key={cat.id} className="space-y-1.5 bg-slate-50/60 p-3 rounded-xl border border-slate-200/80">
+                  <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider">
+                    {cat.nombre}
+                  </div>
+                  <div className="space-y-1 pt-0.5">
+                    {cat.items.map(item => {
+                      const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
+                      const lvlObj = nivelesActuales.find(l => l.key === selKey);
+                      return (
+                        <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/70">
+                          <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
+                          <span className="font-bold px-2 py-0.5 rounded text-[10px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                            {lvlObj ? lvlObj.label : 'Consolidado'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Gráfico de Radar (Rombo de Rendimiento) y Textos Finales */}
-            <div className="grid grid-cols-12 gap-4 items-center pt-2 border-t border-slate-200">
-              <div className="col-span-4 flex flex-col items-center justify-center">
+            {/* Bloque inferior: Gráfico de Radar + Fortalezas y Objetivos en perfecta armonía */}
+            <div className="grid grid-cols-12 gap-5 items-center pt-3 border-t border-slate-200">
+              <div className="col-span-4 flex flex-col items-center justify-center bg-slate-50 p-3 rounded-xl border border-slate-200">
                 <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
                   Perfil de Rendimiento
                 </span>
-                <svg width="130" height="130" viewBox="0 0 150 150" className="overflow-visible">
+                <svg width="120" height="120" viewBox="0 0 150 150" className="overflow-visible">
                   <polygon points="75,25 125,75 75,125 25,75" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
                   <polygon points="75,50 100,75 75,100 50,75" fill="none" stroke="#E2E8F0" strokeWidth="1" />
                   <line x1="75" y1="25" x2="75" y2="125" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
                   <line x1="25" y1="75" x2="125" y2="75" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
 
-                  <polygon points={radarPoints} fill="rgba(5, 150, 105, 0.25)" stroke="#059669" strokeWidth="2.5" />
+                  <polygon points={radarPoints} fill="rgba(5, 150, 105, 0.2)" stroke="#059669" strokeWidth="2.5" />
 
-                  <text x="75" y="17" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">MOTOR</text>
-                  <text x="132" y="78" textAnchor="start" className="text-[8px] font-bold fill-slate-700">TÉCNICA</text>
-                  <text x="75" y="137" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">TÁCTICA</text>
-                  <text x="18" y="78" textAnchor="end" className="text-[8px] font-bold fill-slate-700">DEFENSA</text>
+                  <text x="75" y="15" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">MOTOR</text>
+                  <text x="135" y="78" textAnchor="start" className="text-[8px] font-bold fill-slate-700">TÉCNICA</text>
+                  <text x="75" y="140" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">TÁCTICA</text>
+                  <text x="15" y="78" textAnchor="end" className="text-[8px] font-bold fill-slate-700">DEFENSA</text>
                 </svg>
               </div>
 
-              <div className="col-span-8 grid grid-cols-2 gap-2 text-[10px]">
-                <div className="bg-slate-50 p-2 rounded border border-slate-200">
-                  <strong className="block font-bold text-slate-900 mb-0.5">Fortalezas:</strong>
-                  <p className="text-slate-700 line-clamp-3">{fortalezas}</p>
+              <div className="col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px]">
+                <div className="bg-emerald-50/40 p-3 rounded-xl border border-emerald-200/80">
+                  <strong className="block font-bold text-emerald-950 uppercase text-[10px] tracking-wider mb-1">Fortalezas:</strong>
+                  <p className="text-emerald-900 leading-relaxed">{fortalezas}</p>
                 </div>
-                <div className="bg-slate-50 p-2 rounded border border-slate-200">
-                  <strong className="block font-bold text-slate-900 mb-0.5">Objetivos:</strong>
-                  <p className="text-slate-700 line-clamp-3">{objetivos}</p>
+                <div className="bg-amber-50/40 p-3 rounded-xl border border-amber-200/80">
+                  <strong className="block font-bold text-amber-950 uppercase text-[10px] tracking-wider mb-1">Objetivos de Mejora:</strong>
+                  <p className="text-amber-900 leading-relaxed">{objetivos}</p>
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 border-t flex justify-between items-center text-[10px] text-slate-500 print:hidden">
-              <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-medium">← Volver a editar</button>
-              <button onClick={() => window.print()} className="bg-slate-900 text-white px-4 py-2 rounded font-medium shadow">🖨️ Imprimir / Guardar PDF</button>
+            <div className="pt-3 border-t flex justify-between items-center text-xs text-slate-500 print:hidden">
+              <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-semibold hover:underline">← Volver a editar ficha</button>
+              <button onClick={() => window.print()} className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-semibold shadow transition">
+                🖨️ Imprimir o Guardar en PDF
+              </button>
             </div>
           </div>
         )}
