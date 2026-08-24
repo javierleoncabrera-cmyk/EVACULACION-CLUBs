@@ -46,7 +46,6 @@ interface Player {
   inicial: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
   media: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
   final: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
-  evaluaciones?: Record<Period, { respuestas: Record<string, { nivel: string; obs: string }>; fortalezas: string; objetivos: string; evaluador: string }>;
   historial?: EvaluationRecord[];
 }
 
@@ -209,7 +208,6 @@ export default function App() {
     return saved ? JSON.parse(saved) : EQUIPOS_INICIALES;
   });
 
-  const [editandoClub, setEditandoClub] = useState(false);
   const [genero, setGenero] = useState<Gender>('MASCULINO');
   const [tipoEvaluacion, setTipoEvaluacion] = useState<TargetType>('JUGADORES');
   const [periodo, setPeriodo] = useState<Period>('Inicial');
@@ -252,9 +250,8 @@ export default function App() {
     'Claridad y brevedad en consignas': { nivel: 'EXCELENTE', obs: 'Consignas directas.' }
   });
 
-  const [fortalezas, setFortalezas] = useState('Excelente actitud, visión táctica y disciplina.');
-  const [objetivos, setObjetivos] = useState('Mejora en la mano no dominante y control de ritmo.');
-  const [evaluadorNombre, setEvaluadorNombre] = useState('Dirección Técnica');
+  const [fortalezas] = useState('Excelente actitud, visión táctica y disciplina.');
+  const [objetivos] = useState('Mejora en la mano no dominante y control de ritmo.');
 
   const effectiveClubId = sessionUser?.role === 'DIRECTOR' || sessionUser?.role === 'ENTRENADOR'
     ? (sessionUser.clubId || clubActivoId)
@@ -405,17 +402,6 @@ export default function App() {
     link.href = encodeURI('data:text/csv;charset=utf-8,' + csv);
     link.download = 'plantilla.csv';
     link.click();
-  };
-
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setClubs(clubs.map(c => c.id === clubActivo.id ? { ...c, logoUrl: reader.result as string } : c));
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   const handleAbrirPaseLista = () => {
@@ -695,7 +681,7 @@ export default function App() {
                     placeholder="direccion@club.com"
                     value={authEmail}
                     onChange={(e) => setAuthEmail(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
 
@@ -707,7 +693,7 @@ export default function App() {
                     placeholder="••••••••"
                     value={authPass}
                     onChange={(e) => setAuthPass(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
 
@@ -734,8 +720,8 @@ export default function App() {
       <style>{`
         @media print {
           @page { size: A4 portrait; margin: 4mm; }
-          html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 10px !important; }
-          .print-full-page { height: 285mm !important; max-height: 285mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 2mm !important; }
+          html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 9.5px !important; }
+          .print-full-page { height: 280mm !important; max-height: 280mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 1mm !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
         }
@@ -1157,10 +1143,10 @@ export default function App() {
               <span className="text-xs font-bold bg-slate-100 px-2.5 py-1 rounded">Asistencia: {asistActual.pct}%</span>
             </div>
             
-            <div className="grid grid-cols-2 gap-4 my-2 text-[11px]">
+            <div className="grid grid-cols-2 gap-3 my-2 text-[10px]">
               {rubricasActivas.map(cat => (
                 <div key={cat.id} className="space-y-1">
-                  <div className="bg-slate-900 text-white font-semibold px-2 py-0.5 rounded text-[10px] uppercase">{cat.nombre}</div>
+                  <div className="bg-slate-900 text-white font-semibold px-2 py-0.5 rounded text-[9.5px] uppercase">{cat.nombre}</div>
                   {cat.items.map(item => (
                     <div key={item} className="flex justify-between py-0.5 px-1 bg-slate-50 rounded border border-slate-100">
                       <span className="truncate pr-2">{item}</span>
@@ -1171,12 +1157,12 @@ export default function App() {
               ))}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-[11px] pt-1">
-              <div className="bg-slate-50 p-2 rounded border border-slate-200">
+            <div className="grid grid-cols-2 gap-2 text-[10px] pt-1">
+              <div className="bg-slate-50 p-1.5 rounded border border-slate-200">
                 <strong className="block font-bold text-slate-900 mb-0.5">Fortalezas:</strong>
                 <p className="text-slate-700 line-clamp-2">{fortalezas}</p>
               </div>
-              <div className="bg-slate-50 p-2 rounded border border-slate-200">
+              <div className="bg-slate-50 p-1.5 rounded border border-slate-200">
                 <strong className="block font-bold text-slate-900 mb-0.5">Objetivos:</strong>
                 <p className="text-slate-700 line-clamp-2">{objetivos}</p>
               </div>
