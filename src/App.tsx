@@ -776,15 +776,15 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL SIN MÁRGENES FANTASMAS)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL PROFESIONAL SIN MARGENES VISIBLES)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
       <style>{`
         @media print {
           @page { size: A4 portrait; margin: 0; }
-          html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 9.5px !important; }
-          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 10mm 12mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; }
+          html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 10px !important; }
+          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 12mm 14mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
         }
@@ -1255,11 +1255,11 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL EXPANDIDO A PÁGINA COMPLETA (SIN MARGENES FANTASMAS) */}
+        {/* INFORME PROFESIONAL MAGISTRAL A4 VERTICAL CENTRADO Y EXTENDIDO A PÁGINA COMPLETA */}
         {pantalla === 'INFORME' && (
           <div className="print-portrait-page bg-white rounded-xl shadow-xl border border-slate-200 p-6 space-y-4">
             
-            {/* 1. Cabecera A4 Real */}
+            {/* Cabecera A4 Real */}
             <div className="border-b-2 border-slate-900 pb-3.5 flex justify-between items-center w-full">
               <div className="flex items-center space-x-3.5">
                 <div className="w-12 h-12 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-extrabold text-base shadow shrink-0">
@@ -1282,7 +1282,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* 2. Resumen Ejecutivo Superior con Rombo Ampliado y Altura Cómoda */}
+            {/* Resumen Ejecutivo Superior con Rombo Ampliado y Altura Expansiva */}
             <div className="grid grid-cols-12 gap-4 items-center bg-slate-50 p-5 rounded-2xl border border-slate-200 w-full">
               <div className="col-span-5 flex flex-col items-center justify-center border-r border-slate-200 pr-4">
                 <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-2">
@@ -1315,7 +1315,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* 3. Secciones de Rúbricas Técnicas expandidas verticalmente para ocupar toda la página */}
+            {/* Secciones de Rúbricas Técnicas expandidas verticalmente para ocupar toda la página */}
             <div className="grid grid-cols-2 gap-4 text-[10.5px] w-full">
               {rubricasActivas.map(cat => (
                 <div key={cat.id} className="space-y-2 bg-slate-50/85 p-4 rounded-2xl border border-slate-200 flex flex-col justify-between">
@@ -1340,17 +1340,22 @@ export default function App() {
               ))}
             </div>
 
-            {/* 4. Pie Institucional de Firma y Validación Técnica */}
+            {/* Pie Institucional con Firma y Marca de Empresa / App */}
             <div className="pt-3.5 border-t-2 border-slate-200 flex justify-between items-center text-[10px] text-slate-600 w-full">
               <div className="flex items-center gap-6">
-                <span>Director Técnico / Entrenador: ___________________________________</span>
-                <span>Firma: _____________________</span>
+                <span>Director Técnico / Entrenador: _____________________</span>
+                <span>Firma: _______________</span>
               </div>
-              <div className="no-print space-x-2">
-                <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-semibold hover:underline">← Editar</button>
-                <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-xl font-semibold shadow transition text-xs">
-                  🖨️ Guardar PDF
-                </button>
+              <div className="flex items-center gap-3">
+                <span className="font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                  ⚡ Powered by Cantera360°
+                </span>
+                <div className="no-print space-x-2">
+                  <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-semibold hover:underline">← Editar</button>
+                  <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl font-semibold shadow transition text-xs">
+                    🖨️ Guardar PDF
+                  </button>
+                </div>
               </div>
             </div>
           </div>
