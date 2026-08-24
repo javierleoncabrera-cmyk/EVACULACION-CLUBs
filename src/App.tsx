@@ -117,7 +117,7 @@ const NIVELES_ENTRENADORES: LevelOption[] = [
   { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado en este ciclo.', color: '#94A3B8', weight: 0 },
 ];
 
-// ORDEN CAMBIADO: 1º Técnica Individual, 2º Desarrollo Motor, 3º Comprensión, 4º Defensa
+// ORDEN FIJO Y EXPLICITO: 1º Técnica Individual, 2º Desarrollo Motor, 3º Comprensión, 4º Defensa
 const RUBRICA_JUGADORES_DEF: RubricCategory[] = [
   { id: 'cat_tecnica', nombre: 'Técnica individual', items: ['Bote', 'Pase', 'Recepción', 'Tiro', 'Entrada', 'Paradas', 'Pivotes', 'Mano no dominante'] },
   { id: 'cat_motor', nombre: 'Desarrollo motor', items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto'] },
@@ -265,7 +265,6 @@ export default function App() {
   const [nuevoDorsal, setNuevoDorsal] = useState('');
   const [nuevoNacimiento, setNuevoNacimiento] = useState('');
 
-  // Respuestas predefinidas persistentes para que Mateo Álvarez tenga su evaluación inicial completa por defecto
   const [respuestas, setRespuestas] = useState<Record<string, { nivel: string; obs: string }>>({
     'Bote': { nivel: 'NECESITA_APOYO', obs: '' },
     'Pase': { nivel: 'CONSOLIDADO', obs: '' },
@@ -532,7 +531,7 @@ export default function App() {
   const handleScore = (indicador: string, levelKey: string) => {
     const statusField = periodo === 'Inicial' ? 'inicial' : periodo === 'Media' ? 'media' : 'final';
     if (jugadorSeleccionado[statusField] === 'COMPLETADA' && sessionUser?.role !== 'SUPER_ADMIN') {
-      alert(`La evaluación ${periodo} ya está completada y cerrada para este deportista.`);
+      alert(`La evaluación ${periodo} ya está completada y bloqueada para este deportista.`);
       return;
     }
     setRespuestas(prev => ({
@@ -590,7 +589,7 @@ export default function App() {
     return total > 0 ? (suma / (total * 4)) : 0.7;
   };
 
-  // Índices actualizados tras cambiar el orden de las categorías:
+  // Índices según el nuevo orden en RUBRICA_JUGADORES_DEF:
   // 0: Técnica Individual, 1: Desarrollo Motor, 2: Comprensión, 3: Defensa
   const cTechVal = calcularPromedioCategoria(0);
   const cMotorVal = calcularPromedioCategoria(1);
@@ -798,7 +797,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL SIN RAYAS Y TABLAS REORDENADAS)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL SIN RAYAS Y TABLAS CON TABLAS HTML TRADICIONALES)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
@@ -806,10 +805,10 @@ export default function App() {
         @media print {
           @page { size: A4 portrait; margin: 0; }
           html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 10px !important; resize: none !important; }
-          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 10mm 12mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; resize: none !important; outline: none !important; }
+          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 8mm 10mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; resize: none !important; outline: none !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
-          * { resize: none !important; }
+          * { resize: none !important; pointer-events: auto !important; }
         }
       `}</style>
 
@@ -1278,12 +1277,12 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL SIN RAYA Y CON TABLAS REORDENADAS */}
+        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL ESTRICTO (USO DE TABLAS HTML TRADICIONALES PARA CERO ERRORES DE IMPRESIÓN) */}
         {pantalla === 'INFORME' && (
           <div className="print-portrait-page bg-white rounded-xl shadow-xl border border-slate-200 p-6 space-y-4">
             
             {/* Cabecera A4 Real */}
-            <div className="border-b-2 border-slate-900 pb-3.5 flex justify-between items-center w-full">
+            <div className="border-b-2 border-slate-900 pb-3 flex justify-between items-center w-full">
               <div className="flex items-center space-x-3.5">
                 <div className="w-12 h-12 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-extrabold text-base shadow shrink-0">
                   {siglasClub}
@@ -1305,8 +1304,8 @@ export default function App() {
               </div>
             </div>
 
-            {/* Resumen Ejecutivo Superior con Rombo Ampliado y Ejes Reordenados */}
-            <div className="grid grid-cols-12 gap-4 items-center bg-slate-50 p-5 rounded-2xl border border-slate-200 w-full">
+            {/* Resumen Ejecutivo Superior con Rombo Ampliado y Ejes Corregidos */}
+            <div className="grid grid-cols-12 gap-4 items-center bg-slate-50 p-4 rounded-2xl border border-slate-200 w-full">
               <div className="col-span-5 flex flex-col items-center justify-center border-r border-slate-200 pr-4">
                 <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-2">
                   Perfil de Rendimiento
@@ -1326,45 +1325,115 @@ export default function App() {
                 </svg>
               </div>
 
-              <div className="col-span-7 grid grid-cols-1 gap-3 text-[11px]">
-                <div className="bg-white p-3.5 rounded-xl border border-emerald-200 shadow-2xs">
+              <div className="col-span-7 grid grid-cols-1 gap-2.5 text-[11px]">
+                <div className="bg-white p-3 rounded-xl border border-emerald-200 shadow-2xs">
                   <strong className="block font-bold text-emerald-950 uppercase text-[10px] tracking-wider mb-1">Fortalezas:</strong>
                   <p className="text-emerald-900 leading-relaxed">{fortalezas}</p>
                 </div>
-                <div className="bg-white p-3.5 rounded-xl border border-amber-200 shadow-2xs">
+                <div className="bg-white p-3 rounded-xl border border-amber-200 shadow-2xs">
                   <strong className="block font-bold text-amber-950 uppercase text-[10px] tracking-wider mb-1">Objetivos de Mejora:</strong>
                   <p className="text-amber-900 leading-relaxed">{objetivos}</p>
                 </div>
               </div>
             </div>
 
-            {/* Secciones de Rúbricas Técnicas reordenadas: 1º Técnica Individual, 2º Desarrollo Motor, etc. */}
-            <div className="grid grid-cols-2 gap-4 text-[10.5px] w-full">
-              {rubricasActivas.map(cat => (
-                <div key={cat.id} className="space-y-2 bg-slate-50/85 p-4 rounded-2xl border border-slate-200 flex flex-col justify-between">
-                  <div className="bg-slate-900 text-white font-bold px-3 py-1.5 rounded-lg text-[10.5px] uppercase tracking-wider">
-                    {cat.nombre}
-                  </div>
-                  <div className="space-y-1.5 pt-1">
-                    {cat.items.map(item => {
-                      const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
-                      const lvlObj = nivelesActuales.find(l => l.key === selKey);
-                      return (
-                        <div key={item} className="flex justify-between items-center py-2 px-3 bg-white rounded-lg border border-slate-200/90 shadow-2xs">
-                          <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                          <span className="font-bold px-2.5 py-0.5 rounded text-[10px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
-                            {lvlObj ? lvlObj.label : 'Consolidado'}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Secciones de Rúbricas Técnicas construidas con tablas HTML tradicionales (Sin fallos de renderizado de cabecera) */}
+            <table className="w-full border-collapse text-[10px]">
+              <tbody>
+                <tr>
+                  <td className="w-1/2 pr-2 align-top">
+                    {/* Tabla 1: Técnica Individual */}
+                    <div className="bg-slate-50/85 p-3 rounded-2xl border border-slate-200 space-y-1.5 mb-2.5">
+                      <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded-lg text-[10px] uppercase tracking-wider">
+                        {rubricasActivas[0].nombre}
+                      </div>
+                      <div className="space-y-1">
+                        {rubricasActivas[0].items.map(item => {
+                          const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
+                          const lvlObj = nivelesActuales.find(l => l.key === selKey);
+                          return (
+                            <div key={item} className="flex justify-between items-center py-1.5 px-2.5 bg-white rounded-lg border border-slate-200/90 shadow-2xs">
+                              <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
+                              <span className="font-bold px-2 py-0.5 rounded text-[9.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                                {lvlObj ? lvlObj.label : 'Consolidado'}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Tabla 3: Comprensión del juego */}
+                    <div className="bg-slate-50/85 p-3 rounded-2xl border border-slate-200 space-y-1.5">
+                      <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded-lg text-[10px] uppercase tracking-wider">
+                        {rubricasActivas[2].nombre}
+                      </div>
+                      <div className="space-y-1">
+                        {rubricasActivas[2].items.map(item => {
+                          const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
+                          const lvlObj = nivelesActuales.find(l => l.key === selKey);
+                          return (
+                            <div key={item} className="flex justify-between items-center py-1.5 px-2.5 bg-white rounded-lg border border-slate-200/90 shadow-2xs">
+                              <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
+                              <span className="font-bold px-2 py-0.5 rounded text-[9.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                                {lvlObj ? lvlObj.label : 'Consolidado'}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </td>
+
+                  <td className="w-1/2 pl-2 align-top">
+                    {/* Tabla 2: Desarrollo Motor */}
+                    <div className="bg-slate-50/85 p-3 rounded-2xl border border-slate-200 space-y-1.5 mb-2.5">
+                      <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded-lg text-[10px] uppercase tracking-wider">
+                        {rubricasActivas[1].nombre}
+                      </div>
+                      <div className="space-y-1">
+                        {rubricasActivas[1].items.map(item => {
+                          const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
+                          const lvlObj = nivelesActuales.find(l => l.key === selKey);
+                          return (
+                            <div key={item} className="flex justify-between items-center py-1.5 px-2.5 bg-white rounded-lg border border-slate-200/90 shadow-2xs">
+                              <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
+                              <span className="font-bold px-2 py-0.5 rounded text-[9.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                                {lvlObj ? lvlObj.label : 'Consolidado'}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Tabla 4: Defensa */}
+                    <div className="bg-slate-50/85 p-3 rounded-2xl border border-slate-200 space-y-1.5">
+                      <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded-lg text-[10px] uppercase tracking-wider">
+                        {rubricasActivas[3].nombre}
+                      </div>
+                      <div className="space-y-1">
+                        {rubricasActivas[3].items.map(item => {
+                          const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
+                          const lvlObj = nivelesActuales.find(l => l.key === selKey);
+                          return (
+                            <div key={item} className="flex justify-between items-center py-1.5 px-2.5 bg-white rounded-lg border border-slate-200/90 shadow-2xs">
+                              <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
+                              <span className="font-bold px-2 py-0.5 rounded text-[9.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                                {lvlObj ? lvlObj.label : 'Consolidado'}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
             {/* Pie Institucional con Firma, Sello de Marca y Cero Líneas en Diagonal */}
-            <div className="pt-3.5 border-t-2 border-slate-200 flex justify-between items-center text-[10px] text-slate-600 w-full">
+            <div className="pt-3 border-t-2 border-slate-200 flex justify-between items-center text-[10px] text-slate-600 w-full">
               <div className="flex items-center gap-6">
                 <span>Director Técnico / Entrenador: _____________________</span>
                 <span>Firma: _______________</span>
