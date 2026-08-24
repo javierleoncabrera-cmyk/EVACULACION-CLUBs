@@ -771,9 +771,9 @@ export default function App() {
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
       <style>{`
         @media print {
-          @page { size: A4 portrait; margin: 4mm; }
-          html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 9px !important; }
-          .print-full-page { height: 280mm !important; max-height: 280mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 1mm !important; }
+          @page { size: A4 portrait; margin: 3mm; }
+          html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 8.5px !important; }
+          .print-full-page { height: 285mm !important; max-height: 285mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 1mm !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
         }
@@ -1244,11 +1244,11 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL REDISEÑADO (ROMBO, FORTALEZAS Y OBJETIVOS BAJO EL NOMBRE) */}
+        {/* INFORME PROFESIONAL MAESTRO (DISPOSICIÓN COMPACTA Y SIN HUECOS) */}
         {pantalla === 'INFORME' && (
           <div className="print-full-page bg-white rounded-2xl shadow-xl border border-slate-200 p-5 sm:p-7 space-y-4">
             
-            {/* 1. Cabecera y Resumen Ejecutivo (Rombo + Fortalezas + Objetivos bajo el nombre) */}
+            {/* Cabecera, Rombo y Fortalezas unificados en la parte superior */}
             <div className="border-b-2 border-slate-900 pb-3 space-y-3">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-3">
@@ -1268,13 +1268,12 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Bloque superior con Rombo a la izquierda y Fortalezas/Objetivos a la derecha */}
-              <div className="grid grid-cols-12 gap-4 items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <div className="grid grid-cols-12 gap-3 items-center bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                 <div className="col-span-4 flex flex-col items-center justify-center border-r border-slate-200 pr-2">
-                  <span className="text-[9px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <span className="text-[8.5px] font-bold text-slate-700 uppercase tracking-wider mb-0.5">
                     Perfil de Rendimiento
                   </span>
-                  <svg width="105" height="105" viewBox="0 0 150 150" className="overflow-visible">
+                  <svg width="95" height="95" viewBox="0 0 150 150" className="overflow-visible">
                     <polygon points="75,25 125,75 75,125 25,75" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
                     <polygon points="75,50 100,75 75,100 50,75" fill="none" stroke="#E2E8F0" strokeWidth="1" />
                     <line x1="75" y1="25" x2="75" y2="125" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
@@ -1290,33 +1289,33 @@ export default function App() {
                 </div>
 
                 <div className="col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
-                  <div className="bg-white p-2.5 rounded-lg border border-emerald-200/80 shadow-sm">
-                    <strong className="block font-bold text-emerald-950 uppercase text-[9.5px] tracking-wider mb-0.5">Fortalezas:</strong>
-                    <p className="text-emerald-900 leading-relaxed line-clamp-3">{fortalezas}</p>
+                  <div className="bg-white p-2 rounded-lg border border-emerald-200 shadow-sm">
+                    <strong className="block font-bold text-emerald-950 uppercase text-[9px] tracking-wider mb-0.5">Fortalezas:</strong>
+                    <p className="text-emerald-900 leading-snug line-clamp-3">{fortalezas}</p>
                   </div>
-                  <div className="bg-white p-2.5 rounded-lg border border-amber-200/80 shadow-sm">
-                    <strong className="block font-bold text-amber-950 uppercase text-[9.5px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
-                    <p className="text-amber-900 leading-relaxed line-clamp-3">{objetivos}</p>
+                  <div className="bg-white p-2 rounded-lg border border-amber-200 shadow-sm">
+                    <strong className="block font-bold text-amber-950 uppercase text-[9px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
+                    <p className="text-amber-900 leading-snug line-clamp-3">{objetivos}</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* 2. Secciones de Rúbricas compactas en Grid de 2 columnas */}
-            <div className="grid grid-cols-2 gap-3 text-[10.5px]">
+            {/* Bloque de Rúbricas organizado de manera súper compacta y sin huecos */}
+            <div className="grid grid-cols-2 gap-2.5 text-[9.5px]">
               {rubricasActivas.map(cat => (
-                <div key={cat.id} className="space-y-1 bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/80">
-                  <div className="bg-slate-900 text-white font-bold px-2 py-0.5 rounded text-[9.5px] uppercase tracking-wider">
+                <div key={cat.id} className="space-y-0.5 bg-slate-50/50 p-2 rounded-xl border border-slate-200/80">
+                  <div className="bg-slate-900 text-white font-bold px-2 py-0.5 rounded text-[9px] uppercase tracking-wider">
                     {cat.nombre}
                   </div>
-                  <div className="space-y-0.5">
+                  <div className="space-y-0.5 pt-0.5">
                     {cat.items.map(item => {
                       const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
                       const lvlObj = nivelesActuales.find(l => l.key === selKey);
                       return (
-                        <div key={item} className="flex justify-between items-center py-0.5 px-2 bg-white rounded border border-slate-200/60">
+                        <div key={item} className="flex justify-between items-center py-0.5 px-1.5 bg-white rounded border border-slate-200/60">
                           <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                          <span className="font-bold px-1.5 py-0.5 rounded text-[9.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                          <span className="font-bold px-1.5 py-0.2 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
                             {lvlObj ? lvlObj.label : 'Consolidado'}
                           </span>
                         </div>
@@ -1327,11 +1326,18 @@ export default function App() {
               ))}
             </div>
 
-            <div className="pt-2 border-t flex justify-between items-center text-xs text-slate-500 print:hidden">
-              <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-semibold hover:underline">← Volver a editar ficha</button>
-              <button onClick={() => window.print()} className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-semibold shadow transition">
-                🖨️ Imprimir o Guardar en PDF
-              </button>
+            {/* Pie institucional de firma y validación técnica (Aporta peso corporativo y cierra el documento) */}
+            <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-[9.5px] text-slate-500">
+              <div className="flex items-center gap-4">
+                <span>Director Técnico / Entrenador: _____________________</span>
+                <span>Firma: _________________</span>
+              </div>
+              <div className="no-print space-x-2">
+                <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-semibold hover:underline">← Editar</button>
+                <button onClick={() => window.print()} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 rounded-lg font-semibold shadow transition">
+                  🖨️ Imprimir PDF
+                </button>
+              </div>
             </div>
           </div>
         )}
