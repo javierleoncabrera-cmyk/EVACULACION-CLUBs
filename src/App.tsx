@@ -576,7 +576,7 @@ export default function App() {
   const c3Val = calcularPromedioCategoria(2);
   const c4Val = calcularPromedioCategoria(3);
 
-  const cx = 75, cy = 75, r = 50;
+  const cx = 85, cy = 85, r = 60;
   const p1 = `${cx},${cy - r * c1Val}`;
   const p2 = `${cx + r * c2Val},${cy}`;
   const p3 = `${cx},${cy + r * c3Val}`;
@@ -776,7 +776,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL FLUIDO Y SIN HUECOS)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL MAGISTRAL Y ROMBO AMPLIADO)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
@@ -1255,81 +1255,84 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL SUPREMO (VERTICAL A4 DE ANCHO 100% REAL Y EQUILIBRIO PERFECTO) */}
+        {/* INFORME PROFESIONAL MAGISTRAL (CON ROMBO AMPLIADO Y OCUPACIÓN ÓPTIMA) */}
         {pantalla === 'INFORME' && (
-          <div className="print-portrait-page bg-white rounded-2xl shadow-xl border border-slate-200 p-5 space-y-3">
+          <div className="print-portrait-page bg-white rounded-xl shadow-xl border border-slate-200 p-4 space-y-2.5">
             
-            {/* 1. Cabecera A4 Real de Ancho Total */}
-            <div className="border-b-2 border-slate-900 pb-2.5 flex justify-between items-center w-full">
+            {/* Cabecera A4 Real */}
+            <div className="border-b-2 border-slate-900 pb-2 flex justify-between items-center w-full">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-sm shadow shrink-0">
+                <div className="w-9 h-9 rounded-lg bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-xs shadow shrink-0">
                   {siglasClub}
                 </div>
                 <div>
-                  <h2 className="text-lg font-extrabold text-slate-900 leading-tight">
+                  <h2 className="text-sm font-extrabold text-slate-900 leading-tight">
                     {tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}
                   </h2>
-                  <p className="text-[10.5px] text-slate-600 font-medium">
-                    {clubActivo.nombre} • Dossier Técnico 360° ({periodo}) • Equipo: {equipoSeleccionado.nombre} {tipoEvaluacion === 'JUGADORES' ? `• Dorsal #${jugadorSeleccionado.dorsal}` : ''}
+                  <p className="text-[9.5px] text-slate-500 font-medium">
+                    {clubActivo.nombre} • Dossier 360° ({periodo}) • Equipo: {equipoSeleccionado.nombre} {tipoEvaluacion === 'JUGADORES' ? `• Dorsal #${jugadorSeleccionado.dorsal}` : ''}
                   </p>
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <span className="text-xs font-bold bg-slate-100 text-slate-800 px-3 py-1 rounded-md border border-slate-200">
+                <span className="text-[10px] font-bold bg-slate-100 text-slate-800 px-2 py-0.5 rounded border border-slate-200">
                   Asistencia: {asistActual.pct}%
                 </span>
-                <p className="text-[9.5px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
+                <p className="text-[8.5px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
               </div>
             </div>
 
-            {/* 2. Resumen Ejecutivo Extendido (Rombo a la izquierda + Fortalezas & Objetivos amplios a la derecha) */}
-            <div className="grid grid-cols-12 gap-3 items-center bg-slate-50 p-3.5 rounded-xl border border-slate-200 w-full">
-              <div className="col-span-3 flex flex-col items-center justify-center border-r border-slate-200 pr-2">
+            {/* Resumen Ejecutivo Superior con ROMBO AMPLIADO (Ancho 5) y Textos (Ancho 7) */}
+            <div className="grid grid-cols-12 gap-3 items-center bg-slate-50 p-3 rounded-xl border border-slate-200 w-full">
+              
+              {/* Rombo Ampliado (cx=85, cy=85, r=60) */}
+              <div className="col-span-5 flex flex-col items-center justify-center border-r border-slate-200 pr-2">
                 <span className="text-[9px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Rendimiento
+                  Perfil de Rendimiento
                 </span>
-                <svg width="85" height="85" viewBox="0 0 150 150" className="overflow-visible">
-                  <polygon points="75,25 125,75 75,125 25,75" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
-                  <polygon points="75,50 100,75 75,100 50,75" fill="none" stroke="#E2E8F0" strokeWidth="1" />
-                  <line x1="75" y1="25" x2="75" y2="125" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
-                  <line x1="25" y1="75" x2="125" y2="75" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
+                <svg width="115" height="115" viewBox="0 0 170 170" className="overflow-visible">
+                  <polygon points="85,20 150,85 85,150 20,85" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
+                  <polygon points="85,50 120,85 85,120 50,85" fill="none" stroke="#E2E8F0" strokeWidth="1" />
+                  <line x1="85" y1="20" x2="85" y2="150" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
+                  <line x1="20" y1="85" x2="150" y2="85" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
 
                   <polygon points={radarPoints} fill="rgba(5, 150, 105, 0.2)" stroke="#059669" strokeWidth="2.5" />
 
-                  <text x="75" y="15" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">MOTOR</text>
-                  <text x="135" y="78" textAnchor="start" className="text-[8px] font-bold fill-slate-700">TÉCNICA</text>
-                  <text x="75" y="140" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">TÁCTICA</text>
-                  <text x="15" y="78" textAnchor="end" className="text-[8px] font-bold fill-slate-700">DEFENSA</text>
+                  <text x="85" y="12" textAnchor="middle" className="text-[8.5px] font-bold fill-slate-700">MOTOR</text>
+                  <text x="157" y="88" textAnchor="start" className="text-[8.5px] font-bold fill-slate-700">TÉCNICA</text>
+                  <text x="85" y="163" textAnchor="middle" className="text-[8.5px] font-bold fill-slate-700">TÁCTICA</text>
+                  <text x="13" y="88" textAnchor="end" className="text-[8.5px] font-bold fill-slate-700">DEFENSA</text>
                 </svg>
               </div>
 
-              <div className="col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
-                <div className="bg-white p-2.5 rounded-lg border border-emerald-200 shadow-2xs">
-                  <strong className="block font-bold text-emerald-950 uppercase text-[9px] tracking-wider mb-0.5">Fortalezas:</strong>
+              {/* Bloques de Fortalezas y Objetivos Ampliados */}
+              <div className="col-span-7 grid grid-cols-1 gap-2 text-[9.5px]">
+                <div className="bg-white p-2 rounded-lg border border-emerald-200 shadow-2xs">
+                  <strong className="block font-bold text-emerald-950 uppercase text-[8.5px] tracking-wider mb-0.5">Fortalezas:</strong>
                   <p className="text-emerald-900 leading-normal">{fortalezas}</p>
                 </div>
-                <div className="bg-white p-2.5 rounded-lg border border-amber-200 shadow-2xs">
-                  <strong className="block font-bold text-amber-950 uppercase text-[9px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
+                <div className="bg-white p-2 rounded-lg border border-amber-200 shadow-2xs">
+                  <strong className="block font-bold text-amber-950 uppercase text-[8.5px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
                   <p className="text-amber-900 leading-normal">{objetivos}</p>
                 </div>
               </div>
             </div>
 
-            {/* 3. Secciones de Rúbricas Técnicas expandidas en Ancho Completo (Ocupan de lado a lado la hoja) */}
-            <div className="grid grid-cols-2 gap-3 text-[10px] w-full">
+            {/* Secciones de Rúbricas Técnicas en 2 columnas compactas */}
+            <div className="grid grid-cols-2 gap-2 text-[9px] w-full">
               {rubricasActivas.map(cat => (
-                <div key={cat.id} className="space-y-1.5 bg-slate-50/70 p-3 rounded-xl border border-slate-200">
-                  <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded text-[10px] uppercase tracking-wider">
+                <div key={cat.id} className="space-y-1 bg-slate-50/70 p-2 rounded-xl border border-slate-200">
+                  <div className="bg-slate-900 text-white font-bold px-2 py-0.5 rounded text-[8.5px] uppercase tracking-wider">
                     {cat.nombre}
                   </div>
-                  <div className="space-y-1 pt-0.5">
+                  <div className="space-y-0.5 pt-0.5">
                     {cat.items.map(item => {
                       const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
                       const lvlObj = nivelesActuales.find(l => l.key === selKey);
                       return (
-                        <div key={item} className="flex justify-between items-center py-1.5 px-2.5 bg-white rounded border border-slate-200/80 shadow-2xs">
+                        <div key={item} className="flex justify-between items-center py-0.5 px-1.5 bg-white rounded border border-slate-200/70">
                           <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                          <span className="font-bold px-2 py-0.5 rounded text-[10px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                          <span className="font-bold px-1.5 py-0.2 rounded text-[8.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
                             {lvlObj ? lvlObj.label : 'Consolidado'}
                           </span>
                         </div>
@@ -1340,15 +1343,15 @@ export default function App() {
               ))}
             </div>
 
-            {/* 4. Pie Institucional de Firma y Validación Técnica */}
-            <div className="pt-2.5 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-500 w-full">
+            {/* Pie Institucional de Firma y Validación Técnica */}
+            <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-[9px] text-slate-500 w-full">
               <div className="flex items-center gap-6">
                 <span>Director Técnico / Entrenador: ___________________________________</span>
                 <span>Firma: _____________________</span>
               </div>
               <div className="no-print space-x-2">
                 <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-semibold hover:underline">← Editar</button>
-                <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-semibold shadow transition text-[10.5px]">
+                <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-lg font-semibold shadow transition text-[9.5px]">
                   🖨️ Guardar PDF
                 </button>
               </div>
