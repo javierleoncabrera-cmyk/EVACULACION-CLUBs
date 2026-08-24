@@ -118,8 +118,8 @@ const NIVELES_ENTRENADORES: LevelOption[] = [
 ];
 
 const RUBRICA_JUGADORES_DEF: RubricCategory[] = [
-  { id: 'cat_motor', nombre: 'Desarrollo motor', items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto'] },
   { id: 'cat_tecnica', nombre: 'Técnica individual', items: ['Bote', 'Pase', 'Recepción', 'Tiro', 'Entrada', 'Paradas', 'Pivotes', 'Mano no dominante'] },
+  { id: 'cat_motor', nombre: 'Desarrollo motor', items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto'] },
   { id: 'cat_tactica', nombre: 'Comprensión del juego', items: ['Ocupación de espacios', 'Juego sin balón', '1c1', 'Toma de decisiones', 'Lectura del juego', 'Juego colectivo'] },
   { id: 'cat_defensa', nombre: 'Defensa', items: ['Actitud defensiva', 'Colocación', '1c1 defensivo', 'Ayudas', 'Balance defensivo'] }
 ];
@@ -611,7 +611,7 @@ export default function App() {
   );
 
   // ==========================================
-  // VISTA PÚBLICA FAMILIAS (QR)
+  // VISTA PÚBLICA FAMILIAS (QR 100% FLUIDA PARA MÓVIL)
   // ==========================================
   if (publicToken) {
     const jugadorPublico = equipos.flatMap(e => e.jugadores).find(p => p.tokenPublico === publicToken || p.id === publicToken) || EQUIPOS_INICIALES[0].jugadores[0];
@@ -621,31 +621,31 @@ export default function App() {
     const siglasP = (clubPublico?.nombre || 'CB').split(' ').map(w => w[0]).join('').toUpperCase();
 
     return (
-      <div className="min-h-screen bg-slate-100 p-4 sm:p-6 font-sans">
-        <div className="max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-xl space-y-6">
-          <div className="flex justify-between items-center border-b pb-4">
+      <div className="min-h-screen bg-slate-100 p-3 sm:p-6 font-sans">
+        <div className="w-full max-w-xl mx-auto bg-white p-4 sm:p-6 rounded-2xl shadow-xl space-y-4">
+          <div className="flex justify-between items-center border-b pb-3">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-xl bg-slate-50 border flex items-center justify-center font-bold text-emerald-600">
+              <div className="w-10 h-10 rounded-xl bg-slate-50 border flex items-center justify-center font-bold text-emerald-600">
                 {siglasP}
               </div>
               <div>
-                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded uppercase">Portal Familiar</span>
-                <h1 className="text-xl font-bold">{jugadorPublico.nombre}</h1>
-                <p className="text-xs text-slate-500">{clubPublico?.nombre} • {equipoPublico?.nombre} • #{jugadorPublico.dorsal}</p>
+                <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded uppercase">Portal Familiar</span>
+                <h1 className="text-base font-bold text-slate-900">{jugadorPublico.nombre}</h1>
+                <p className="text-[11px] text-slate-500">{clubPublico?.nombre} • #{jugadorPublico.dorsal}</p>
               </div>
             </div>
             <div className="text-right">
-              <span className="text-xs font-bold bg-slate-100 px-3 py-1 rounded">Asistencia: {asistP.pct}%</span>
+              <span className="text-[11px] font-bold bg-slate-100 px-2.5 py-1 rounded">Asistencia: {asistP.pct}%</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div className="space-y-4 text-xs">
             {rubricasJugadores.map(cat => (
-              <div key={cat.id} className="bg-slate-50 p-4 rounded-xl border space-y-2">
-                <h3 className="font-bold text-slate-900 uppercase">{cat.nombre}</h3>
+              <div key={cat.id} className="bg-slate-50 p-3 rounded-xl border space-y-1.5">
+                <h3 className="font-bold text-slate-900 uppercase text-[10px]">{cat.nombre}</h3>
                 {cat.items.map(item => (
-                  <div key={item} className="flex justify-between bg-white p-2 rounded border">
-                    <span>{item}</span>
+                  <div key={item} className="flex justify-between bg-white p-2 rounded border text-[11px]">
+                    <span className="text-slate-800">{item}</span>
                     <span className="font-bold text-emerald-700">Consolidado</span>
                   </div>
                 ))}
@@ -653,9 +653,9 @@ export default function App() {
             ))}
           </div>
 
-          <div className="border-t pt-4 flex justify-between text-xs">
-            <span>Evaluación {periodo}</span>
-            <button onClick={() => setPublicToken(null)} className="text-emerald-700 font-bold">← Acceso Entrenadores</button>
+          <div className="border-t pt-3 flex justify-between text-xs">
+            <span className="text-slate-500 font-medium">Evaluación {periodo}</span>
+            <button onClick={() => setPublicToken(null)} className="text-emerald-700 font-bold hover:underline">← Acceso Entrenadores</button>
           </div>
         </div>
       </div>
@@ -793,7 +793,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL ESTRICTO USANDO CONTENEDOR DE TAMAÑO FIJO 210x297mm)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL ABSOLUTO Y SIMÉTRICO)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
@@ -801,7 +801,7 @@ export default function App() {
         @media print {
           @page { size: A4 portrait; margin: 0; }
           html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 10px !important; overflow: hidden !important; }
-          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 12mm 14mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; overflow: hidden !important; }
+          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 10mm 12mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; overflow: hidden !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
           * { box-shadow: none !important; outline: none !important; }
@@ -1273,9 +1273,9 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL ESTRICTO USANDO CONTENEDOR ABSOLUTO DE 210x297mm PARA CERO MÁRGENES FANTASMAS, CERO LÍNEAS Y PERFECTO ENCUADRE */}
+        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL ESTRICTO (CON LA FUNCIÓN handlePrintPDF DECLARADA PERFECTAMENTE Y CERO ERRORES DE TIPO) */}
         {pantalla === 'INFORME' && (
-          <div className="print-portrait-page bg-white p-4 space-y-2.5" style={{ width: '210mm', height: '297mm', position: 'relative', overflow: 'hidden' }}>
+          <div className="print-portrait-page bg-white rounded-none shadow-none border-0 p-4 space-y-2.5" style={{ width: '210mm', height: '297mm', position: 'relative', overflow: 'hidden' }}>
             
             {/* Cabecera A4 Real */}
             <div className="border-b-2 border-slate-900 pb-2.5 flex justify-between items-center w-full">
@@ -1293,7 +1293,7 @@ export default function App() {
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <span className="text-[11px] font-bold bg-slate-100 text-slate-800 px-3 py-1 rounded-md border border-slate-200">
+                <span className="text-[11px] font-bold bg-slate-100 text-slate-800 px-3.5 py-1 rounded-md border border-slate-200">
                   Asistencia: {asistActual.pct}%
                 </span>
                 <p className="text-[9px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
