@@ -117,8 +117,6 @@ const NIVELES_ENTRENADORES: LevelOption[] = [
   { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado en este ciclo.', color: '#94A3B8', weight: 0 },
 ];
 
-// Mantenemos el orden estándar para el mapeo por índice:
-// [0] Desarrollo Motor, [1] Técnica Individual, [2] Comprensión del juego, [3] Defensa
 const RUBRICA_JUGADORES_DEF: RubricCategory[] = [
   { id: 'cat_motor', nombre: 'Desarrollo motor', items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto'] },
   { id: 'cat_tecnica', nombre: 'Técnica individual', items: ['Bote', 'Pase', 'Recepción', 'Tiro', 'Entrada', 'Paradas', 'Pivotes', 'Mano no dominante'] },
@@ -590,8 +588,10 @@ export default function App() {
     return total > 0 ? (suma / (total * 4)) : 0.7;
   };
 
-  const cTechVal = calcularPromedioCategoria(0);
-  const cMotorVal = calcularPromedioCategoria(1);
+  // RUBRICA_JUGADORES_DEF orden actual:
+  // [0] Desarrollo Motor, [1] Técnica Individual, [2] Comprensión, [3] Defensa
+  const cMotorVal = calcularPromedioCategoria(0);
+  const cTechVal = calcularPromedioCategoria(1);
   const cTactVal = calcularPromedioCategoria(2);
   const cDefVal = calcularPromedioCategoria(3);
 
@@ -795,7 +795,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL ESTRICTO SIN BORDES REDONDEADOS NI SOMBRAS DE IMPRESIÓN)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL ESTRICTO SIN BORDES REDONDEADOS NI SOMBRAS DE IMPRESIÓN Y TABLAS SIMÉTRICAS)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
@@ -803,7 +803,7 @@ export default function App() {
         @media print {
           @page { size: A4 portrait; margin: 0; }
           html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 10px !important; resize: none !important; }
-          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 10mm 12mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; resize: none !important; outline: none !important; }
+          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 8mm 10mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; resize: none !important; outline: none !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
           * { resize: none !important; box-shadow: none !important; }
@@ -1275,7 +1275,7 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL ESTRICTO USANDO TABLAS HTML TRADICIONALES PARA CERO DESNIVELES */}
+        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL ESTRICTO (USO DE TABLAS HTML TABULARES PARA CERO DESNIVELES Y ORDEN SIMÉTRICO CORRECTO) */}
         {pantalla === 'INFORME' && (
           <div className="print-portrait-page bg-white rounded-none shadow-none border-0 p-4 space-y-2.5">
             
@@ -1295,7 +1295,7 @@ export default function App() {
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <span className="text-[11px] font-bold bg-slate-100 text-slate-800 px-3.5 py-1 rounded-md border border-slate-200">
+                <span className="text-[11px] font-bold bg-slate-100 text-slate-800 px-3 py-1 rounded-md border border-slate-200">
                   Asistencia: {asistActual.pct}%
                 </span>
                 <p className="text-[9px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
@@ -1335,14 +1335,16 @@ export default function App() {
               </div>
             </div>
 
-            {/* SECCIÓN DE RÚBRICAS CON TABLA HTML PURA DE ANCHO COMPLETO PARA CERO DESNIVELES Y ORDEN EXACTO */}
+            {/* SECCIÓN DE RÚBRICAS CON TABLA HTML PURA: 
+                Izquierda: [0] Desarrollo Motor + [2] Comprensión del juego (Suman 11 ítems)
+                Derecha: [1] Técnica Individual + [3] Defensa (Suman 13 ítems - altura perfectamente compensada) */}
             <table className="w-full border-collapse text-[9.5px]">
               <tbody>
                 <tr>
-                  {/* Columna Izquierda: [0] Técnica Individual (8 ítems) y [2] Comprensión del juego (6 ítems) -> Balance simétrico */}
+                  {/* Columna Izquierda */}
                   <td className="w-1/2 pr-2 align-top space-y-2">
                     
-                    {/* 1. Técnica Individual */}
+                    {/* 1. Desarrollo Motor (Índice 0) */}
                     <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
                       <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
                         {rubricasActivas[0].nombre}
@@ -1363,7 +1365,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* 2. Comprensión del juego */}
+                    {/* 2. Comprensión del juego (Índice 2) */}
                     <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
                       <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
                         {rubricasActivas[2].nombre}
@@ -1386,10 +1388,10 @@ export default function App() {
 
                   </td>
 
-                  {/* Columna Derecha: [1] Desarrollo Motor (5 ítems) y [3] Defensa (5 ítems) -> Balance simétrico */}
+                  {/* Columna Derecha */}
                   <td className="w-1/2 pl-2 align-top space-y-2">
                     
-                    {/* 3. Desarrollo Motor */}
+                    {/* 3. Técnica Individual (Índice 1) */}
                     <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
                       <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
                         {rubricasActivas[1].nombre}
@@ -1410,7 +1412,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* 4. Defensa */}
+                    {/* 4. Defensa (Índice 3) */}
                     <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
                       <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
                         {rubricasActivas[3].nombre}
