@@ -776,15 +776,15 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME VERTICAL A4 PERFECTO)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME VERTICAL A4 IDEAL)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
       <style>{`
         @media print {
-          @page { size: A4 portrait; margin: 4mm; }
+          @page { size: A4 portrait; margin: 3mm; }
           html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 8.5px !important; }
-          .print-portrait-page { width: 200mm !important; height: 285mm !important; max-height: 285mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 2mm !important; margin: 0 auto !important; }
+          .print-portrait-page { width: 100% !important; height: 100% !important; min-height: 275mm !important; max-height: 280mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 2mm !important; margin: 0 auto !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
         }
@@ -1255,49 +1255,40 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL VERTICAL A4 PERFECTO (OPTIMIZADO PARA LLENAR LA HOJA SIN HUECOS) */}
+        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL COMPACTO (LLENADO TOTAL DE LA HOJA SIN HUECOS) */}
         {pantalla === 'INFORME' && (
-          <div className="print-portrait-page bg-white rounded-2xl shadow-xl border border-slate-200 p-4 space-y-2.5">
+          <div className="print-portrait-page bg-white rounded-xl shadow-xl border border-slate-200 p-3 space-y-2">
             
-            {/* 1. Cabecera Vertical A4 Ultra Compacta y Segura (Diseño en Bloques de 2 Líneas para evitar solapamientos) */}
-            <div className="border-b-2 border-slate-900 pb-2 space-y-1.5">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-2.5">
-                  <div className="w-9 h-9 rounded-lg bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 shadow">
-                    {siglasClub}
-                  </div>
-                  <div>
-                    <h2 className="text-base font-extrabold text-slate-900 leading-tight">
-                      {tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}
-                    </h2>
-                    <p className="text-[9.5px] text-slate-500 font-medium">
-                      {clubActivo.nombre} • Dossier Técnico 360° ({periodo})
-                    </p>
-                  </div>
+            {/* Cabecera Ultra Compacta y Robusta */}
+            <div className="border-b-2 border-slate-900 pb-1.5 flex justify-between items-center">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-lg bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+                  {siglasClub}
                 </div>
-                
-                <div className="text-right shrink-0">
-                  <span className="text-[10px] font-bold bg-slate-100 text-slate-800 px-2 py-0.5 rounded border border-slate-200">
-                    Asistencia: {asistActual.pct}%
-                  </span>
-                  <p className="text-[8.5px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
+                <div>
+                  <h2 className="text-sm font-extrabold text-slate-900 leading-tight">
+                    {tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}
+                  </h2>
+                  <p className="text-[8.5px] text-slate-500 font-medium">
+                    {clubActivo.nombre} • Dossier Técnico 360° ({periodo}) • Equipo: {equipoSeleccionado.nombre} {tipoEvaluacion === 'JUGADORES' ? `• Dorsal #${jugadorSeleccionado.dorsal}` : ''}
+                  </p>
                 </div>
               </div>
-
-              <div className="bg-slate-50 px-2 py-1 rounded text-[9.5px] text-slate-700 font-medium flex justify-between">
-                <span>Equipo: <strong>{equipoSeleccionado.nombre}</strong></span>
-                {tipoEvaluacion === 'JUGADORES' && <span>Dorsal: <strong>#{jugadorSeleccionado.dorsal}</strong></span>}
-                <span>Categoría: <strong>{equipoSeleccionado.categoria}</strong></span>
+              <div className="text-right shrink-0">
+                <span className="text-[9.5px] font-bold bg-slate-100 text-slate-800 px-2 py-0.5 rounded border border-slate-200">
+                  Asistencia: {asistActual.pct}%
+                </span>
+                <p className="text-[8px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
               </div>
             </div>
 
-            {/* 2. Resumen Ejecutivo en 1 sola Fila Compacta (Rombo + Fortalezas & Objetivos) */}
-            <div className="grid grid-cols-12 gap-2.5 items-center bg-slate-50/90 p-2 rounded-xl border border-slate-200">
+            {/* Resumen Ejecutivo Superior (Rombo + Fortalezas & Objetivos en bloque único y simétrico) */}
+            <div className="grid grid-cols-12 gap-2 items-center bg-slate-50 p-2 rounded-lg border border-slate-200">
               <div className="col-span-3 flex flex-col items-center justify-center border-r border-slate-200 pr-1">
                 <span className="text-[7.5px] font-bold text-slate-700 uppercase tracking-wider mb-0.5">
                   Rendimiento
                 </span>
-                <svg width="70" height="70" viewBox="0 0 150 150" className="overflow-visible">
+                <svg width="65" height="65" viewBox="0 0 150 150" className="overflow-visible">
                   <polygon points="75,25 125,75 75,125 25,75" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
                   <polygon points="75,50 100,75 75,100 50,75" fill="none" stroke="#E2E8F0" strokeWidth="1" />
                   <line x1="75" y1="25" x2="75" y2="125" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
@@ -1312,23 +1303,23 @@ export default function App() {
                 </svg>
               </div>
 
-              <div className="col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[9px]">
-                <div className="bg-white p-1.5 rounded-lg border border-emerald-200 shadow-sm">
-                  <strong className="block font-bold text-emerald-950 uppercase text-[8.5px] tracking-wider mb-0.5">Fortalezas:</strong>
+              <div className="col-span-9 grid grid-cols-2 gap-1.5 text-[8.5px]">
+                <div className="bg-white p-1.5 rounded border border-emerald-200 shadow-2xs">
+                  <strong className="block font-bold text-emerald-950 uppercase text-[8px] tracking-wider mb-0.5">Fortalezas:</strong>
                   <p className="text-emerald-900 leading-tight line-clamp-2">{fortalezas}</p>
                 </div>
-                <div className="bg-white p-1.5 rounded-lg border border-amber-200 shadow-sm">
-                  <strong className="block font-bold text-amber-950 uppercase text-[8.5px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
+                <div className="bg-white p-1.5 rounded border border-amber-200 shadow-2xs">
+                  <strong className="block font-bold text-amber-950 uppercase text-[8px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
                   <p className="text-amber-900 leading-tight line-clamp-2">{objetivos}</p>
                 </div>
               </div>
             </div>
 
-            {/* 3. Secciones de Rúbricas Técnicas en 2 columnas muy limpias para rellenar toda la altura A4 */}
-            <div className="grid grid-cols-2 gap-2 text-[9px]">
+            {/* Secciones de Rúbricas Técnicas en 2 columnas verticales compactas */}
+            <div className="grid grid-cols-2 gap-2 text-[8.5px]">
               {rubricasActivas.map(cat => (
-                <div key={cat.id} className="space-y-0.5 bg-slate-50/60 p-2 rounded-xl border border-slate-200">
-                  <div className="bg-slate-900 text-white font-bold px-2 py-0.5 rounded text-[8.5px] uppercase tracking-wider">
+                <div key={cat.id} className="space-y-0.5 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+                  <div className="bg-slate-900 text-white font-bold px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider">
                     {cat.nombre}
                   </div>
                   <div className="space-y-0.5 pt-0.5">
@@ -1336,9 +1327,9 @@ export default function App() {
                       const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
                       const lvlObj = nivelesActuales.find(l => l.key === selKey);
                       return (
-                        <div key={item} className="flex justify-between items-center py-0.5 px-1.5 bg-white rounded border border-slate-200/70">
-                          <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                          <span className="font-bold px-1.5 py-0.1 rounded text-[8.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                        <div key={item} className="flex justify-between items-center py-0.3 px-1 bg-white rounded border border-slate-200/70">
+                          <span className="font-medium text-slate-800 truncate pr-1">{item}</span>
+                          <span className="font-bold px-1 py-0.1 rounded text-[8px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
                             {lvlObj ? lvlObj.label : 'Consolidado'}
                           </span>
                         </div>
@@ -1349,16 +1340,16 @@ export default function App() {
               ))}
             </div>
 
-            {/* 4. Pie Institucional de Firma y Validación Técnica */}
-            <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-[9px] text-slate-500">
+            {/* Pie Institucional de Firma y Validación Técnica */}
+            <div className="pt-1.5 border-t border-slate-200 flex justify-between items-center text-[8.5px] text-slate-500">
               <div className="flex items-center gap-4">
-                <span>Director Técnico / Entrenador: _____________________</span>
-                <span>Firma: _________________</span>
+                <span>Director Técnico / Entrenador: _________________</span>
+                <span>Firma: _______________</span>
               </div>
-              <div className="no-print space-x-2">
+              <div className="no-print space-x-1.5">
                 <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-semibold hover:underline">← Editar</button>
-                <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 rounded-lg font-semibold shadow transition">
-                  🖨️ Guardar PDF ({tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : 'Staff'})
+                <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-3 py-1 rounded-md font-semibold shadow transition text-[9px]">
+                  🖨️ Guardar PDF
                 </button>
               </div>
             </div>
