@@ -46,6 +46,7 @@ interface Player {
   inicial: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
   media: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
   final: 'COMPLETADA' | 'BORRADOR' | 'PENDIENTE';
+  evaluaciones?: Record<Period, { respuestas: Record<string, { nivel: string; obs: string }>; fortalezas: string; objetivos: string; evaluador: string }>;
   historial?: EvaluationRecord[];
 }
 
@@ -101,13 +102,12 @@ interface RubricCategory {
   items: string[];
 }
 
-// Escala con colores diferenciados y semánticos
 const NIVELES_JUGADORES: LevelOption[] = [
-  { key: 'EXCELENTE', label: 'Excelente', desc: 'Dominio sobresaliente y constante de la habilidad.', color: '#059669', weight: 4 },      // Esmeralda oscuro
-  { key: 'CONSOLIDADO', label: 'Consolidado', desc: 'Adquirido y ejecutado de forma autónoma en situaciones reales.', color: '#0EA5E9', weight: 3 }, // Azul cielo
-  { key: 'EN_DESARROLLO', label: 'En desarrollo', desc: 'En proceso de aprendizaje; requiere práctica guiada.', color: '#F59E0B', weight: 2 }, // Ámbar / Naranja
-  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Dificultad evidente; requiere intervención directa.', color: '#EF4444', weight: 1 }, // Rojo
-  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'Sin datos suficientes de valoración en este periodo.', color: '#94A3B8', weight: 0 }, // Gris pizarra
+  { key: 'EXCELENTE', label: 'Excelente', desc: 'Dominio sobresaliente y constante de la habilidad.', color: '#059669', weight: 4 },
+  { key: 'CONSOLIDADO', label: 'Consolidado', desc: 'Adquirido y ejecutado de forma autónoma en situaciones reales.', color: '#0EA5E9', weight: 3 },
+  { key: 'EN_DESARROLLO', label: 'En desarrollo', desc: 'En proceso de aprendizaje; requiere práctica guiada.', color: '#F59E0B', weight: 2 },
+  { key: 'NECESITA_APOYO', label: 'Necesita apoyo', desc: 'Dificultad evidente; requiere intervención directa.', color: '#EF4444', weight: 1 },
+  { key: 'NO_OBSERVADO', label: 'No observado', desc: 'Sin datos suficientes de valoración en este periodo.', color: '#94A3B8', weight: 0 },
 ];
 
 const NIVELES_ENTRENADORES: LevelOption[] = [
@@ -214,7 +214,6 @@ export default function App() {
   const [tipoEvaluacion, setTipoEvaluacion] = useState<TargetType>('JUGADORES');
   const [periodo, setPeriodo] = useState<Period>('Inicial');
   const [pantalla, setPantalla] = useState<Screen>('EQUIPOS');
-  const [mostrarDemo, setMostrarDemo] = useState(false);
 
   const [modalConfirmacion, setModalConfirmacion] = useState<{
     tipo: 'ELIMINAR_USUARIO' | 'EDITAR_PASSWORD';
@@ -252,6 +251,10 @@ export default function App() {
     'Dominio del bote': { nivel: 'NECESITA_APOYO', obs: '' },
     'Claridad y brevedad en consignas': { nivel: 'EXCELENTE', obs: 'Consignas directas.' }
   });
+
+  const [fortalezas, setFortalezas] = useState('Excelente actitud, visión táctica y disciplina.');
+  const [objetivos, setObjetivos] = useState('Mejora en la mano no dominante y control de ritmo.');
+  const [evaluadorNombre, setEvaluadorNombre] = useState('Dirección Técnica');
 
   const effectiveClubId = sessionUser?.role === 'DIRECTOR' || sessionUser?.role === 'ENTRENADOR'
     ? (sessionUser.clubId || clubActivoId)
@@ -307,13 +310,6 @@ export default function App() {
     setSessionUser(found);
     if (found.clubId) setClubActivoId(found.clubId);
     setPantalla(found.role === 'SUPER_ADMIN' ? 'PANEL_SUPERADMIN' : 'EQUIPOS');
-  };
-
-  const handleDemoLogin = (role: UserRole) => {
-    const demoUser = usuarios.find(u => u.role === role) || USUARIOS_INICIALES[0];
-    setSessionUser(demoUser);
-    if (demoUser.clubId) setClubActivoId(demoUser.clubId);
-    setPantalla(role === 'SUPER_ADMIN' ? 'PANEL_SUPERADMIN' : 'EQUIPOS');
   };
 
   const handleLogout = () => {
@@ -505,10 +501,37 @@ export default function App() {
   };
 
   const handleScore = (indicador: string, levelKey: string) => {
+    const statusField = periodo === 'Inicial' ? 'inicial' : periodo === 'Media' ? 'media' : 'final';
+    if (jugadorSeleccionado[statusField] === 'COMPLETADA' && sessionUser?.role !== 'SUPER_ADMIN') {
+      alert(`La evaluación ${periodo} ya está completada y bloqueada para este deportista.`);
+      return;
+    }
     setRespuestas(prev => ({
       ...prev,
       [indicador]: { ...prev[indicador], nivel: levelKey }
     }));
+  };
+
+  const handleCerrarEvaluacion = () => {
+    const statusField = periodo === 'Inicial' ? 'inicial' : periodo === 'Media' ? 'media' : 'final';
+    const actualizados = equipos.map(eq => {
+      if (eq.id === equipoSeleccionado.id) {
+        const nuevosJugs = eq.jugadores.map(j => {
+          if (j.id === jugadorSeleccionado.id) {
+            return { ...j, [statusField]: 'COMPLETADA' as const };
+          }
+          return j;
+        });
+        const eqActualizado = { ...eq, jugadores: nuevosJugs };
+        setEquipoSeleccionado(eqActualizado);
+        return eqActualizado;
+      }
+      return eq;
+    });
+    setEquipos(actualizados);
+    setJugadorSeleccionado({ ...jugadorSeleccionado, [statusField]: 'COMPLETADA' });
+    alert(`Evaluación ${periodo} guardada y bloqueada correctamente.`);
+    setPantalla('INFORME');
   };
 
   const asistActual = calcularAsistenciaJugador(jugadorSeleccionado?.id, equipoSeleccionado);
@@ -574,7 +597,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA: PORTADA PROFESIONAL (LOGIN)
+  // VISTA: PORTADA PROFESIONAL (LOGIN SEGURO)
   // ==========================================
   if (!sessionUser) {
     return (
@@ -600,7 +623,7 @@ export default function App() {
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl hover:border-emerald-500/50 transition">
+                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl">
                   <div className="text-emerald-400 font-semibold mb-1 flex items-center space-x-1.5 text-sm">
                     <span>🏀</span>
                     <span>Evaluación Técnica 360°</span>
@@ -610,7 +633,7 @@ export default function App() {
                   </p>
                 </div>
 
-                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl hover:border-blue-500/50 transition">
+                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl">
                   <div className="text-blue-400 font-semibold mb-1 flex items-center space-x-1.5 text-sm">
                     <span>📋</span>
                     <span>Control de Asistencia</span>
@@ -620,7 +643,7 @@ export default function App() {
                   </p>
                 </div>
 
-                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl hover:border-purple-500/50 transition">
+                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl">
                   <div className="text-purple-400 font-semibold mb-1 flex items-center space-x-1.5 text-sm">
                     <span>📱</span>
                     <span>Portal QR Familias</span>
@@ -630,7 +653,7 @@ export default function App() {
                   </p>
                 </div>
 
-                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl hover:border-amber-500/50 transition">
+                <div className="bg-slate-800/60 border border-slate-700/50 p-4 rounded-xl">
                   <div className="text-amber-400 font-semibold mb-1 flex items-center space-x-1.5 text-sm">
                     <span>🖨️</span>
                     <span>Dossier A4 Profesional</span>
@@ -695,28 +718,6 @@ export default function App() {
                   Entrar al Portal
                 </button>
               </form>
-
-              <div className="pt-4 border-t border-slate-800/80 text-center">
-                {!mostrarDemo ? (
-                  <button
-                    type="button"
-                    onClick={() => setMostrarDemo(true)}
-                    className="text-[11px] text-slate-400 hover:text-emerald-400 font-medium transition inline-flex items-center gap-1.5 py-1"
-                  >
-                    <span>🛠️</span> Probar Demostración en Vivo
-                  </button>
-                ) : (
-                  <div className="space-y-2 text-left animate-in fade-in duration-200 bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Accesos Rápidos Demo</span>
-                      <button type="button" onClick={() => setMostrarDemo(false)} className="text-[10px] text-slate-400 hover:text-white">✕ Ocultar</button>
-                    </div>
-                    <button type="button" onClick={() => handleDemoLogin('SUPER_ADMIN')} className="w-full bg-purple-950/40 hover:bg-purple-900 text-purple-200 text-xs py-2 px-3 rounded-lg flex justify-between items-center transition"><span>👑 Super Admin</span><span className="text-[10px] text-purple-400">Global →</span></button>
-                    <button type="button" onClick={() => handleDemoLogin('DIRECTOR')} className="w-full bg-emerald-950/40 hover:bg-emerald-900 text-emerald-200 text-xs py-2 px-3 rounded-lg flex justify-between items-center transition"><span>🏢 Director Deportivo</span><span className="text-[10px] text-emerald-400">Club →</span></button>
-                    <button type="button" onClick={() => handleDemoLogin('ENTRENADOR')} className="w-full bg-blue-950/40 hover:bg-blue-900 text-blue-200 text-xs py-2 px-3 rounded-lg flex justify-between items-center transition"><span>📋 Entrenador en Pista</span><span className="text-[10px] text-blue-400">Carlos →</span></button>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
 
@@ -726,15 +727,15 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL - DISEÑO LIMPIO)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
       <style>{`
         @media print {
-          @page { size: A4 portrait; margin: 6mm; }
-          html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          .print-full-page { height: 282mm !important; max-height: 282mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; }
+          @page { size: A4 portrait; margin: 4mm; }
+          html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 10px !important; }
+          .print-full-page { height: 285mm !important; max-height: 285mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 2mm !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
         }
@@ -772,57 +773,33 @@ export default function App() {
         </div>
       )}
 
-      {/* Cabecera Principal */}
-      <header className="bg-slate-900 text-white px-6 py-3 shadow-md print:hidden">
-        <div className="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-4">
-          <div className="flex items-center space-x-3">
+      {/* Cabecera Responsive */}
+      <header className="bg-slate-900 text-white px-4 sm:px-6 py-3 shadow-md print:hidden">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div className="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-start">
             <div onClick={() => setPantalla(sessionUser.role === 'SUPER_ADMIN' ? 'PANEL_SUPERADMIN' : 'EQUIPOS')} className="w-10 h-10 rounded-lg bg-slate-800 border flex items-center justify-center font-bold text-emerald-400 cursor-pointer overflow-hidden">
               {clubActivo.logoUrl ? <img src={clubActivo.logoUrl} alt="Logo" className="w-full h-full object-contain" /> : <span>{siglasClub || 'CB'}</span>}
             </div>
             <div>
-              {editandoClub && sessionUser.role === 'SUPER_ADMIN' ? (
-                <div className="flex items-center gap-2 bg-slate-800 p-1.5 rounded-lg border">
-                  <input type="text" value={clubActivo.nombre} onChange={(e) => setClubs(clubs.map(c => c.id === clubActivo.id ? { ...c, nombre: e.target.value } : c))} className="bg-slate-900 text-emerald-400 text-xs px-2 py-1 rounded" />
-                  <input type="text" value={clubActivo.temporada} onChange={(e) => setClubs(clubs.map(c => c.id === clubActivo.id ? { ...c, temporada: e.target.value } : c))} className="bg-slate-900 text-white text-xs px-2 py-1 w-20 rounded" />
-                  <label className="bg-slate-700 text-white text-[11px] px-2 py-1 rounded cursor-pointer">Escudo<input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" /></label>
-                  <button onClick={() => setEditandoClub(false)} className="bg-emerald-600 text-white text-[11px] px-3 py-1 rounded font-bold">Guardar</button>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  {sessionUser.role === 'SUPER_ADMIN' ? (
-                    <>
-                      <select value={clubActivoId} onChange={(e) => setClubActivoId(e.target.value)} className="bg-slate-800 text-emerald-400 font-bold text-sm px-2.5 py-1 rounded-lg border cursor-pointer">
-                        {clubs.map(c => <option key={c.id} value={c.id}>{c.nombre} ({c.temporada})</option>)}
-                      </select>
-                      <button onClick={() => setEditandoClub(true)} className="text-[10px] bg-amber-600 px-2 py-1 rounded font-semibold">✏️ Renombrar</button>
-                      <button onClick={() => setPantalla('PANEL_SUPERADMIN')} className="text-[10px] bg-purple-700 px-2 py-1 rounded font-semibold">Panel Master</button>
-                      <button onClick={() => setPantalla('EDITOR_RUBRICAS')} className="text-[10px] bg-blue-700 px-2 py-1 rounded font-semibold">⚙️ Rúbricas</button>
-                    </>
-                  ) : (
-                    <div>
-                      <h1 className="text-sm font-bold text-emerald-400">{clubActivo.nombre}</h1>
-                      <p className="text-[11px] text-slate-400">{sessionUser.name} • {sessionUser.role === 'DIRECTOR' ? 'Director/a Técnico' : 'Entrenador/a'}</p>
-                    </div>
-                  )}
-                </div>
-              )}
+              <h1 className="text-sm font-bold text-emerald-400">{clubActivo.nombre}</h1>
+              <p className="text-[11px] text-slate-400">{sessionUser.name} • {sessionUser.role === 'DIRECTOR' ? 'Director/a' : sessionUser.role === 'SUPER_ADMIN' ? 'Admin' : 'Entrenador/a'}</p>
             </div>
           </div>
 
-          <div className="flex items-center flex-wrap gap-2.5">
+          <div className="flex items-center flex-wrap gap-2 w-full sm:w-auto justify-end">
             {sessionUser.role !== 'ENTRENADOR' && (
               <>
                 <div className="flex bg-slate-800 p-1 rounded-lg border text-xs">
-                  <button onClick={() => { setGenero('FEMENINO'); setPantalla(tipoEvaluacion === 'JUGADORES' ? 'EQUIPOS' : 'LISTA_ENTRENADORES'); }} className={`px-3 py-1 rounded ${genero === 'FEMENINO' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}>Femenino</button>
-                  <button onClick={() => { setGenero('MASCULINO'); setPantalla(tipoEvaluacion === 'JUGADORES' ? 'EQUIPOS' : 'LISTA_ENTRENADORES'); }} className={`px-3 py-1 rounded ${genero === 'MASCULINO' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}>Masculino</button>
+                  <button onClick={() => { setGenero('FEMENINO'); setPantalla(tipoEvaluacion === 'JUGADORES' ? 'EQUIPOS' : 'LISTA_ENTRENADORES'); }} className={`px-2.5 py-1 rounded ${genero === 'FEMENINO' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}>Fem</button>
+                  <button onClick={() => { setGenero('MASCULINO'); setPantalla(tipoEvaluacion === 'JUGADORES' ? 'EQUIPOS' : 'LISTA_ENTRENADORES'); }} className={`px-2.5 py-1 rounded ${genero === 'MASCULINO' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}>Masc</button>
                 </div>
                 <div className="flex bg-slate-800 p-1 rounded-lg border text-xs">
-                  <button onClick={() => { setTipoEvaluacion('JUGADORES'); setPantalla('EQUIPOS'); }} className={`px-3 py-1 rounded ${tipoEvaluacion === 'JUGADORES' ? 'bg-slate-600 text-white font-medium' : 'text-slate-400'}`}>Jugador@s</button>
-                  <button onClick={() => { setTipoEvaluacion('ENTRENADORES'); setPantalla('LISTA_ENTRENADORES'); }} className={`px-3 py-1 rounded ${tipoEvaluacion === 'ENTRENADORES' ? 'bg-slate-600 text-white font-medium' : 'text-slate-400'}`}>Entrenador@s</button>
+                  <button onClick={() => { setTipoEvaluacion('JUGADORES'); setPantalla('EQUIPOS'); }} className={`px-2.5 py-1 rounded ${tipoEvaluacion === 'JUGADORES' ? 'bg-slate-600 text-white font-medium' : 'text-slate-400'}`}>Jugadores</button>
+                  <button onClick={() => { setTipoEvaluacion('ENTRENADORES'); setPantalla('LISTA_ENTRENADORES'); }} className={`px-2.5 py-1 rounded ${tipoEvaluacion === 'ENTRENADORES' ? 'bg-slate-600 text-white font-medium' : 'text-slate-400'}`}>Staff</button>
                 </div>
               </>
             )}
-            <select value={periodo} onChange={(e) => setPeriodo(e.target.value as Period)} className="bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg border">
+            <select value={periodo} onChange={(e) => setPeriodo(e.target.value as Period)} className="bg-slate-800 text-white text-xs px-2.5 py-1.5 rounded-lg border">
               <option value="Inicial">Ev. Inicial</option>
               <option value="Media">Ev. Media</option>
               <option value="Final">Ev. Final</option>
@@ -832,36 +809,36 @@ export default function App() {
         </div>
       </header>
 
-      {/* Contenedor Principal de Pantallas */}
-      <main className="max-w-4xl mx-auto mt-6 px-4 print:mt-0 print:px-0">
+      {/* Contenedor Principal Responsive */}
+      <main className="max-w-4xl mx-auto mt-4 sm:mt-6 px-3 sm:px-4 print:mt-0 print:px-0">
         
         {pantalla === 'MODAL_QR' && (
           <div className="bg-white rounded-2xl shadow-xl border p-6 max-w-sm mx-auto text-center space-y-4">
             <div>
-              <span className="text-[10px] uppercase font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border">Acceso Público Familias</span>
+              <span className="text-[10px] uppercase font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border">Acceso Público Familias</span>
               <h2 className="text-lg font-bold mt-2">{jugadorSeleccionado.nombre}</h2>
             </div>
             <div className="p-3 bg-white border rounded-xl inline-block mx-auto"><img src={qrCodeUrl} alt="QR" className="w-48 h-48 mx-auto" /></div>
-            <button onClick={() => { navigator.clipboard.writeText(publicFamilyUrl); alert('¡Enlace copiado!'); }} className="w-full bg-emerald-600 text-white text-xs py-2 rounded-lg font-semibold">📋 Copiar Enlace WhatsApp</button>
+            <button onClick={() => { navigator.clipboard.writeText(publicFamilyUrl); alert('¡Enlace copiado!'); }} className="w-full bg-emerald-600 text-white text-xs py-2.5 rounded-lg font-semibold">📋 Copiar Enlace WhatsApp</button>
             <button onClick={() => setPantalla('PLANTILLA')} className="w-full bg-slate-100 text-slate-700 text-xs py-2 rounded-lg">Cerrar</button>
           </div>
         )}
 
         {pantalla === 'EDITOR_RUBRICAS' && sessionUser.role === 'SUPER_ADMIN' && (
-          <div className="bg-white rounded-xl shadow border p-6 space-y-6">
-            <div className="flex justify-between items-center border-b pb-4">
+          <div className="bg-white rounded-xl shadow border p-4 sm:p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 gap-3">
               <div>
                 <button onClick={() => setPantalla('EQUIPOS')} className="text-xs text-blue-600 font-semibold mb-1 hover:underline">← Volver a equipos</button>
-                <h2 className="text-xl font-bold">Editor de Rúbricas Técnicas</h2>
+                <h2 className="text-lg sm:text-xl font-bold">Editor de Rúbricas Técnicas</h2>
               </div>
               <div className="flex bg-slate-100 p-1 rounded-lg text-xs font-medium">
                 <button onClick={() => setPestanaRubrica('JUGADORES')} className={`px-3 py-1.5 rounded ${pestanaRubrica === 'JUGADORES' ? 'bg-blue-600 text-white' : ''}`}>Jugador@s</button>
                 <button onClick={() => setPestanaRubrica('ENTRENADORES')} className={`px-3 py-1.5 rounded ${pestanaRubrica === 'ENTRENADORES' ? 'bg-blue-600 text-white' : ''}`}>Entrenadores</button>
               </div>
             </div>
-            <form onSubmit={handleAddCategory} className="flex gap-2 text-xs">
+            <form onSubmit={handleAddCategory} className="flex flex-col sm:flex-row gap-2 text-xs">
               <input type="text" required placeholder="Nueva categoría..." value={nuevaCatNombre} onChange={(e) => setNuevaCatNombre(e.target.value)} className="flex-1 border rounded-lg p-2.5" />
-              <button type="submit" className="bg-blue-600 text-white font-medium px-4 rounded-lg">+ Añadir</button>
+              <button type="submit" className="bg-blue-600 text-white font-medium px-4 py-2.5 rounded-lg">+ Añadir</button>
             </form>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {(pestanaRubrica === 'JUGADORES' ? rubricasJugadores : rubricasEntrenadores).map(cat => (
@@ -882,26 +859,26 @@ export default function App() {
 
         {pantalla === 'PANEL_SUPERADMIN' && sessionUser.role === 'SUPER_ADMIN' && (
           <div className="space-y-6">
-            <div className="bg-purple-900 text-white p-6 rounded-2xl shadow flex justify-between items-center">
+            <div className="bg-purple-900 text-white p-5 sm:p-6 rounded-2xl shadow flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
               <div>
-                <h2 className="text-xl font-bold">Panel Maestro de Control</h2>
+                <h2 className="text-xl sm:text-2xl font-bold">Panel Maestro de Control</h2>
                 <p className="text-xs text-purple-200 mt-1">Gestión integral de accesos y clubes.</p>
               </div>
               <button onClick={() => setPantalla('EQUIPOS')} className="bg-white text-purple-900 font-semibold text-xs px-4 py-2 rounded-lg">Ver App como Club →</button>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow border">
-              <h3 className="font-semibold text-sm mb-4">1. Dar de Alta Nuevo Club</h3>
-              <form onSubmit={handleCrearClub} className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            <div className="bg-white p-5 sm:p-6 rounded-xl shadow border space-y-4">
+              <h3 className="font-semibold text-sm">1. Dar de Alta Nuevo Club</h3>
+              <form onSubmit={handleCrearClub} className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <input type="text" required placeholder="Nombre del Club" value={nuevoClubNombre} onChange={(e) => setNuevoClubNombre(e.target.value)} className="border rounded-lg p-2.5" />
                 <input type="text" placeholder="Temporada (2026/27)" value={nuevoClubTemporada} onChange={(e) => setNuevoClubTemporada(e.target.value)} className="border rounded-lg p-2.5" />
                 <button type="submit" className="bg-purple-700 text-white font-medium rounded-lg p-2.5">+ Crear Club</button>
               </form>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow border">
-              <h3 className="font-semibold text-sm mb-4">2. Crear Usuario y Asignar Credenciales</h3>
-              <form onSubmit={handleCrearUsuario} className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
+            <div className="bg-white p-5 sm:p-6 rounded-xl shadow border space-y-4">
+              <h3 className="font-semibold text-sm">2. Crear Usuario y Asignar Credenciales</h3>
+              <form onSubmit={handleCrearUsuario} className="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs">
                 <input type="text" required placeholder="Nombre" value={nuevoUserNombre} onChange={(e) => setNuevoUserNombre(e.target.value)} className="border rounded-lg p-2.5" />
                 <input type="email" required placeholder="Correo" value={nuevoUserEmail} onChange={(e) => setNuevoUserEmail(e.target.value)} className="border rounded-lg p-2.5" />
                 <input type="text" required placeholder="Contraseña" value={nuevoUserPass} onChange={(e) => setNuevoUserPass(e.target.value)} className="border rounded-lg p-2.5 font-mono" />
@@ -912,15 +889,15 @@ export default function App() {
                 <select value={nuevoUserClubId} onChange={(e) => setNuevoUserClubId(e.target.value)} className="border rounded-lg p-2.5">
                   {clubs.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                 </select>
-                <div className="md:col-span-5 flex justify-end">
+                <div className="sm:col-span-5 flex justify-end">
                   <button type="submit" className="bg-emerald-600 text-white font-medium px-6 py-2 rounded-lg">Crear Acceso</button>
                 </div>
               </form>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow border">
+            <div className="bg-white p-5 sm:p-6 rounded-xl shadow border overflow-x-auto">
               <h3 className="font-semibold text-sm mb-4">3. Usuarios Activos</h3>
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs min-w-[500px]">
                 <thead>
                   <tr className="border-b text-slate-400 font-medium"><th className="pb-2">Nombre</th><th className="pb-2">Correo</th><th className="pb-2">Rol</th><th className="pb-2 text-right">Acciones</th></tr>
                 </thead>
@@ -943,8 +920,8 @@ export default function App() {
         )}
 
         {pantalla === 'EQUIPOS' && (
-          <div className="bg-white rounded-xl shadow border p-6">
-            <div className="flex justify-between items-center mb-6">
+          <div className="bg-white rounded-xl shadow border p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
               <div>
                 <h2 className="text-lg font-bold">{clubActivo.nombre} — Sección {genero === 'FEMENINO' ? 'Femenina' : 'Masculina'}</h2>
                 <p className="text-xs text-slate-500">Temporada {clubActivo.temporada}</p>
@@ -954,7 +931,7 @@ export default function App() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {equiposFiltrados.map(equipo => (
-                <div key={equipo.id} onClick={() => { setEquipoSeleccionado(equipo); setPantalla('PLANTILLA'); }} className="p-5 border rounded-xl hover:border-emerald-500 hover:shadow-md cursor-pointer bg-slate-50/50">
+                <div key={equipo.id} onClick={() => { setEquipoSeleccionado(equipo); setPantalla('PLANTILLA'); }} className="p-4 sm:p-5 border rounded-xl hover:border-emerald-500 hover:shadow-md cursor-pointer bg-slate-50/50">
                   <h3 className="font-semibold text-base mb-1">{equipo.nombre}</h3>
                   <p className="text-xs text-slate-500 mb-3">{equipo.categoria} • {equipo.jugadores.length} jugadores</p>
                   <div className="text-xs text-slate-600 flex justify-between border-t pt-3">
@@ -968,60 +945,63 @@ export default function App() {
         )}
 
         {pantalla === 'PLANTILLA' && (
-          <div className="bg-white rounded-xl shadow border p-6 space-y-6">
-            <div className="flex justify-between items-center border-b pb-4">
+          <div className="bg-white rounded-xl shadow border p-4 sm:p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 gap-3">
               <div>
                 <button onClick={() => setPantalla('EQUIPOS')} className="text-xs text-emerald-700 font-medium mb-1 hover:underline">← Volver a equipos</button>
                 <h2 className="text-lg font-bold">{equipoSeleccionado.nombre}</h2>
               </div>
-              <div className="space-x-2">
+              <div className="flex flex-wrap gap-2">
                 <button onClick={handleExportarExcel} className="bg-emerald-800 text-white text-xs px-3 py-1.5 rounded-lg font-medium">📊 Excel</button>
                 <button onClick={handleAbrirPaseLista} className="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium">📋 Pasar Lista</button>
                 <button onClick={() => setPantalla('INFORME_EQUIPO')} className="bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg font-medium">🖨️ Imprimir Todo</button>
               </div>
             </div>
 
-            <form onSubmit={handleAddJugador} className="bg-slate-50 border rounded-lg p-3 text-xs flex items-end gap-3">
-              <div className="flex-1"><label className="block text-[11px] font-medium mb-1 text-slate-600">Nombre</label><input type="text" required placeholder="Nombre..." value={nuevoNombreJugador} onChange={(e) => setNuevoNombreJugador(e.target.value)} className="w-full border rounded px-2.5 py-1.5 bg-white" /></div>
-              <div className="w-16"><label className="block text-[11px] font-medium mb-1 text-slate-600">Dorsal</label><input type="number" placeholder="7" value={nuevoDorsal} onChange={(e) => setNuevoDorsal(e.target.value)} className="w-full border rounded px-2.5 py-1.5 bg-white" /></div>
-              <div className="w-20"><label className="block text-[11px] font-medium mb-1 text-slate-600">Año</label><input type="number" placeholder="2015" value={nuevoNacimiento} onChange={(e) => setNuevoNacimiento(e.target.value)} className="w-full border rounded px-2.5 py-1.5 bg-white" /></div>
-              <button type="submit" className="bg-emerald-600 text-white font-medium px-4 py-1.5 rounded">+ Añadir</button>
+            <form onSubmit={handleAddJugador} className="bg-slate-50 border rounded-lg p-3 text-xs flex flex-col sm:flex-row items-end gap-3">
+              <div className="w-full sm:flex-1"><label className="block text-[11px] font-medium mb-1 text-slate-600">Nombre</label><input type="text" required placeholder="Nombre..." value={nuevoNombreJugador} onChange={(e) => setNuevoNombreJugador(e.target.value)} className="w-full border rounded px-2.5 py-1.5 bg-white" /></div>
+              <div className="w-full sm:w-20"><label className="block text-[11px] font-medium mb-1 text-slate-600">Dorsal</label><input type="number" placeholder="7" value={nuevoDorsal} onChange={(e) => setNuevoDorsal(e.target.value)} className="w-full border rounded px-2.5 py-1.5 bg-white" /></div>
+              <div className="w-full sm:w-24"><label className="block text-[11px] font-medium mb-1 text-slate-600">Año</label><input type="number" placeholder="2015" value={nuevoNacimiento} onChange={(e) => setNuevoNacimiento(e.target.value)} className="w-full border rounded px-2.5 py-1.5 bg-white" /></div>
+              <button type="submit" className="w-full sm:w-auto bg-emerald-600 text-white font-medium px-4 py-1.5 rounded">+ Añadir</button>
             </form>
 
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b text-slate-400 font-medium"><th className="pb-3 px-2">Dorsal</th><th className="pb-3 px-2">Nombre</th><th className="pb-3 px-2 text-center">Asistencia</th><th className="pb-3 px-2 text-center">Ev. Inicial</th><th className="pb-3 px-2 text-right">Acciones</th></tr>
-              </thead>
-              <tbody className="divide-y">
-                {equipoSeleccionado.jugadores.map(jugador => {
-                  const asist = calcularAsistenciaJugador(jugador.id, equipoSeleccionado);
-                  return (
-                    <tr key={jugador.id} className="hover:bg-slate-50">
-                      <td className="py-3 px-2 font-medium text-slate-600">#{jugador.dorsal}</td>
-                      <td className="py-3 px-2 font-medium text-slate-900">{jugador.nombre}</td>
-                      <td className="py-3 px-2 text-center"><span className="px-2 py-0.5 rounded font-medium bg-emerald-100 text-emerald-800">{asist.pct}%</span></td>
-                      <td className="py-3 px-2 text-center">{badgeStatus(jugador.inicial)}</td>
-                      <td className="py-3 px-2 text-right space-x-1">
-                        <button onClick={() => { setJugadorSeleccionado(jugador); setPantalla('FORMULARIO'); }} className="bg-emerald-600 text-white px-2.5 py-1 rounded font-medium">Evaluar</button>
-                        <button onClick={() => { setJugadorSeleccionado(jugador); setPantalla('INFORME'); }} className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded border font-medium">Ficha</button>
-                        <button onClick={() => { setJugadorSeleccionado(jugador); setPantalla('MODAL_QR'); }} className="bg-purple-50 text-purple-700 px-2 py-1 rounded border font-medium">📱 QR</button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs min-w-[550px]">
+                <thead>
+                  <tr className="border-b text-slate-400 font-medium"><th className="pb-3 px-2">Dorsal</th><th className="pb-3 px-2">Nombre</th><th className="pb-3 px-2 text-center">Asistencia</th><th className="pb-3 px-2 text-center">Evaluación</th><th className="pb-3 px-2 text-right">Acciones</th></tr>
+                </thead>
+                <tbody className="divide-y">
+                  {equipoSeleccionado.jugadores.map(jugador => {
+                    const asist = calcularAsistenciaJugador(jugador.id, equipoSeleccionado);
+                    const statusField = periodo === 'Inicial' ? jugador.inicial : periodo === 'Media' ? jugador.media : jugador.final;
+                    return (
+                      <tr key={jugador.id} className="hover:bg-slate-50">
+                        <td className="py-3 px-2 font-medium text-slate-600">#{jugador.dorsal}</td>
+                        <td className="py-3 px-2 font-medium text-slate-900">{jugador.nombre}</td>
+                        <td className="py-3 px-2 text-center"><span className="px-2 py-0.5 rounded font-medium bg-emerald-100 text-emerald-800">{asist.pct}%</span></td>
+                        <td className="py-3 px-2 text-center">{badgeStatus(statusField)}</td>
+                        <td className="py-3 px-2 text-right space-x-1">
+                          <button onClick={() => { setJugadorSeleccionado(jugador); setPantalla('FORMULARIO'); }} className="bg-emerald-600 text-white px-2.5 py-1 rounded font-medium">Evaluar</button>
+                          <button onClick={() => { setJugadorSeleccionado(jugador); setPantalla('INFORME'); }} className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded border font-medium">Ficha</button>
+                          <button onClick={() => { setJugadorSeleccionado(jugador); setPantalla('MODAL_QR'); }} className="bg-purple-50 text-purple-700 px-2 py-1 rounded border font-medium">📱 QR</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
         {pantalla === 'PASAR_LISTA' && (
-          <div className="bg-white rounded-xl shadow border p-6 max-w-2xl mx-auto space-y-6">
+          <div className="bg-white rounded-xl shadow border p-4 sm:p-6 max-w-2xl mx-auto space-y-6">
             <div className="flex justify-between items-center border-b pb-4">
               <h2 className="text-lg font-bold">Pasar Lista</h2>
               <button onClick={() => setPantalla('PLANTILLA')} className="text-xs text-slate-500">✕ Cancelar</button>
             </div>
             <form onSubmit={handleGuardarSesion} className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg border">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg border">
                 <div><label className="block font-medium mb-1 text-slate-600">Fecha</label><input type="date" required value={sessionFecha} onChange={(e) => setSessionFecha(e.target.value)} className="w-full border rounded p-2 bg-white" /></div>
                 <div><label className="block font-medium mb-1 text-slate-600">Tipo</label><select value={sessionTipo} onChange={(e) => setSessionTipo(e.target.value as SessionType)} className="w-full border rounded p-2 bg-white"><option value="ENTRENAMIENTO">Entrenamiento</option><option value="PARTIDO">Partido</option></select></div>
               </div>
@@ -1029,9 +1009,9 @@ export default function App() {
                 {equipoSeleccionado.jugadores.map(jugador => {
                   const estado = sessionAsistencias[jugador.id] || 'PRESENTE';
                   return (
-                    <div key={jugador.id} className="flex justify-between items-center p-3 bg-white">
-                      <span className="font-medium">#{jugador.dorsal} {jugador.nombre}</span>
-                      <div className="space-x-1">
+                    <div key={jugador.id} className="flex justify-between items-center p-3 bg-white gap-2">
+                      <span className="font-medium text-xs sm:text-sm">#{jugador.dorsal} {jugador.nombre}</span>
+                      <div className="flex space-x-1">
                         <button type="button" onClick={() => setSessionAsistencias({ ...sessionAsistencias, [jugador.id]: 'PRESENTE' })} className={`px-2 py-1 rounded text-xs ${estado === 'PRESENTE' ? 'bg-emerald-600 text-white' : 'bg-slate-100'}`}>✅</button>
                         <button type="button" onClick={() => setSessionAsistencias({ ...sessionAsistencias, [jugador.id]: 'FALTA' })} className={`px-2 py-1 rounded text-xs ${estado === 'FALTA' ? 'bg-rose-600 text-white' : 'bg-slate-100'}`}>❌</button>
                       </div>
@@ -1057,9 +1037,9 @@ export default function App() {
         )}
 
         {pantalla === 'LISTA_ENTRENADORES' && (
-          <div className="bg-white rounded-xl shadow border p-6">
+          <div className="bg-white rounded-xl shadow border p-4 sm:p-6 overflow-x-auto">
             <h2 className="text-lg font-bold mb-4">Cuerpo Técnico — {clubActivo.nombre}</h2>
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[450px]">
               <thead><tr className="border-b text-slate-400 font-medium"><th className="pb-3 px-2">Entrenador/a</th><th className="pb-3 px-2">Equipo</th><th className="pb-3 px-2 text-right">Acción</th></tr></thead>
               <tbody className="divide-y">
                 {entrenadoresFiltrados.map(coach => (
@@ -1076,92 +1056,135 @@ export default function App() {
           </div>
         )}
 
-        {pantalla === 'FORMULARIO' && (
-          <div className="bg-white rounded-xl shadow border p-6 space-y-6">
-            <div className="flex justify-between items-center border-b pb-4">
-              <div>
-                <button onClick={() => setPantalla(tipoEvaluacion === 'JUGADORES' ? 'PLANTILLA' : 'LISTA_ENTRENADORES')} className="text-xs text-emerald-700 font-medium mb-1 hover:underline">← Volver</button>
-                <h2 className="text-lg font-bold">{tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}</h2>
+        {pantalla === 'FORMULARIO' && (() => {
+          const statusField = periodo === 'Inicial' ? jugadorSeleccionado.inicial : periodo === 'Media' ? jugadorSeleccionado.media : jugadorSeleccionado.final;
+          const isLocked = statusField === 'COMPLETADA' && sessionUser?.role !== 'SUPER_ADMIN';
+
+          return (
+            <div className="bg-white rounded-xl shadow border p-4 sm:p-6 space-y-6">
+              <div className="flex justify-between items-center border-b pb-4">
+                <div>
+                  <button onClick={() => setPantalla(tipoEvaluacion === 'JUGADORES' ? 'PLANTILLA' : 'LISTA_ENTRENADORES')} className="text-xs text-emerald-700 font-medium mb-1 hover:underline">← Volver</button>
+                  <h2 className="text-lg font-bold">{tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}</h2>
+                </div>
+                <div className="flex items-center gap-2">
+                  {isLocked && <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-1 rounded">🔒 Bloqueado ({periodo})</span>}
+                  <button onClick={() => setPantalla('INFORME')} className="bg-slate-900 text-white text-xs px-3 py-1.5 rounded font-medium">Ver Ficha</button>
+                </div>
               </div>
-              <button onClick={() => setPantalla('INFORME')} className="bg-slate-900 text-white text-xs px-3 py-1.5 rounded font-medium">Ver Ficha</button>
-            </div>
 
-            {/* Guía visual de colores diferenciados para los niveles */}
-            <div className="bg-slate-50 border p-3 rounded-lg flex flex-wrap gap-4 text-xs text-slate-700">
-              {nivelesActuales.map(n => (
-                <div key={n.key} className="flex items-center space-x-1.5">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: n.color }} />
-                  <span className="font-medium">{n.label}</span>
+              {isLocked && (
+                <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs p-3 rounded-lg">
+                  La evaluación <strong>{periodo}</strong> ya se encuentra completada y cerrada para este deportista. Para modificarla, cambia de periodo en el menú superior o solicita permisos de Super Administrador.
                 </div>
-              ))}
-            </div>
+              )}
 
-            <div className="space-y-6">
-              {rubricasActivas.map(cat => (
-                <div key={cat.id} className="space-y-3">
-                  <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500 border-b pb-1">{cat.nombre}</h3>
-                  <div className="divide-y">
-                    {cat.items.map(item => {
-                      const selKey = respuestas[item]?.nivel;
-                      const activeLvl = nivelesActuales.find(l => l.key === selKey);
-                      return (
-                        <div key={item} className="py-3.5 space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium text-sm text-slate-800">{item}</span>
-                            <div className="flex space-x-2">
-                              {nivelesActuales.map(lvl => (
-                                <button 
-                                  key={lvl.key} 
-                                  type="button" 
-                                  onClick={() => handleScore(item, lvl.key)} 
-                                  className={`w-7 h-7 rounded-full border-2 transition-all flex items-center justify-center text-[10px] font-bold ${respuestas[item]?.nivel === lvl.key ? 'scale-110 shadow-sm ring-2 ring-offset-1 ring-slate-400' : 'bg-white opacity-80'}`} 
-                                  style={{ backgroundColor: respuestas[item]?.nivel === lvl.key ? lvl.color : '#fff', borderColor: lvl.color, color: respuestas[item]?.nivel === lvl.key ? '#fff' : 'transparent' }} 
-                                  title={lvl.label}
-                                >
-                                  {respuestas[item]?.nivel === lvl.key ? '✓' : ''}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Caja de descripción del nivel seleccionado para aportar claridad pedagógica */}
-                          {activeLvl && activeLvl.key !== 'NO_OBSERVADO' && (
-                            <div className="bg-slate-50 border border-slate-200/80 rounded px-3 py-1.5 text-xs text-slate-600 flex items-center gap-2">
-                              <span className="font-semibold" style={{ color: activeLvl.color }}>{activeLvl.label}:</span>
-                              <span>{activeLvl.desc}</span>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+              <div className="bg-slate-50 border p-3 rounded-lg flex flex-wrap gap-4 text-xs text-slate-700">
+                {nivelesActuales.map(n => (
+                  <div key={n.key} className="flex items-center space-x-1.5">
+                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: n.color }} />
+                    <span className="font-medium">{n.label}</span>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              <div className="space-y-6">
+                {rubricasActivas.map(cat => (
+                  <div key={cat.id} className="space-y-3">
+                    <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500 border-b pb-1">{cat.nombre}</h3>
+                    <div className="divide-y">
+                      {cat.items.map(item => {
+                        const selKey = respuestas[item]?.nivel;
+                        const activeLvl = nivelesActuales.find(l => l.key === selKey);
+                        return (
+                          <div key={item} className="py-3.5 space-y-2">
+                            <div className="flex justify-between items-center gap-3">
+                              <span className="font-medium text-xs sm:text-sm text-slate-800">{item}</span>
+                              <div className="flex space-x-1 sm:space-x-2">
+                                {nivelesActuales.map(lvl => (
+                                  <button 
+                                    key={lvl.key} 
+                                    type="button" 
+                                    disabled={isLocked}
+                                    onClick={() => handleScore(item, lvl.key)} 
+                                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 transition-all flex items-center justify-center text-[10px] font-bold ${isLocked ? 'opacity-50 cursor-not-allowed' : ''} ${respuestas[item]?.nivel === lvl.key ? 'scale-110 shadow-sm ring-2 ring-offset-1 ring-slate-400' : 'bg-white opacity-80'}`} 
+                                    style={{ backgroundColor: respuestas[item]?.nivel === lvl.key ? lvl.color : '#fff', borderColor: lvl.color, color: respuestas[item]?.nivel === lvl.key ? '#fff' : 'transparent' }} 
+                                    title={lvl.label}
+                                  >
+                                    {respuestas[item]?.nivel === lvl.key ? '✓' : ''}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {activeLvl && activeLvl.key !== 'NO_OBSERVADO' && (
+                              <div className="bg-slate-50 border border-slate-200/80 rounded px-3 py-1.5 text-xs text-slate-600 flex items-center gap-2">
+                                <span className="font-semibold" style={{ color: activeLvl.color }}>{activeLvl.label}:</span>
+                                <span>{activeLvl.desc}</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-4 border-t flex justify-between items-center">
+                <button onClick={() => setPantalla('PLANTILLA')} className="text-xs text-slate-600 font-medium">← Volver</button>
+                {!isLocked ? (
+                  <button onClick={handleCerrarEvaluacion} className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-xs font-semibold shadow">
+                    🔒 Cerrar y Guardar Evaluación {periodo}
+                  </button>
+                ) : (
+                  <button onClick={() => setPantalla('INFORME')} className="bg-slate-900 text-white px-6 py-2.5 rounded-lg text-xs font-semibold">
+                    Ver Informe Oficial
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="pt-4 border-t flex justify-end"><button onClick={() => setPantalla('INFORME')} className="bg-emerald-600 text-white px-6 py-2 rounded text-xs font-medium">Ver Informe Oficial</button></div>
-          </div>
-        )}
+          );
+        })()}
 
         {pantalla === 'INFORME' && (
-          <div className="print-full-page bg-white rounded-xl shadow border p-8">
-            <div className="flex justify-between items-center border-b-2 border-slate-900 pb-3">
+          <div className="print-full-page bg-white rounded-xl shadow border p-4 sm:p-8 space-y-4">
+            <div className="flex justify-between items-center border-b-2 border-slate-900 pb-2">
               <div>
-                <h2 className="text-xl font-bold">{tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}</h2>
-                <p className="text-xs text-slate-600">{clubActivo.nombre} • Evaluación 360°</p>
+                <h2 className="text-lg sm:text-xl font-bold">{tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}</h2>
+                <p className="text-[11px] text-slate-600">{clubActivo.nombre} • Evaluación 360° ({periodo})</p>
               </div>
-              <span className="text-xs font-bold bg-slate-100 px-3 py-1 rounded">Asistencia: {asistActual.pct}%</span>
+              <span className="text-xs font-bold bg-slate-100 px-2.5 py-1 rounded">Asistencia: {asistActual.pct}%</span>
             </div>
-            <div className="grid grid-cols-2 gap-8 my-6 text-xs">
+            
+            <div className="grid grid-cols-2 gap-4 my-2 text-[11px]">
               {rubricasActivas.map(cat => (
-                <div key={cat.id} className="space-y-2">
-                  <div className="bg-slate-900 text-white font-semibold px-3 py-1 rounded text-[11px] uppercase">{cat.nombre}</div>
-                  {cat.items.map(item => <div key={item} className="flex justify-between py-1 px-1 bg-slate-50 rounded"><span>{item}</span><span className="font-semibold text-emerald-700">Consolidado</span></div>)}
+                <div key={cat.id} className="space-y-1">
+                  <div className="bg-slate-900 text-white font-semibold px-2 py-0.5 rounded text-[10px] uppercase">{cat.nombre}</div>
+                  {cat.items.map(item => (
+                    <div key={item} className="flex justify-between py-0.5 px-1 bg-slate-50 rounded border border-slate-100">
+                      <span className="truncate pr-2">{item}</span>
+                      <span className="font-semibold text-emerald-700 shrink-0">Consolidado</span>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
-            <div className="pt-4 border-t flex justify-between items-center print:hidden">
-              <button onClick={() => setPantalla('FORMULARIO')} className="text-xs text-slate-600 font-medium">← Volver</button>
-              <button onClick={() => window.print()} className="bg-slate-900 text-white text-xs px-5 py-2 rounded font-medium">Imprimir PDF</button>
+
+            <div className="grid grid-cols-2 gap-3 text-[11px] pt-1">
+              <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                <strong className="block font-bold text-slate-900 mb-0.5">Fortalezas:</strong>
+                <p className="text-slate-700 line-clamp-2">{fortalezas}</p>
+              </div>
+              <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                <strong className="block font-bold text-slate-900 mb-0.5">Objetivos:</strong>
+                <p className="text-slate-700 line-clamp-2">{objetivos}</p>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t flex justify-between items-center text-[10px] text-slate-500 print:hidden">
+              <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-medium">← Volver a editar</button>
+              <button onClick={() => window.print()} className="bg-slate-900 text-white px-4 py-2 rounded font-medium shadow">🖨️ Imprimir / Guardar PDF</button>
             </div>
           </div>
         )}
@@ -1169,7 +1192,7 @@ export default function App() {
         {pantalla === 'INFORME_EQUIPO' && (
           <div className="space-y-8">
             <div className="bg-white p-4 rounded-xl shadow border flex justify-between items-center print:hidden">
-              <h3 className="font-bold">Dossier Completo de {equipoSeleccionado.nombre}</h3>
+              <h3 className="font-bold text-sm">Dossier Completo de {equipoSeleccionado.nombre}</h3>
               <div className="space-x-2">
                 <button onClick={() => setPantalla('PLANTILLA')} className="text-xs px-3 py-2 rounded">← Volver</button>
                 <button onClick={() => window.print()} className="bg-slate-900 text-white text-xs px-5 py-2 rounded font-medium">Imprimir Todo</button>
