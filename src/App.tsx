@@ -182,7 +182,7 @@ const USUARIOS_INICIALES: AppUser[] = [
 ];
 
 export default function App() {
-  const [publicToken, setPublicToken] = useState<string | null>(() => {
+  const [publicToken, setPublicToken] = useState<string | null> (() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       return params.get('token');
@@ -777,15 +777,15 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME APAISADO / LANDSCAPE)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
       <style>{`
         @media print {
-          @page { size: A4 portrait; margin: 3mm; }
-          html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 8.5px !important; }
-          .print-full-page { height: 284mm !important; max-height: 284mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 1mm !important; }
+          @page { size: A4 landscape; margin: 4mm; }
+          html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 9.5px !important; }
+          .print-landscape-page { width: 287mm !important; height: 195mm !important; max-height: 195mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 2mm !important; margin: 0 auto !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
         }
@@ -1256,42 +1256,43 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL SUPREMO (ARMONIOSO, SIN SUPERPOSICIONES Y LLENO DE VALOR VISUAL) */}
+        {/* INFORME PROFESIONAL APAISADO (LANDSCAPE A4 - DISTRIBUCIÓN HORIZONTE DE ÉLITE) */}
         {pantalla === 'INFORME' && (
-          <div className="print-full-page bg-white rounded-2xl shadow-xl border border-slate-200 p-5 sm:p-6 space-y-3.5">
+          <div className="print-landscape-page bg-white rounded-2xl shadow-xl border border-slate-200 p-5 space-y-3">
             
-            {/* 1. Cabecera robusta sin solapamientos (Estructura de grilla estricta) */}
-            <div className="border-b-2 border-slate-900 pb-3">
-              <div className="grid grid-cols-12 gap-3 items-center">
-                <div className="col-span-8 flex items-center space-x-3">
-                  <div className="w-11 h-11 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-base shrink-0 shadow">
-                    {siglasClub}
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-extrabold text-slate-900 leading-tight">
-                      {tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}
-                    </h2>
-                    <p className="text-[10px] text-slate-600 font-medium mt-0.5">
-                      {clubActivo.nombre} • Dossier Técnico 360° ({periodo}) • {equipoSeleccionado.nombre} {tipoEvaluacion === 'JUGADORES' ? `• #${jugadorSeleccionado.dorsal}` : ''}
-                    </p>
-                  </div>
+            {/* 1. Cabecera Panorámica Optimizada (Cero solapamientos) */}
+            <div className="border-b-2 border-slate-900 pb-2.5 flex justify-between items-center">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-sm shadow">
+                  {siglasClub}
                 </div>
-                
-                <div className="col-span-4 text-right bg-slate-50 p-2 rounded-xl border border-slate-200">
-                  <span className="text-[11px] font-extrabold text-emerald-800">
-                    Asistencia: {asistActual.pct}%
-                  </span>
-                  <p className="text-[9px] text-slate-500 font-medium mt-0.5">Temporada {clubActivo.temporada}</p>
+                <div>
+                  <h2 className="text-base font-extrabold text-slate-900 leading-tight">
+                    {tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}
+                  </h2>
+                  <p className="text-[10px] text-slate-500 font-medium">
+                    {clubActivo.nombre} • Dossier 360° ({periodo}) • Equipo: {equipoSeleccionado.nombre} {tipoEvaluacion === 'JUGADORES' ? `• Dorsal #${jugadorSeleccionado.dorsal}` : ''}
+                  </p>
                 </div>
               </div>
+              <div className="text-right">
+                <span className="text-[11px] font-bold bg-slate-100 text-slate-800 px-3 py-1 rounded-lg border border-slate-200">
+                  Asistencia: {asistActual.pct}%
+                </span>
+                <p className="text-[9px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
+              </div>
+            </div>
 
-              {/* Resumen Ejecutivo Integrado: Rombo + Tarjetas de Fortalezas y Objetivos */}
-              <div className="grid grid-cols-12 gap-3 items-center bg-slate-50/90 p-2.5 rounded-xl border border-slate-200 mt-3">
-                <div className="col-span-4 flex flex-col items-center justify-center border-r border-slate-200 pr-2">
-                  <span className="text-[8px] font-bold text-slate-700 uppercase tracking-wider mb-0.5">
+            {/* 2. Estructura Apaisada en 2 Columnas Maestras (Izquierda: Rombo + Textos / Derecha: Rúbricas en 4 columnas completas) */}
+            <div className="grid grid-cols-12 gap-3 items-start">
+              
+              {/* Columna Izquierda (Ancho 4): Gráfico de Radar + Fortalezas & Objetivos */}
+              <div className="col-span-4 space-y-2">
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex flex-col items-center justify-center">
+                  <span className="text-[9px] font-bold text-slate-700 uppercase tracking-wider mb-1">
                     Perfil de Rendimiento
                   </span>
-                  <svg width="85" height="85" viewBox="0 0 150 150" className="overflow-visible">
+                  <svg width="110" height="110" viewBox="0 0 150 150" className="overflow-visible">
                     <polygon points="75,25 125,75 75,125 25,75" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
                     <polygon points="75,50 100,75 75,100 50,75" fill="none" stroke="#E2E8F0" strokeWidth="1" />
                     <line x1="75" y1="25" x2="75" y2="125" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
@@ -1306,54 +1307,54 @@ export default function App() {
                   </svg>
                 </div>
 
-                <div className="col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[9.5px]">
-                  <div className="bg-white p-2 rounded-lg border border-emerald-200 shadow-sm">
-                    <strong className="block font-bold text-emerald-950 uppercase text-[8.5px] tracking-wider mb-0.5">Fortalezas:</strong>
-                    <p className="text-emerald-900 leading-snug line-clamp-3">{fortalezas}</p>
-                  </div>
-                  <div className="bg-white p-2 rounded-lg border border-amber-200 shadow-sm">
-                    <strong className="block font-bold text-amber-950 uppercase text-[8.5px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
-                    <p className="text-amber-900 leading-snug line-clamp-3">{objetivos}</p>
-                  </div>
+                <div className="bg-emerald-50/50 p-2.5 rounded-xl border border-emerald-200/80 text-[10px]">
+                  <strong className="block font-bold text-emerald-950 uppercase text-[9px] tracking-wider mb-0.5">Fortalezas:</strong>
+                  <p className="text-emerald-900 leading-snug">{fortalezas}</p>
+                </div>
+
+                <div className="bg-amber-50/50 p-2.5 rounded-xl border border-amber-200/80 text-[10px]">
+                  <strong className="block font-bold text-amber-950 uppercase text-[9px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
+                  <p className="text-amber-900 leading-snug">{objetivos}</p>
                 </div>
               </div>
-            </div>
 
-            {/* 2. Secciones de Rúbricas Técnicas en 2 columnas compactas y conectadas */}
-            <div className="grid grid-cols-2 gap-2.5 text-[9.5px]">
-              {rubricasActivas.map(cat => (
-                <div key={cat.id} className="space-y-1 bg-slate-50/60 p-2.5 rounded-xl border border-slate-200">
-                  <div className="bg-slate-900 text-white font-bold px-2 py-0.5 rounded text-[9px] uppercase tracking-wider">
-                    {cat.nombre}
+              {/* Columna Derecha (Ancho 8): Las 4 categorías de Rúbricas distribuidas en Grid de 2x2 para aprovechar el formato horizontal */}
+              <div className="col-span-8 grid grid-cols-2 gap-2 text-[9px]">
+                {rubricasActivas.map(cat => (
+                  <div key={cat.id} className="space-y-1 bg-slate-50/60 p-2 rounded-xl border border-slate-200">
+                    <div className="bg-slate-900 text-white font-bold px-2 py-0.5 rounded text-[9px] uppercase tracking-wider">
+                      {cat.nombre}
+                    </div>
+                    <div className="space-y-0.5 pt-0.5">
+                      {cat.items.map(item => {
+                        const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
+                        const lvlObj = nivelesActuales.find(l => l.key === selKey);
+                        return (
+                          <div key={item} className="flex justify-between items-center py-0.5 px-1.5 bg-white rounded border border-slate-200/70">
+                            <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
+                            <span className="font-bold px-1.5 py-0.2 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                              {lvlObj ? lvlObj.label : 'Consolidado'}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="space-y-1 pt-0.5">
-                    {cat.items.map(item => {
-                      const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
-                      const lvlObj = nivelesActuales.find(l => l.key === selKey);
-                      return (
-                        <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/80 shadow-2xs">
-                          <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                          <span className="font-bold px-2 py-0.5 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
-                            {lvlObj ? lvlObj.label : 'Consolidado'}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+
             </div>
 
             {/* 3. Pie Institucional de Firma y Validación Técnica */}
             <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-[9px] text-slate-500">
               <div className="flex items-center gap-6">
-                <span>Director Técnico / Entrenador: _________________________</span>
-                <span>Firma: _________________</span>
+                <span>Director Técnico / Entrenador: ___________________________________</span>
+                <span>Firma: _____________________</span>
               </div>
               <div className="no-print space-x-2">
                 <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-semibold hover:underline">← Editar</button>
                 <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 rounded-lg font-semibold shadow transition">
-                  🖨️ Guardar PDF ({tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : 'Staff'})
+                  🖨️ Guardar PDF (Horizontal)
                 </button>
               </div>
             </div>
@@ -1370,7 +1371,7 @@ export default function App() {
               </div>
             </div>
             {equipoSeleccionado.jugadores.map(jugador => (
-              <div key={jugador.id} className="print-full-page bg-white rounded-xl shadow border p-8 page-break">
+              <div key={jugador.id} className="print-landscape-page bg-white rounded-xl shadow border p-8 page-break">
                 <h2 className="text-xl font-bold mb-2">{jugador.nombre}</h2>
                 <p className="text-xs text-slate-600">Dorsal #{jugador.dorsal} • {clubActivo.nombre}</p>
               </div>
