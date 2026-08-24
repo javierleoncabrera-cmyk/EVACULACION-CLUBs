@@ -118,10 +118,10 @@ const NIVELES_ENTRENADORES: LevelOption[] = [
 ];
 
 const RUBRICA_JUGADORES_DEF: RubricCategory[] = [
-  { id: 'cat_motor', nombre: 'Desarrollo motor', items: ['Coordinación dinámica', 'Equilibrio y apoyos', 'Velocidad gestual', 'Cambios de dirección', 'Frecuencia de salto'] },
-  { id: 'cat_tecnica', nombre: 'Técnica individual', items: ['Dominio del bote', 'Precisión en el pase', 'Recepción en movimiento', 'Mecánica de tiro', 'Finalizaciones/Entradas', 'Mano no dominante'] },
-  { id: 'cat_tactica', nombre: 'Comprensión del juego', items: ['Ocupación de espacios', 'Juego sin balón', 'Toma de decisiones en 1c1', 'Lectura de ventajas', 'Generosidad colectiva'] },
-  { id: 'cat_defensa', nombre: 'Defensa y Actitud', items: ['Actitud e intensidad', '1c1 al hombre con balón', 'Colocación en lado de ayuda', 'Cierre de rebote', 'Balance defensivo'] }
+  { id: 'cat_motor', nombre: 'Desarrollo motor', items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto'] },
+  { id: 'cat_tecnica', nombre: 'Técnica individual', items: ['Bote', 'Pase', 'Recepción', 'Tiro', 'Entrada', 'Paradas', 'Pivotes', 'Mano no dominante'] },
+  { id: 'cat_tactica', nombre: 'Comprensión del juego', items: ['Ocupación de espacios', 'Juego sin balón', '1c1', 'Toma de decisiones', 'Lectura del juego', 'Juego colectivo'] },
+  { id: 'cat_defensa', nombre: 'Defensa', items: ['Actitud defensiva', 'Colocación', '1c1 defensivo', 'Ayudas', 'Balance defensivo'] }
 ];
 
 const RUBRICA_ENTRENADORES_DEF: RubricCategory[] = [
@@ -245,9 +245,13 @@ export default function App() {
   const [nuevoNacimiento, setNuevoNacimiento] = useState('');
 
   const [respuestas, setRespuestas] = useState<Record<string, { nivel: string; obs: string }>>({
-    'Coordinación dinámica': { nivel: 'EN_DESARROLLO', obs: '' },
-    'Dominio del bote': { nivel: 'NECESITA_APOYO', obs: '' },
-    'Claridad y brevedad en consignas': { nivel: 'EXCELENTE', obs: 'Consignas directas.' }
+    'Coordinación': { nivel: 'CONSOLIDADO', obs: '' },
+    'Equilibrio': { nivel: 'EXCELENTE', obs: '' },
+    'Carrera': { nivel: 'EN_DESARROLLO', obs: '' },
+    'Cambios de dirección': { nivel: 'EN_DESARROLLO', obs: '' },
+    'Salto': { nivel: 'NECESITA_APOYO', obs: '' },
+    'Bote': { nivel: 'NECESITA_APOYO', obs: '' },
+    'Pase': { nivel: 'CONSOLIDADO', obs: '' }
   });
 
   const [fortalezas] = useState('Excelente actitud, visión táctica y disciplina.');
@@ -519,6 +523,34 @@ export default function App() {
     alert(`Evaluación ${periodo} guardada y bloqueada correctamente.`);
     setPantalla('INFORME');
   };
+
+  // Cálculo dinámico para el gráfico de radar (Rombo) basado en las respuestas reales
+  const calcularPromedioCategoria = (categoriaIdx: number) => {
+    const cat = rubricasJugadores[categoriaIdx];
+    if (!cat || cat.items.length === 0) return 0.7;
+    let suma = 0, total = 0;
+    cat.items.forEach(item => {
+      const lvlKey = respuestas[item]?.nivel;
+      const lvl = NIVELES_JUGADORES.find(n => n.key === lvlKey);
+      if (lvl && lvl.weight > 0) {
+        suma += lvl.weight;
+        total++;
+      }
+    });
+    return total > 0 ? (suma / (total * 4)) : 0.7;
+  };
+
+  const c1Val = calcularPromedioCategoria(0);
+  const c2Val = calcularPromedioCategoria(1);
+  const c3Val = calcularPromedioCategoria(2);
+  const c4Val = calcularPromedioCategoria(3);
+
+  const cx = 75, cy = 75, r = 50;
+  const p1 = `${cx},${cy - r * c1Val}`;
+  const p2 = `${cx + r * c2Val},${cy}`;
+  const p3 = `${cx},${cy + r * c3Val}`;
+  const p4 = `${cx - r * c4Val},${cy}`;
+  const radarPoints = `${p1} ${p2} ${p3} ${p4}`;
 
   const asistActual = calcularAsistenciaJugador(jugadorSeleccionado?.id, equipoSeleccionado);
   const publicFamilyUrl = `https://evaculacion-clu-bs.vercel.app/?token=${jugadorSeleccionado?.tokenPublico || 'sec_8f9a2b1c4e7d'}`;
@@ -1080,7 +1112,7 @@ export default function App() {
                     <h3 className="font-bold text-xs uppercase tracking-wider text-slate-500 border-b pb-1">{cat.nombre}</h3>
                     <div className="divide-y">
                       {cat.items.map(item => {
-                        const selKey = respuestas[item]?.nivel;
+                        const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
                         const activeLvl = nivelesActuales.find(l => l.key === selKey);
                         return (
                           <div key={item} className="py-3.5 space-y-2">
@@ -1143,28 +1175,56 @@ export default function App() {
               <span className="text-xs font-bold bg-slate-100 px-2.5 py-1 rounded">Asistencia: {asistActual.pct}%</span>
             </div>
             
-            <div className="grid grid-cols-2 gap-3 my-2 text-[10px]">
+            <div className="grid grid-cols-2 gap-4 my-2 text-[11px]">
               {rubricasActivas.map(cat => (
                 <div key={cat.id} className="space-y-1">
-                  <div className="bg-slate-900 text-white font-semibold px-2 py-0.5 rounded text-[9.5px] uppercase">{cat.nombre}</div>
-                  {cat.items.map(item => (
-                    <div key={item} className="flex justify-between py-0.5 px-1 bg-slate-50 rounded border border-slate-100">
-                      <span className="truncate pr-2">{item}</span>
-                      <span className="font-semibold text-emerald-700 shrink-0">Consolidado</span>
-                    </div>
-                  ))}
+                  <div className="bg-slate-900 text-white font-semibold px-2 py-0.5 rounded text-[10px] uppercase">{cat.nombre}</div>
+                  {cat.items.map(item => {
+                    const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
+                    const lvlObj = nivelesActuales.find(l => l.key === selKey);
+                    return (
+                      <div key={item} className="flex justify-between py-0.5 px-1 bg-slate-50 rounded border border-slate-100">
+                        <span className="truncate pr-2">{item}</span>
+                        <span className="font-semibold shrink-0" style={{ color: lvlObj?.color || '#0EA5E9' }}>
+                          {lvlObj ? lvlObj.label : 'Consolidado'}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               ))}
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-[10px] pt-1">
-              <div className="bg-slate-50 p-1.5 rounded border border-slate-200">
-                <strong className="block font-bold text-slate-900 mb-0.5">Fortalezas:</strong>
-                <p className="text-slate-700 line-clamp-2">{fortalezas}</p>
+            {/* Gráfico de Radar (Rombo de Rendimiento) Restaurado */}
+            <div className="grid grid-cols-12 gap-4 items-center pt-2 border-t border-slate-200">
+              <div className="col-span-4 flex flex-col items-center justify-center">
+                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Perfil de Rendimiento
+                </span>
+                <svg width="130" height="130" viewBox="0 0 150 150" className="overflow-visible">
+                  <polygon points="75,25 125,75 75,125 25,75" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
+                  <polygon points="75,50 100,75 75,100 50,75" fill="none" stroke="#E2E8F0" strokeWidth="1" />
+                  <line x1="75" y1="25" x2="75" y2="125" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
+                  <line x1="25" y1="75" x2="125" y2="75" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
+
+                  <polygon points={radarPoints} fill="rgba(5, 150, 105, 0.25)" stroke="#059669" strokeWidth="2.5" />
+
+                  <text x="75" y="17" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">MOTOR</text>
+                  <text x="132" y="78" textAnchor="start" className="text-[8px] font-bold fill-slate-700">TÉCNICA</text>
+                  <text x="75" y="137" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">TÁCTICA</text>
+                  <text x="18" y="78" textAnchor="end" className="text-[8px] font-bold fill-slate-700">DEFENSA</text>
+                </svg>
               </div>
-              <div className="bg-slate-50 p-1.5 rounded border border-slate-200">
-                <strong className="block font-bold text-slate-900 mb-0.5">Objetivos:</strong>
-                <p className="text-slate-700 line-clamp-2">{objetivos}</p>
+
+              <div className="col-span-8 grid grid-cols-2 gap-2 text-[10px]">
+                <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                  <strong className="block font-bold text-slate-900 mb-0.5">Fortalezas:</strong>
+                  <p className="text-slate-700 line-clamp-2">{fortalezas}</p>
+                </div>
+                <div className="bg-slate-50 p-2 rounded border border-slate-200">
+                  <strong className="block font-bold text-slate-900 mb-0.5">Objetivos:</strong>
+                  <p className="text-slate-700 line-clamp-2">{objetivos}</p>
+                </div>
               </div>
             </div>
 
