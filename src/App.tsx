@@ -117,9 +117,10 @@ const NIVELES_ENTRENADORES: LevelOption[] = [
   { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado en este ciclo.', color: '#94A3B8', weight: 0 },
 ];
 
+// ORDEN CAMBIADO: 1º Técnica Individual, 2º Desarrollo Motor, 3º Comprensión, 4º Defensa
 const RUBRICA_JUGADORES_DEF: RubricCategory[] = [
-  { id: 'cat_motor', nombre: 'Desarrollo motor', items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto'] },
   { id: 'cat_tecnica', nombre: 'Técnica individual', items: ['Bote', 'Pase', 'Recepción', 'Tiro', 'Entrada', 'Paradas', 'Pivotes', 'Mano no dominante'] },
+  { id: 'cat_motor', nombre: 'Desarrollo motor', items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto'] },
   { id: 'cat_tactica', nombre: 'Comprensión del juego', items: ['Ocupación de espacios', 'Juego sin balón', '1c1', 'Toma de decisiones', 'Lectura del juego', 'Juego colectivo'] },
   { id: 'cat_defensa', nombre: 'Defensa', items: ['Actitud defensiva', 'Colocación', '1c1 defensivo', 'Ayudas', 'Balance defensivo'] }
 ];
@@ -264,14 +265,32 @@ export default function App() {
   const [nuevoDorsal, setNuevoDorsal] = useState('');
   const [nuevoNacimiento, setNuevoNacimiento] = useState('');
 
+  // Respuestas predefinidas persistentes para que Mateo Álvarez tenga su evaluación inicial completa por defecto
   const [respuestas, setRespuestas] = useState<Record<string, { nivel: string; obs: string }>>({
+    'Bote': { nivel: 'NECESITA_APOYO', obs: '' },
+    'Pase': { nivel: 'CONSOLIDADO', obs: '' },
+    'Recepción': { nivel: 'CONSOLIDADO', obs: '' },
+    'Tiro': { nivel: 'CONSOLIDADO', obs: '' },
+    'Entrada': { nivel: 'CONSOLIDADO', obs: '' },
+    'Paradas': { nivel: 'CONSOLIDADO', obs: '' },
+    'Pivotes': { nivel: 'CONSOLIDADO', obs: '' },
+    'Mano no dominante': { nivel: 'CONSOLIDADO', obs: '' },
     'Coordinación': { nivel: 'CONSOLIDADO', obs: '' },
     'Equilibrio': { nivel: 'EXCELENTE', obs: '' },
     'Carrera': { nivel: 'EN_DESARROLLO', obs: '' },
     'Cambios de dirección': { nivel: 'EN_DESARROLLO', obs: '' },
     'Salto': { nivel: 'NECESITA_APOYO', obs: '' },
-    'Bote': { nivel: 'NECESITA_APOYO', obs: '' },
-    'Pase': { nivel: 'CONSOLIDADO', obs: '' }
+    'Ocupación de espacios': { nivel: 'CONSOLIDADO', obs: '' },
+    'Juego sin balón': { nivel: 'CONSOLIDADO', obs: '' },
+    '1c1': { nivel: 'CONSOLIDADO', obs: '' },
+    'Toma de decisiones': { nivel: 'CONSOLIDADO', obs: '' },
+    'Lectura del juego': { nivel: 'CONSOLIDADO', obs: '' },
+    'Juego colectivo': { nivel: 'CONSOLIDADO', obs: '' },
+    'Actitud defensiva': { nivel: 'CONSOLIDADO', obs: '' },
+    'Colocación': { nivel: 'CONSOLIDADO', obs: '' },
+    '1c1 defensivo': { nivel: 'CONSOLIDADO', obs: '' },
+    'Ayudas': { nivel: 'CONSOLIDADO', obs: '' },
+    'Balance defensivo': { nivel: 'CONSOLIDADO', obs: '' }
   });
 
   const [fortalezas, setFortalezas] = useState('Excelente actitud, visión táctica y disciplina.');
@@ -513,7 +532,7 @@ export default function App() {
   const handleScore = (indicador: string, levelKey: string) => {
     const statusField = periodo === 'Inicial' ? 'inicial' : periodo === 'Media' ? 'media' : 'final';
     if (jugadorSeleccionado[statusField] === 'COMPLETADA' && sessionUser?.role !== 'SUPER_ADMIN') {
-      alert(`La evaluación ${periodo} ya está completada y bloqueada para este deportista.`);
+      alert(`La evaluación ${periodo} ya está completada y cerrada para este deportista.`);
       return;
     }
     setRespuestas(prev => ({
@@ -571,17 +590,20 @@ export default function App() {
     return total > 0 ? (suma / (total * 4)) : 0.7;
   };
 
-  const c1Val = calcularPromedioCategoria(0);
-  const c2Val = calcularPromedioCategoria(1);
-  const c3Val = calcularPromedioCategoria(2);
-  const c4Val = calcularPromedioCategoria(3);
+  // Índices actualizados tras cambiar el orden de las categorías:
+  // 0: Técnica Individual, 1: Desarrollo Motor, 2: Comprensión, 3: Defensa
+  const cTechVal = calcularPromedioCategoria(0);
+  const cMotorVal = calcularPromedioCategoria(1);
+  const cTactVal = calcularPromedioCategoria(2);
+  const cDefVal = calcularPromedioCategoria(3);
 
   const cx = 95, cy = 95, r = 70;
-  const p1 = `${cx},${cy - r * c1Val}`;
-  const p2 = `${cx + r * c2Val},${cy}`;
-  const p3 = `${cx},${cy + r * c3Val}`;
-  const p4 = `${cx - r * c4Val},${cy}`;
-  const radarPoints = `${p1} ${p2} ${p3} ${p4}`;
+  // Ejes del rombo: Arriba (Motor), Derecha (Técnica), Abajo (Táctica), Izquierda (Defensa)
+  const pMotor = `${cx},${cy - r * cMotorVal}`;
+  const pTech = `${cx + r * cTechVal},${cy}`;
+  const pTact = `${cx},${cy + r * cTactVal}`;
+  const pDef = `${cx - r * cDefVal},${cy}`;
+  const radarPoints = `${pMotor} ${pTech} ${pTact} ${pDef}`;
 
   const asistActual = calcularAsistenciaJugador(jugadorSeleccionado?.id, equipoSeleccionado);
   const publicFamilyUrl = `https://evaculacion-clu-bs.vercel.app/?token=${jugadorSeleccionado?.tokenPublico || 'sec_8f9a2b1c4e7d'}`;
@@ -776,17 +798,18 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL PERFECTAMENTE CENTRADO Y SIN HUECOS)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL SIN RAYAS Y TABLAS REORDENADAS)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
       <style>{`
         @media print {
           @page { size: A4 portrait; margin: 0; }
-          html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 10px !important; }
-          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 8mm 10mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; }
+          html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 10px !important; resize: none !important; }
+          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 10mm 12mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; resize: none !important; outline: none !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
+          * { resize: none !important; }
         }
       `}</style>
 
@@ -1255,11 +1278,11 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL PERFECTAMENTE CENTRADO Y EXPANDIDO */}
+        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL SIN RAYA Y CON TABLAS REORDENADAS */}
         {pantalla === 'INFORME' && (
           <div className="print-portrait-page bg-white rounded-xl shadow-xl border border-slate-200 p-6 space-y-4">
             
-            {/* Cabecera A4 Real Centrada y Equilibrada */}
+            {/* Cabecera A4 Real */}
             <div className="border-b-2 border-slate-900 pb-3.5 flex justify-between items-center w-full">
               <div className="flex items-center space-x-3.5">
                 <div className="w-12 h-12 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-extrabold text-base shadow shrink-0">
@@ -1282,7 +1305,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Resumen Ejecutivo Superior con Rombo Magistral y Altura Cómoda */}
+            {/* Resumen Ejecutivo Superior con Rombo Ampliado y Ejes Reordenados */}
             <div className="grid grid-cols-12 gap-4 items-center bg-slate-50 p-5 rounded-2xl border border-slate-200 w-full">
               <div className="col-span-5 flex flex-col items-center justify-center border-r border-slate-200 pr-4">
                 <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-2">
@@ -1315,7 +1338,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Secciones de Rúbricas Técnicas expandidas verticalmente para rellenar toda la página A4 */}
+            {/* Secciones de Rúbricas Técnicas reordenadas: 1º Técnica Individual, 2º Desarrollo Motor, etc. */}
             <div className="grid grid-cols-2 gap-4 text-[10.5px] w-full">
               {rubricasActivas.map(cat => (
                 <div key={cat.id} className="space-y-2 bg-slate-50/85 p-4 rounded-2xl border border-slate-200 flex flex-col justify-between">
@@ -1340,7 +1363,7 @@ export default function App() {
               ))}
             </div>
 
-            {/* Pie Institucional con Firma y Sello de Marca */}
+            {/* Pie Institucional con Firma, Sello de Marca y Cero Líneas en Diagonal */}
             <div className="pt-3.5 border-t-2 border-slate-200 flex justify-between items-center text-[10px] text-slate-600 w-full">
               <div className="flex items-center gap-6">
                 <span>Director Técnico / Entrenador: _____________________</span>
