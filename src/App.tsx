@@ -698,7 +698,7 @@ export default function App() {
                     <span>Portal QR Familias</span>
                   </div>
                   <p className="text-slate-400 text-[11px] leading-relaxed">
-                    Fichas in real-time para padres con token seguro y estricto cumplimiento RGPD.
+                    Fichas en real-time para padres con token seguro y estricto cumplimiento RGPD.
                   </p>
                 </div>
 
@@ -782,9 +782,9 @@ export default function App() {
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
       <style>{`
         @media print {
-          @page { size: A4 portrait; margin: 4mm; }
-          html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 9px !important; }
-          .print-portrait-page { width: 100% !important; max-width: 100% !important; min-height: 275mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 0px !important; margin: 0 !important; }
+          @page { size: A4 portrait; margin: 0; }
+          html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 8.5px !important; }
+          .print-portrait-page { width: 100% !important; height: 100% !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 6mm 8mm !important; margin: 0 !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
         }
@@ -1255,37 +1255,37 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL MAESTRO FLUIDO A4 VERTICAL (OCUPACIÓN DEL 100% DE LA HOJA SIN HUECOS) */}
+        {/* INFORME PROFESIONAL SUPREMO (VERTICAL A4 DE ANCHO 100% REAL Y EQUILIBRIO PERFECTO) */}
         {pantalla === 'INFORME' && (
-          <div className="print-portrait-page bg-white rounded-xl shadow-xl border border-slate-200 p-4 space-y-3">
+          <div className="print-portrait-page bg-white rounded-2xl shadow-xl border border-slate-200 p-5 space-y-3">
             
-            {/* 1. Cabecera Fluida 100% de Ancho */}
-            <div className="border-b-2 border-slate-900 pb-2 flex justify-between items-center w-full">
+            {/* 1. Cabecera A4 Real de Ancho Total */}
+            <div className="border-b-2 border-slate-900 pb-2.5 flex justify-between items-center w-full">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-lg bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 shadow">
+                <div className="w-10 h-10 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-sm shadow shrink-0">
                   {siglasClub}
                 </div>
                 <div>
-                  <h2 className="text-base font-extrabold text-slate-900 leading-tight">
+                  <h2 className="text-lg font-extrabold text-slate-900 leading-tight">
                     {tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}
                   </h2>
-                  <p className="text-[10px] text-slate-500 font-medium">
+                  <p className="text-[10.5px] text-slate-600 font-medium">
                     {clubActivo.nombre} • Dossier Técnico 360° ({periodo}) • Equipo: {equipoSeleccionado.nombre} {tipoEvaluacion === 'JUGADORES' ? `• Dorsal #${jugadorSeleccionado.dorsal}` : ''}
                   </p>
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <span className="text-[11px] font-bold bg-slate-100 text-slate-800 px-2.5 py-1 rounded border border-slate-200">
+                <span className="text-xs font-bold bg-slate-100 text-slate-800 px-3 py-1 rounded-md border border-slate-200">
                   Asistencia: {asistActual.pct}%
                 </span>
-                <p className="text-[9px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
+                <p className="text-[9.5px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
               </div>
             </div>
 
-            {/* 2. Resumen Ejecutivo de Ancho Completo (Rombo centrado a la izquierda + Textos distribuidos a lo ancho) */}
-            <div className="grid grid-cols-12 gap-3 items-center bg-slate-50 p-3 rounded-xl border border-slate-200 w-full">
+            {/* 2. Resumen Ejecutivo Extendido (Rombo a la izquierda + Fortalezas & Objetivos amplios a la derecha) */}
+            <div className="grid grid-cols-12 gap-3 items-center bg-slate-50 p-3.5 rounded-xl border border-slate-200 w-full">
               <div className="col-span-3 flex flex-col items-center justify-center border-r border-slate-200 pr-2">
-                <span className="text-[8.5px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <span className="text-[9px] font-bold text-slate-700 uppercase tracking-wider mb-1">
                   Rendimiento
                 </span>
                 <svg width="85" height="85" viewBox="0 0 150 150" className="overflow-visible">
@@ -1306,20 +1306,20 @@ export default function App() {
               <div className="col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
                 <div className="bg-white p-2.5 rounded-lg border border-emerald-200 shadow-2xs">
                   <strong className="block font-bold text-emerald-950 uppercase text-[9px] tracking-wider mb-0.5">Fortalezas:</strong>
-                  <p className="text-emerald-900 leading-normal line-clamp-3">{fortalezas}</p>
+                  <p className="text-emerald-900 leading-normal">{fortalezas}</p>
                 </div>
                 <div className="bg-white p-2.5 rounded-lg border border-amber-200 shadow-2xs">
                   <strong className="block font-bold text-amber-950 uppercase text-[9px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
-                  <p className="text-amber-900 leading-normal line-clamp-3">{objetivos}</p>
+                  <p className="text-amber-900 leading-normal">{objetivos}</p>
                 </div>
               </div>
             </div>
 
-            {/* 3. Secciones de Rúbricas en Grid de 2 Columnas de Ancho Completo (Elimina cualquier hueco lateral o vertical) */}
+            {/* 3. Secciones de Rúbricas Técnicas expandidas en Ancho Completo (Ocupan de lado a lado la hoja) */}
             <div className="grid grid-cols-2 gap-3 text-[10px] w-full">
               {rubricasActivas.map(cat => (
-                <div key={cat.id} className="space-y-1 bg-slate-50/70 p-2.5 rounded-xl border border-slate-200">
-                  <div className="bg-slate-900 text-white font-bold px-2 py-1 rounded text-[9.5px] uppercase tracking-wider">
+                <div key={cat.id} className="space-y-1.5 bg-slate-50/70 p-3 rounded-xl border border-slate-200">
+                  <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded text-[10px] uppercase tracking-wider">
                     {cat.nombre}
                   </div>
                   <div className="space-y-1 pt-0.5">
@@ -1327,9 +1327,9 @@ export default function App() {
                       const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
                       const lvlObj = nivelesActuales.find(l => l.key === selKey);
                       return (
-                        <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/80 shadow-2xs">
+                        <div key={item} className="flex justify-between items-center py-1.5 px-2.5 bg-white rounded border border-slate-200/80 shadow-2xs">
                           <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                          <span className="font-bold px-2 py-0.5 rounded text-[9.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                          <span className="font-bold px-2 py-0.5 rounded text-[10px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
                             {lvlObj ? lvlObj.label : 'Consolidado'}
                           </span>
                         </div>
@@ -1341,14 +1341,14 @@ export default function App() {
             </div>
 
             {/* 4. Pie Institucional de Firma y Validación Técnica */}
-            <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-500 w-full">
+            <div className="pt-2.5 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-500 w-full">
               <div className="flex items-center gap-6">
                 <span>Director Técnico / Entrenador: ___________________________________</span>
                 <span>Firma: _____________________</span>
               </div>
               <div className="no-print space-x-2">
                 <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-semibold hover:underline">← Editar</button>
-                <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 rounded-lg font-semibold shadow transition text-[10px]">
+                <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-semibold shadow transition text-[10.5px]">
                   🖨️ Guardar PDF
                 </button>
               </div>
@@ -1365,7 +1365,7 @@ export default function App() {
                 <button onClick={() => window.print()} className="bg-slate-900 text-white text-xs px-5 py-2 rounded font-medium">Imprimir Todo</button>
               </div>
             </div>
-            {equipoSeleccionado.jugadores.log.map?.((jugador: Player) => (
+            {equipoSeleccionado.jugadores.map(jugador => (
               <div key={jugador.id} className="print-portrait-page bg-white rounded-xl shadow border p-8 page-break">
                 <h2 className="text-xl font-bold mb-2">{jugador.nombre}</h2>
                 <p className="text-xs text-slate-600">Dorsal #{jugador.dorsal} • {clubActivo.nombre}</p>
