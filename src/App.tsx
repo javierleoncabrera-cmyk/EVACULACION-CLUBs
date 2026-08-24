@@ -118,8 +118,8 @@ const NIVELES_ENTRENADORES: LevelOption[] = [
 ];
 
 const RUBRICA_JUGADORES_DEF: RubricCategory[] = [
-  { id: 'cat_motor', nombre: 'Desarrollo motor', items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto'] },
   { id: 'cat_tecnica', nombre: 'Técnica individual', items: ['Bote', 'Pase', 'Recepción', 'Tiro', 'Entrada', 'Paradas', 'Pivotes', 'Mano no dominante'] },
+  { id: 'cat_motor', nombre: 'Desarrollo motor', items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto'] },
   { id: 'cat_tactica', nombre: 'Comprensión del juego', items: ['Ocupación de espacios', 'Juego sin balón', '1c1', 'Toma de decisiones', 'Lectura del juego', 'Juego colectivo'] },
   { id: 'cat_defensa', nombre: 'Defensa', items: ['Actitud defensiva', 'Colocación', '1c1 defensivo', 'Ayudas', 'Balance defensivo'] }
 ];
@@ -561,18 +561,7 @@ export default function App() {
     setPantalla('INFORME');
   };
 
-  const handlePrintPDF = () => {
-    const targetName = tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : (coachSeleccionado?.nombre || 'Staff');
-    const safeName = targetName.replace(/[^a-zA-Z0-9]/g, '_');
-    const originalTitle = document.title;
-    document.title = `${safeName}_Evaluacion_${periodo}`;
-    window.print();
-    setTimeout(() => {
-      document.title = originalTitle;
-    }, 1000);
-  };
-
-  // Cálculo dinámico para el gráfico de radar (Rombo) basado en el índice [0] Desarrollo Motor
+  // Cálculo dinámico para el gráfico de radar (Rombo)
   const calcularPromedioCategoria = (categoriaIdx: number) => {
     const cat = rubricasJugadores[categoriaIdx];
     if (!cat || cat.items.length === 0) return 0.7;
@@ -793,7 +782,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL ESTRICTO: SIN LÍNEAS, SIN SOMBRAS, SIMETRÍA 100% TABULAR)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL ESTRICTO SIN BORDES REDONDEADOS NI SOMBRAS DE IMPRESIÓN Y TABLAS SIMÉTRICAS)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
@@ -1273,7 +1262,7 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL ESTRICTO (USO DE TABLAS HTML TABULARES PARA CERO DESNIVELES Y ORDEN SIMÉTRICO CORRECTO) */}
+        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL ESTRICTO (USO DE TABLAS HTML PURAS Y ALTURAS RIGIDAS PARA ELIMINAR CUALQUIER DESNIVEL O RAYA) */}
         {pantalla === 'INFORME' && (
           <div className="print-portrait-page bg-white rounded-none shadow-none border-0 p-4 space-y-2.5">
             
@@ -1333,102 +1322,106 @@ export default function App() {
               </div>
             </div>
 
-            {/* SECCIÓN DE RÚBRICAS CON TABLA HTML PURA DE ANCHO COMPLETO PARA CERO DESNIVELES Y ORDEN EXACTO */}
+            {/* SECCIÓN DE RÚBRICAS CON TABLAS HTML PURAS DE ALTURA RIGUROSA Y ANCHO COMPLETO PARA CERO DESNIVELES */}
             <table className="w-full border-collapse text-[9.5px]">
               <tbody>
                 <tr>
-                  {/* Columna Izquierda: [0] Desarrollo Motor y [2] Comprensión del juego */}
-                  <td className="w-1/2 pr-2 align-top space-y-2">
-                    
-                    {/* 1. Desarrollo Motor */}
-                    <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
-                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
-                        {rubricasActivas[0].nombre}
+                  {/* Columna Izquierda: [0] Desarrollo Motor (5 ítems) + [1] Técnica Individual (8 ítems) en altura total fija */}
+                  <td className="w-1/2 pr-2 align-top">
+                    <div className="flex flex-col justify-between h-full space-y-2">
+                      
+                      {/* Desarrollo Motor */}
+                      <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
+                        <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
+                          {rubricasActivas[0].nombre}
+                        </div>
+                        <div className="space-y-0.5">
+                          {rubricasActivas[0].items.map(item => {
+                            const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
+                            const lvlObj = nivelesActuales.find(l => l.key === selKey);
+                            return (
+                              <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/90 shadow-2xs">
+                                <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
+                                <span className="font-bold px-1.5 py-0.2 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                                  {lvlObj ? lvlObj.label : 'Consolidado'}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <div className="space-y-0.5">
-                        {rubricasActivas[0].items.map(item => {
-                          const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
-                          const lvlObj = nivelesActuales.find(l => l.key === selKey);
-                          return (
-                            <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/90 shadow-2xs">
-                              <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                              <span className="font-bold px-1.5 py-0.2 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
-                                {lvlObj ? lvlObj.label : 'Consolidado'}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
 
-                    {/* 2. Comprensión del juego */}
-                    <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
-                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
-                        {rubricasActivas[2].nombre}
+                      {/* Técnica Individual */}
+                      <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
+                        <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
+                          {rubricasActivas[1].nombre}
+                        </div>
+                        <div className="space-y-0.5">
+                          {rubricasActivas[1].items.map(item => {
+                            const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
+                            const lvlObj = nivelesActuales.find(l => l.key === selKey);
+                            return (
+                              <div key={item} className="flex justify-between items-center py-0.5 px-2 bg-white rounded border border-slate-200/90 shadow-2xs">
+                                <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
+                                <span className="font-bold px-1.5 py-0.2 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                                  {lvlObj ? lvlObj.label : 'Consolidado'}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <div className="space-y-0.5">
-                        {rubricasActivas[2].items.map(item => {
-                          const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
-                          const lvlObj = nivelesActuales.find(l => l.key === selKey);
-                          return (
-                            <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/90 shadow-2xs">
-                              <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                              <span className="font-bold px-1.5 py-0.2 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
-                                {lvlObj ? lvlObj.label : 'Consolidado'}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
 
+                    </div>
                   </td>
 
-                  {/* Columna Derecha: [1] Técnica Individual y [3] Defensa */}
-                  <td className="w-1/2 pl-2 align-top space-y-2">
-                    
-                    {/* 3. Técnica Individual */}
-                    <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
-                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
-                        {rubricasActivas[1].nombre}
+                  {/* Columna Derecha: [2] Comprensión del juego (6 ítems) + [3] Defensa (5 ítems) */}
+                  <td className="w-1/2 pl-2 align-top">
+                    <div className="flex flex-col justify-between h-full space-y-2">
+                      
+                      {/* Comprensión del juego */}
+                      <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
+                        <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
+                          {rubricasActivas[2].nombre}
+                        </div>
+                        <div className="space-y-0.5">
+                          {rubricasActivas[2].items.map(item => {
+                            const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
+                            const lvlObj = nivelesActuales.find(l => l.key === selKey);
+                            return (
+                              <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/90 shadow-2xs">
+                                <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
+                                <span className="font-bold px-1.5 py-0.2 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                                  {lvlObj ? lvlObj.label : 'Consolidado'}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <div className="space-y-0.5">
-                        {rubricasActivas[1].items.map(item => {
-                          const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
-                          const lvlObj = nivelesActuales.find(l => l.key === selKey);
-                          return (
-                            <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/90 shadow-2xs">
-                              <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                              <span className="font-bold px-1.5 py-0.2 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
-                                {lvlObj ? lvlObj.label : 'Consolidado'}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
 
-                    {/* 4. Defensa */}
-                    <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
-                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
-                        {rubricasActivas[3].nombre}
+                      {/* Defensa */}
+                      <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
+                        <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
+                          {rubricasActivas[3].nombre}
+                        </div>
+                        <div className="space-y-0.5">
+                          {rubricasActivas[3].items.map(item => {
+                            const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
+                            const lvlObj = nivelesActuales.find(l => l.key === selKey);
+                            return (
+                              <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/90 shadow-2xs">
+                                <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
+                                <span className="font-bold px-1.5 py-0.2 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                                  {lvlObj ? lvlObj.label : 'Consolidado'}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <div className="space-y-0.5">
-                        {rubricasActivas[3].items.map(item => {
-                          const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
-                          const lvlObj = nivelesActuales.find(l => l.key === selKey);
-                          return (
-                            <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/90 shadow-2xs">
-                              <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                              <span className="font-bold px-1.5 py-0.2 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
-                                {lvlObj ? lvlObj.label : 'Consolidado'}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
 
+                    </div>
                   </td>
                 </tr>
               </tbody>
