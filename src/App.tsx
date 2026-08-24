@@ -1256,81 +1256,84 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL DE ÉLITE (DISEÑO COMPACTO Y SIN HUECOS) */}
+        {/* INFORME PROFESIONAL SUPREMO (ARMONIOSO, SIN SUPERPOSICIONES Y LLENO DE VALOR VISUAL) */}
         {pantalla === 'INFORME' && (
-          <div className="print-full-page bg-white rounded-2xl shadow-xl border border-slate-200 p-4 sm:p-6 space-y-3">
+          <div className="print-full-page bg-white rounded-2xl shadow-xl border border-slate-200 p-5 sm:p-6 space-y-3.5">
             
-            {/* 1. Cabecera Corporativa con Identidad Completa */}
-            <div className="border-b-2 border-slate-900 pb-2.5 flex justify-between items-center">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-lg bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-sm">
-                  {siglasClub}
-                </div>
-                <div>
-                  <h2 className="text-lg font-extrabold text-slate-900 leading-tight">
-                    {tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}
-                  </h2>
-                  <p className="text-[10px] text-slate-500 font-medium">
-                    {clubActivo.nombre} • Dossier Técnico 360° ({periodo}) • {equipoSeleccionado.nombre}
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-[11px] font-bold bg-slate-100 text-slate-800 px-2.5 py-1 rounded-md border border-slate-200">
-                  Asistencia: {asistActual.pct}%
-                </span>
-                <p className="text-[9.5px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
-              </div>
-            </div>
-
-            {/* 2. Resumen Ejecutivo Integrado: Gráfico de Radar + Fortalezas & Objetivos */}
-            <div className="grid grid-cols-12 gap-3 items-center bg-slate-50/80 p-2.5 rounded-xl border border-slate-200">
-              <div className="col-span-4 flex flex-col items-center justify-center border-r border-slate-200 pr-2">
-                <span className="text-[8.5px] font-bold text-slate-700 uppercase tracking-wider mb-0.5">
-                  Perfil de Rendimiento
-                </span>
-                <svg width="90" height="90" viewBox="0 0 150 150" className="overflow-visible">
-                  <polygon points="75,25 125,75 75,125 25,75" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
-                  <polygon points="75,50 100,75 75,100 50,75" fill="none" stroke="#E2E8F0" strokeWidth="1" />
-                  <line x1="75" y1="25" x2="75" y2="125" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
-                  <line x1="25" y1="75" x2="125" y2="75" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
-
-                  <polygon points={radarPoints} fill="rgba(5, 150, 105, 0.2)" stroke="#059669" strokeWidth="2.5" />
-
-                  <text x="75" y="15" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">MOTOR</text>
-                  <text x="135" y="78" textAnchor="start" className="text-[8px] font-bold fill-slate-700">TÉCNICA</text>
-                  <text x="75" y="140" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">TÁCTICA</text>
-                  <text x="15" y="78" textAnchor="end" className="text-[8px] font-bold fill-slate-700">DEFENSA</text>
-                </svg>
-              </div>
-
-              <div className="col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[9.5px]">
-                <div className="bg-white p-2 rounded-lg border border-emerald-200 shadow-sm">
-                  <strong className="block font-bold text-emerald-950 uppercase text-[9px] tracking-wider mb-0.5">Fortalezas:</strong>
-                  <p className="text-emerald-900 leading-snug line-clamp-3">{fortalezas}</p>
-                </div>
-                <div className="bg-white p-2 rounded-lg border border-amber-200 shadow-sm">
-                  <strong className="block font-bold text-amber-950 uppercase text-[9px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
-                  <p className="text-amber-900 leading-snug line-clamp-3">{objetivos}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* 3. Secciones de Rúbricas Técnicas en 2 columnas compactas y conectadas */}
-            <div className="grid grid-cols-2 gap-2 text-[9px]">
-              {rubricasActivas.map(cat => (
-                <div key={cat.id} className="space-y-0.5 bg-slate-50/60 p-2 rounded-xl border border-slate-200">
-                  <div className="bg-slate-900 text-white font-bold px-2 py-0.5 rounded text-[8.5px] uppercase tracking-wider flex justify-between items-center">
-                    <span>{cat.nombre}</span>
+            {/* 1. Cabecera robusta sin solapamientos (Estructura de grilla estricta) */}
+            <div className="border-b-2 border-slate-900 pb-3">
+              <div className="grid grid-cols-12 gap-3 items-center">
+                <div className="col-span-8 flex items-center space-x-3">
+                  <div className="w-11 h-11 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-bold text-base shrink-0 shadow">
+                    {siglasClub}
                   </div>
-                  <div className="space-y-0.5 pt-0.5">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-slate-900 leading-tight">
+                      {tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}
+                    </h2>
+                    <p className="text-[10px] text-slate-600 font-medium mt-0.5">
+                      {clubActivo.nombre} • Dossier Técnico 360° ({periodo}) • {equipoSeleccionado.nombre} {tipoEvaluacion === 'JUGADORES' ? `• #${jugadorSeleccionado.dorsal}` : ''}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="col-span-4 text-right bg-slate-50 p-2 rounded-xl border border-slate-200">
+                  <span className="text-[11px] font-extrabold text-emerald-800">
+                    Asistencia: {asistActual.pct}%
+                  </span>
+                  <p className="text-[9px] text-slate-500 font-medium mt-0.5">Temporada {clubActivo.temporada}</p>
+                </div>
+              </div>
+
+              {/* Resumen Ejecutivo Integrado: Rombo + Tarjetas de Fortalezas y Objetivos */}
+              <div className="grid grid-cols-12 gap-3 items-center bg-slate-50/90 p-2.5 rounded-xl border border-slate-200 mt-3">
+                <div className="col-span-4 flex flex-col items-center justify-center border-r border-slate-200 pr-2">
+                  <span className="text-[8px] font-bold text-slate-700 uppercase tracking-wider mb-0.5">
+                    Perfil de Rendimiento
+                  </span>
+                  <svg width="85" height="85" viewBox="0 0 150 150" className="overflow-visible">
+                    <polygon points="75,25 125,75 75,125 25,75" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
+                    <polygon points="75,50 100,75 75,100 50,75" fill="none" stroke="#E2E8F0" strokeWidth="1" />
+                    <line x1="75" y1="25" x2="75" y2="125" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
+                    <line x1="25" y1="75" x2="125" y2="75" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
+
+                    <polygon points={radarPoints} fill="rgba(5, 150, 105, 0.2)" stroke="#059669" strokeWidth="2.5" />
+
+                    <text x="75" y="15" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">MOTOR</text>
+                    <text x="135" y="78" textAnchor="start" className="text-[8px] font-bold fill-slate-700">TÉCNICA</text>
+                    <text x="75" y="140" textAnchor="middle" className="text-[8px] font-bold fill-slate-700">TÁCTICA</text>
+                    <text x="15" y="78" textAnchor="end" className="text-[8px] font-bold fill-slate-700">DEFENSA</text>
+                  </svg>
+                </div>
+
+                <div className="col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[9.5px]">
+                  <div className="bg-white p-2 rounded-lg border border-emerald-200 shadow-sm">
+                    <strong className="block font-bold text-emerald-950 uppercase text-[8.5px] tracking-wider mb-0.5">Fortalezas:</strong>
+                    <p className="text-emerald-900 leading-snug line-clamp-3">{fortalezas}</p>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-amber-200 shadow-sm">
+                    <strong className="block font-bold text-amber-950 uppercase text-[8.5px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
+                    <p className="text-amber-900 leading-snug line-clamp-3">{objetivos}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Secciones de Rúbricas Técnicas en 2 columnas compactas y conectadas */}
+            <div className="grid grid-cols-2 gap-2.5 text-[9.5px]">
+              {rubricasActivas.map(cat => (
+                <div key={cat.id} className="space-y-1 bg-slate-50/60 p-2.5 rounded-xl border border-slate-200">
+                  <div className="bg-slate-900 text-white font-bold px-2 py-0.5 rounded text-[9px] uppercase tracking-wider">
+                    {cat.nombre}
+                  </div>
+                  <div className="space-y-1 pt-0.5">
                     {cat.items.map(item => {
                       const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
                       const lvlObj = nivelesActuales.find(l => l.key === selKey);
                       return (
-                        <div key={item} className="flex justify-between items-center py-0.5 px-1.5 bg-white rounded border border-slate-200/70">
+                        <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/80 shadow-2xs">
                           <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                          <span className="font-bold px-1.5 py-0.2 rounded text-[8.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                          <span className="font-bold px-2 py-0.5 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
                             {lvlObj ? lvlObj.label : 'Consolidado'}
                           </span>
                         </div>
@@ -1341,7 +1344,7 @@ export default function App() {
               ))}
             </div>
 
-            {/* 4. Pie Institucional de Firma y Validación Técnica con Autoguardado de Nombre de Archivo */}
+            {/* 3. Pie Institucional de Firma y Validación Técnica */}
             <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-[9px] text-slate-500">
               <div className="flex items-center gap-6">
                 <span>Director Técnico / Entrenador: _________________________</span>
