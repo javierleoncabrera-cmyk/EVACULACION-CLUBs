@@ -117,10 +117,10 @@ const NIVELES_ENTRENADORES: LevelOption[] = [
   { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado en este ciclo.', color: '#94A3B8', weight: 0 },
 ];
 
-// ORDEN FIJO Y EXPLICITO: 1º Técnica Individual, 2º Desarrollo Motor, 3º Comprensión, 4º Defensa
+// Orden maestro: 0: Desarrollo Motor, 1: Técnica Individual, 2: Comprensión, 3: Defensa
 const RUBRICA_JUGADORES_DEF: RubricCategory[] = [
-  { id: 'cat_tecnica', nombre: 'Técnica individual', items: ['Bote', 'Pase', 'Recepción', 'Tiro', 'Entrada', 'Paradas', 'Pivotes', 'Mano no dominante'] },
   { id: 'cat_motor', nombre: 'Desarrollo motor', items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto'] },
+  { id: 'cat_tecnica', nombre: 'Técnica individual', items: ['Bote', 'Pase', 'Recepción', 'Tiro', 'Entrada', 'Paradas', 'Pivotes', 'Mano no dominante'] },
   { id: 'cat_tactica', nombre: 'Comprensión del juego', items: ['Ocupación de espacios', 'Juego sin balón', '1c1', 'Toma de decisiones', 'Lectura del juego', 'Juego colectivo'] },
   { id: 'cat_defensa', nombre: 'Defensa', items: ['Actitud defensiva', 'Colocación', '1c1 defensivo', 'Ayudas', 'Balance defensivo'] }
 ];
@@ -573,7 +573,8 @@ export default function App() {
     }, 1000);
   };
 
-  // Cálculo dinámico para el gráfico de radar (Rombo) basado en las respuestas reales
+  // Cálculo dinámico para el gráfico de radar (Rombo) basado en el nuevo orden
+  // RUBRICA_JUGADORES_DEF[0]: Técnica Individual, [1]: Desarrollo Motor, [2]: Comprensión, [3]: Defensa
   const calcularPromedioCategoria = (categoriaIdx: number) => {
     const cat = rubricasJugadores[categoriaIdx];
     if (!cat || cat.items.length === 0) return 0.7;
@@ -589,8 +590,6 @@ export default function App() {
     return total > 0 ? (suma / (total * 4)) : 0.7;
   };
 
-  // Índices según el nuevo orden en RUBRICA_JUGADORES_DEF:
-  // 0: Técnica Individual, 1: Desarrollo Motor, 2: Comprensión, 3: Defensa
   const cTechVal = calcularPromedioCategoria(0);
   const cMotorVal = calcularPromedioCategoria(1);
   const cTactVal = calcularPromedioCategoria(2);
@@ -797,7 +796,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL SIN RAYAS Y TABLAS CON TABLAS HTML TRADICIONALES)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL ESTRICTO SIN RAYA Y CON TABLAS TABULARES SIMÉTRICAS)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
@@ -805,7 +804,7 @@ export default function App() {
         @media print {
           @page { size: A4 portrait; margin: 0; }
           html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 10px !important; resize: none !important; }
-          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 8mm 10mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; resize: none !important; outline: none !important; }
+          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 10mm 12mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; resize: none !important; outline: none !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
           * { resize: none !important; pointer-events: auto !important; }
@@ -1342,7 +1341,7 @@ export default function App() {
               <tbody>
                 <tr>
                   <td className="w-1/2 pr-2 align-top">
-                    {/* Tabla 1: Técnica Individual */}
+                    {/* Tabla 1: Técnica Individual (Ordenada en 1er lugar) */}
                     <div className="bg-slate-50/85 p-3 rounded-2xl border border-slate-200 space-y-1.5 mb-2.5">
                       <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded-lg text-[10px] uppercase tracking-wider">
                         {rubricasActivas[0].nombre}
@@ -1386,7 +1385,7 @@ export default function App() {
                   </td>
 
                   <td className="w-1/2 pl-2 align-top">
-                    {/* Tabla 2: Desarrollo Motor */}
+                    {/* Tabla 2: Desarrollo Motor (Ordenado en 2º lugar) */}
                     <div className="bg-slate-50/85 p-3 rounded-2xl border border-slate-200 space-y-1.5 mb-2.5">
                       <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded-lg text-[10px] uppercase tracking-wider">
                         {rubricasActivas[1].nombre}
