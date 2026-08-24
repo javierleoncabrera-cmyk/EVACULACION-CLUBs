@@ -101,6 +101,26 @@ interface RubricCategory {
   items: string[];
 }
 
+const PLANTILLAS_FORTALEZAS = [
+  "Buena predisposición al trabajo diario, mostrando constancia, atención y una actitud muy receptiva ante las correcciones del cuerpo técnico.",
+  "Evolución favorable en la coordinación y el esquema corporal, destacando por su entrega física e implicación constante en las tareas de equipo.",
+  "Cumplimiento riguroso de las tareas asignadas, destacando por su disciplina táctica básica, concentración y solidez en los fundamentos individuales.",
+  "Alta intensidad defensiva y generosidad en el juego sin balón; un jugador de equipo que prioriza el esfuerzo colectivo y la solidez defensiva.",
+  "Dominio fluido de los fundamentos técnicos básicos bajo presión, mostrando claridad en la toma de decisiones y regularidad en los partidos.",
+  "Excelente lectura táctica de las ventajas ofensivas, capacidad de liderazgo silencioso en pista y alta eficacia en situaciones de 1c1.",
+  "Perfil de rendimiento excelente; destaca por su inteligencia táctica, liderazgo positivo, técnica depurada y capacidad constante para marcar diferencias."
+];
+
+const PLANTILLAS_OBJETIVOS = [
+  "Consolidar los patrones básicos de coordinación dinámica, equilibrio y atención sostenida durante las explicaciones y dinámicas de grupo.",
+  "Mejorar la postura corporal básica y automatizar la correcta ejecución técnica en los desplazamientos sin balón y en la postura defensiva.",
+  "Incrementar la confianza y el uso fluido de la mano no dominante, así como el control del ritmo de ejecución en acciones de bote y pase.",
+  "Acelerar la velocidad en la toma de decisiones durante situaciones reales de juego, mejorando la ocupación de espacios y la lectura de ventajas en superioridad.",
+  "Optimizar la eficacia en la mecánica de finalización y el timing en la lectura y ejecución de bloqueos directos e indirectos.",
+  "Ampliar el repertorio táctico individual, mejorando las ayudas defensivas complejas, la comunicación en pista y la polivalencia en distintas posiciones.",
+  "Mantener el pico de máxima concentración e intensidad competitiva durante los 40 minutos, ejerciendo como referente de exigencia y liderazgo en el equipo."
+];
+
 const NIVELES_JUGADORES: LevelOption[] = [
   { key: 'EXCELENTE', label: 'Excelente', desc: 'Dominio sobresaliente y constante de la habilidad.', color: '#059669', weight: 4 },
   { key: 'CONSOLIDADO', label: 'Consolidado', desc: 'Adquirido y ejecutado de forma autónoma en situaciones reales.', color: '#0EA5E9', weight: 3 },
@@ -254,8 +274,8 @@ export default function App() {
     'Pase': { nivel: 'CONSOLIDADO', obs: '' }
   });
 
-  const [fortalezas] = useState('Excelente actitud, visión táctica y disciplina.');
-  const [objetivos] = useState('Mejora en la mano no dominante y control de ritmo.');
+  const [fortalezas, setFortalezas] = useState('Excelente actitud, visión táctica y disciplina.');
+  const [objetivos, setObjetivos] = useState('Mejora en la mano no dominante y control de ritmo.');
 
   const effectiveClubId = sessionUser?.role === 'DIRECTOR' || sessionUser?.role === 'ENTRENADOR'
     ? (sessionUser.clubId || clubActivoId)
@@ -1097,6 +1117,7 @@ export default function App() {
                 </div>
               )}
 
+              {/* Guía de colores */}
               <div className="bg-slate-50 border p-3 rounded-lg flex flex-wrap gap-4 text-xs text-slate-700">
                 {nivelesActuales.map(n => (
                   <div key={n.key} className="flex items-center space-x-1.5">
@@ -1105,6 +1126,41 @@ export default function App() {
                   </div>
                 ))}
               </div>
+
+              {/* Selectores Rápidos de Plantillas Automatizadas */}
+              {!isLocked && (
+                <div className="bg-emerald-50/60 border border-emerald-200 p-3.5 rounded-xl space-y-3 text-xs">
+                  <span className="font-bold text-emerald-900 uppercase tracking-wider text-[10px]">✨ Plantillas Automatizadas de Apoyo</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-emerald-800 mb-1">Cargar plantilla de Fortalezas:</label>
+                      <select 
+                        onChange={(e) => { if (e.target.value) setFortalezas(e.target.value); }} 
+                        className="w-full bg-white border border-emerald-300 rounded-lg p-2 text-slate-700 focus:outline-none"
+                        defaultValue=""
+                      >
+                        <option value="" disabled>Selecciona una opción rápida...</option>
+                        {PLANTILLAS_FORTALEZAS.map((txt, idx) => (
+                          <option key={idx} value={txt}>Opción {idx + 1}: {txt.substring(0, 50)}...</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-emerald-800 mb-1">Cargar plantilla de Objetivos:</label>
+                      <select 
+                        onChange={(e) => { if (e.target.value) setObjetivos(e.target.value); }} 
+                        className="w-full bg-white border border-emerald-300 rounded-lg p-2 text-slate-700 focus:outline-none"
+                        defaultValue=""
+                      >
+                        <option value="" disabled>Selecciona una opción rápida...</option>
+                        {PLANTILLAS_OBJETIVOS.map((txt, idx) => (
+                          <option key={idx} value={txt}>Opción {idx + 1}: {txt.substring(0, 50)}...</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-6">
                 {rubricasActivas.map(cat => (
@@ -1149,6 +1205,30 @@ export default function App() {
                 ))}
               </div>
 
+              {/* Campos de Fortalezas y Objetivos Editables */}
+              <div className="space-y-4 pt-4 border-t">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Fortalezas Destacadas:</label>
+                  <textarea
+                    rows={2}
+                    disabled={isLocked}
+                    value={fortalezas}
+                    onChange={(e) => setFortalezas(e.target.value)}
+                    className="w-full border rounded-lg p-2.5 text-xs bg-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Objetivos de Mejora:</label>
+                  <textarea
+                    rows={2}
+                    disabled={isLocked}
+                    value={objetivos}
+                    onChange={(e) => setObjetivos(e.target.value)}
+                    className="w-full border rounded-lg p-2.5 text-xs bg-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
               <div className="pt-4 border-t flex justify-between items-center">
                 <button onClick={() => setPantalla('PLANTILLA')} className="text-xs text-slate-600 font-medium">← Volver</button>
                 {!isLocked ? (
@@ -1175,17 +1255,17 @@ export default function App() {
               <span className="text-xs font-bold bg-slate-100 px-2.5 py-1 rounded">Asistencia: {asistActual.pct}%</span>
             </div>
             
-            <div className="grid grid-cols-2 gap-4 my-2 text-[11px]">
+            <div className="grid grid-cols-2 gap-3 my-2 text-[10px]">
               {rubricasActivas.map(cat => (
                 <div key={cat.id} className="space-y-1">
-                  <div className="bg-slate-900 text-white font-semibold px-2 py-0.5 rounded text-[10px] uppercase">{cat.nombre}</div>
+                  <div className="bg-slate-900 text-white font-semibold px-2 py-0.5 rounded text-[9.5px] uppercase">{cat.nombre}</div>
                   {cat.items.map(item => {
                     const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
                     const lvlObj = nivelesActuales.find(l => l.key === selKey);
                     return (
                       <div key={item} className="flex justify-between py-0.5 px-1 bg-slate-50 rounded border border-slate-100">
                         <span className="truncate pr-2">{item}</span>
-                        <span className="font-semibold shrink-0" style={{ color: lvlObj?.color || '#0EA5E9' }}>
+                        <span className="font-semibold shrink-0" style={{ color: lvlObj?.color || '#059669' }}>
                           {lvlObj ? lvlObj.label : 'Consolidado'}
                         </span>
                       </div>
@@ -1195,7 +1275,7 @@ export default function App() {
               ))}
             </div>
 
-            {/* Gráfico de Radar (Rombo de Rendimiento) Restaurado */}
+            {/* Gráfico de Radar (Rombo de Rendimiento) y Textos Finales */}
             <div className="grid grid-cols-12 gap-4 items-center pt-2 border-t border-slate-200">
               <div className="col-span-4 flex flex-col items-center justify-center">
                 <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
@@ -1219,11 +1299,11 @@ export default function App() {
               <div className="col-span-8 grid grid-cols-2 gap-2 text-[10px]">
                 <div className="bg-slate-50 p-2 rounded border border-slate-200">
                   <strong className="block font-bold text-slate-900 mb-0.5">Fortalezas:</strong>
-                  <p className="text-slate-700 line-clamp-2">{fortalezas}</p>
+                  <p className="text-slate-700 line-clamp-3">{fortalezas}</p>
                 </div>
                 <div className="bg-slate-50 p-2 rounded border border-slate-200">
                   <strong className="block font-bold text-slate-900 mb-0.5">Objetivos:</strong>
-                  <p className="text-slate-700 line-clamp-2">{objetivos}</p>
+                  <p className="text-slate-700 line-clamp-3">{objetivos}</p>
                 </div>
               </div>
             </div>
