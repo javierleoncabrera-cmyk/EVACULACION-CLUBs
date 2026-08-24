@@ -117,10 +117,11 @@ const NIVELES_ENTRENADORES: LevelOption[] = [
   { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado en este ciclo.', color: '#94A3B8', weight: 0 },
 ];
 
-// ORDEN ESTRICTO: [0] Técnica Individual, [1] Desarrollo Motor, [2] Comprensión del juego, [3] Defensa
+// Mantenemos el orden estándar para el mapeo por índice:
+// [0] Desarrollo Motor, [1] Técnica Individual, [2] Comprensión del juego, [3] Defensa
 const RUBRICA_JUGADORES_DEF: RubricCategory[] = [
-  { id: 'cat_tecnica', nombre: 'Técnica individual', items: ['Bote', 'Pase', 'Recepción', 'Tiro', 'Entrada', 'Paradas', 'Pivotes', 'Mano no dominante'] },
   { id: 'cat_motor', nombre: 'Desarrollo motor', items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto'] },
+  { id: 'cat_tecnica', nombre: 'Técnica individual', items: ['Bote', 'Pase', 'Recepción', 'Tiro', 'Entrada', 'Paradas', 'Pivotes', 'Mano no dominante'] },
   { id: 'cat_tactica', nombre: 'Comprensión del juego', items: ['Ocupación de espacios', 'Juego sin balón', '1c1', 'Toma de decisiones', 'Lectura del juego', 'Juego colectivo'] },
   { id: 'cat_defensa', nombre: 'Defensa', items: ['Actitud defensiva', 'Colocación', '1c1 defensivo', 'Ayudas', 'Balance defensivo'] }
 ];
@@ -531,7 +532,7 @@ export default function App() {
   const handleScore = (indicador: string, levelKey: string) => {
     const statusField = periodo === 'Inicial' ? 'inicial' : periodo === 'Media' ? 'media' : 'final';
     if (jugadorSeleccionado[statusField] === 'COMPLETADA' && sessionUser?.role !== 'SUPER_ADMIN') {
-      alert(`La evaluación ${periodo} ya está completada y bloqueada para este deportista.`);
+      alert(`La evaluación ${periodo} ya está completada y cerrada para este deportista.`);
       return;
     }
     setRespuestas(prev => ({
@@ -573,8 +574,7 @@ export default function App() {
     }, 1000);
   };
 
-  // Cálculo dinámico para el gráfico de radar (Rombo) basado en el nuevo orden
-  // RUBRICA_JUGADORES_DEF[0]: Técnica Individual, [1]: Desarrollo Motor, [2]: Comprensión, [3]: Defensa
+  // Cálculo dinámico para el gráfico de radar (Rombo) basado en el índice [1] Desarrollo Motor
   const calcularPromedioCategoria = (categoriaIdx: number) => {
     const cat = rubricasJugadores[categoriaIdx];
     if (!cat || cat.items.length === 0) return 0.7;
@@ -596,7 +596,6 @@ export default function App() {
   const cDefVal = calcularPromedioCategoria(3);
 
   const cx = 95, cy = 95, r = 70;
-  // Ejes del rombo: Arriba (Motor), Derecha (Técnica), Abajo (Táctica), Izquierda (Defensa)
   const pMotor = `${cx},${cy - r * cMotorVal}`;
   const pTech = `${cx + r * cTechVal},${cy}`;
   const pTact = `${cx},${cy + r * cTactVal}`;
@@ -796,7 +795,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL ESTRICTO USANDO TABLAS HTML TABULARES PARA CERO DESNIVELES)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL ESTRICTO SIN BORDES REDONDEADOS NI SOMBRAS DE IMPRESIÓN)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
@@ -804,7 +803,7 @@ export default function App() {
         @media print {
           @page { size: A4 portrait; margin: 0; }
           html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 10px !important; resize: none !important; }
-          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 8mm 10mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; resize: none !important; outline: none !important; }
+          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 10mm 12mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; resize: none !important; outline: none !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
           * { resize: none !important; box-shadow: none !important; }
@@ -1276,9 +1275,9 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL ESTRICTO (USO DE TABLAS HTML TABULARES PARA CERO DESNIVELES Y CERO LÍNEAS) */}
+        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL ESTRICTO USANDO TABLAS HTML TRADICIONALES PARA CERO DESNIVELES */}
         {pantalla === 'INFORME' && (
-          <div className="print-portrait-page bg-white rounded-none shadow-none border-0 p-4 space-y-3">
+          <div className="print-portrait-page bg-white rounded-none shadow-none border-0 p-4 space-y-2.5">
             
             {/* Cabecera A4 Real */}
             <div className="border-b-2 border-slate-900 pb-2.5 flex justify-between items-center w-full">
@@ -1296,14 +1295,14 @@ export default function App() {
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <span className="text-[11px] font-bold bg-slate-100 text-slate-800 px-3 py-1 rounded-md border border-slate-200">
+                <span className="text-[11px] font-bold bg-slate-100 text-slate-800 px-3.5 py-1 rounded-md border border-slate-200">
                   Asistencia: {asistActual.pct}%
                 </span>
                 <p className="text-[9px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
               </div>
             </div>
 
-            {/* Resumen Ejecutivo Superior con Rombo y Bloques */}
+            {/* Resumen Ejecutivo Superior con Rombo Ampliado y Ejes Correctos */}
             <div className="grid grid-cols-12 gap-3 items-center bg-slate-50 p-3 rounded-xl border border-slate-200 w-full">
               <div className="col-span-5 flex flex-col items-center justify-center border-r border-slate-200 pr-3">
                 <span className="text-[9px] font-bold text-slate-700 uppercase tracking-wider mb-1">
@@ -1336,16 +1335,16 @@ export default function App() {
               </div>
             </div>
 
-            {/* SECCIÓN DE RÚBRICAS CON TABLA HTML PURA DE ANCHO COMPLETO PARA CERO DESNIVELES */}
+            {/* SECCIÓN DE RÚBRICAS CON TABLA HTML PURA DE ANCHO COMPLETO PARA CERO DESNIVELES Y ORDEN EXACTO */}
             <table className="w-full border-collapse text-[9.5px]">
               <tbody>
                 <tr>
-                  {/* Columna Izquierda: Técnica Individual (8 ítems) y Defensa (5 ítems) sumados equilibran alturas */}
-                  <td className="w-1/2 pr-2 align-top space-y-2.5">
+                  {/* Columna Izquierda: [0] Técnica Individual (8 ítems) y [2] Comprensión del juego (6 ítems) -> Balance simétrico */}
+                  <td className="w-1/2 pr-2 align-top space-y-2">
                     
                     {/* 1. Técnica Individual */}
-                    <div className="bg-slate-50/85 p-2.5 rounded-xl border border-slate-200 space-y-1">
-                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9.5px] uppercase tracking-wider">
+                    <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
+                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
                         {rubricasActivas[0].nombre}
                       </div>
                       <div className="space-y-0.5">
@@ -1364,13 +1363,13 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* 4. Defensa */}
-                    <div className="bg-slate-50/85 p-2.5 rounded-xl border border-slate-200 space-y-1">
-                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9.5px] uppercase tracking-wider">
-                        {rubricasActivas[3].nombre}
+                    {/* 2. Comprensión del juego */}
+                    <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
+                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
+                        {rubricasActivas[2].nombre}
                       </div>
                       <div className="space-y-0.5">
-                        {rubricasActivas[3].items.map(item => {
+                        {rubricasActivas[2].items.map(item => {
                           const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
                           const lvlObj = nivelesActuales.find(l => l.key === selKey);
                           return (
@@ -1387,12 +1386,12 @@ export default function App() {
 
                   </td>
 
-                  {/* Columna Derecha: Desarrollo Motor (5 ítems) y Comprensión del juego (6 ítems) */}
-                  <td className="w-1/2 pl-2 align-top space-y-2.5">
+                  {/* Columna Derecha: [1] Desarrollo Motor (5 ítems) y [3] Defensa (5 ítems) -> Balance simétrico */}
+                  <td className="w-1/2 pl-2 align-top space-y-2">
                     
-                    {/* 2. Desarrollo Motor */}
-                    <div className="bg-slate-50/85 p-2.5 rounded-xl border border-slate-200 space-y-1">
-                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9.5px] uppercase tracking-wider">
+                    {/* 3. Desarrollo Motor */}
+                    <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
+                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
                         {rubricasActivas[1].nombre}
                       </div>
                       <div className="space-y-0.5">
@@ -1411,13 +1410,13 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* 3. Comprensión del juego */}
-                    <div className="bg-slate-50/85 p-2.5 rounded-xl border border-slate-200 space-y-1">
-                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9.5px] uppercase tracking-wider">
-                        {rubricasActivas[2].nombre}
+                    {/* 4. Defensa */}
+                    <div className="bg-slate-50/85 p-2 rounded-xl border border-slate-200 space-y-1">
+                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9px] uppercase tracking-wider">
+                        {rubricasActivas[3].nombre}
                       </div>
                       <div className="space-y-0.5">
-                        {rubricasActivas[2].items.map(item => {
+                        {rubricasActivas[3].items.map(item => {
                           const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
                           const lvlObj = nivelesActuales.find(l => l.key === selKey);
                           return (
