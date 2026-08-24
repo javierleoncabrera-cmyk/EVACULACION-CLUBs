@@ -117,10 +117,10 @@ const NIVELES_ENTRENADORES: LevelOption[] = [
   { key: 'NO_OBSERVADO', label: 'No observado', desc: 'No evaluado en este ciclo.', color: '#94A3B8', weight: 0 },
 ];
 
-// Orden maestro: 0: Desarrollo Motor, 1: Técnica Individual, 2: Comprensión, 3: Defensa
+// ORDEN ESTRICTO: [0] Técnica Individual, [1] Desarrollo Motor, [2] Comprensión del juego, [3] Defensa
 const RUBRICA_JUGADORES_DEF: RubricCategory[] = [
-  { id: 'cat_motor', nombre: 'Desarrollo motor', items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto'] },
   { id: 'cat_tecnica', nombre: 'Técnica individual', items: ['Bote', 'Pase', 'Recepción', 'Tiro', 'Entrada', 'Paradas', 'Pivotes', 'Mano no dominante'] },
+  { id: 'cat_motor', nombre: 'Desarrollo motor', items: ['Coordinación', 'Equilibrio', 'Carrera', 'Cambios de dirección', 'Salto'] },
   { id: 'cat_tactica', nombre: 'Comprensión del juego', items: ['Ocupación de espacios', 'Juego sin balón', '1c1', 'Toma de decisiones', 'Lectura del juego', 'Juego colectivo'] },
   { id: 'cat_defensa', nombre: 'Defensa', items: ['Actitud defensiva', 'Colocación', '1c1 defensivo', 'Ayudas', 'Balance defensivo'] }
 ];
@@ -796,7 +796,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL ESTRICTO SIN RAYA Y CON TABLAS TABULARES SIMÉTRICAS)
+  // VISTA INTERNA (APP PRINCIPAL RESPONSIVE CON INFORME A4 VERTICAL ESTRICTO USANDO TABLAS HTML TABULARES PARA CERO DESNIVELES)
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 pb-16 font-sans print:bg-white print:pb-0 print:p-0">
@@ -804,10 +804,10 @@ export default function App() {
         @media print {
           @page { size: A4 portrait; margin: 0; }
           html, body { width: 210mm; height: 297mm; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; font-size: 10px !important; resize: none !important; }
-          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 10mm 12mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; resize: none !important; outline: none !important; }
+          .print-portrait-page { width: 210mm !important; height: 297mm !important; max-height: 297mm !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; box-sizing: border-box !important; padding: 8mm 10mm !important; margin: 0 !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; background: white !important; resize: none !important; outline: none !important; }
           .page-break { page-break-after: always !important; break-after: page !important; }
           .no-print { display: none !important; }
-          * { resize: none !important; pointer-events: auto !important; }
+          * { resize: none !important; box-shadow: none !important; }
         }
       `}</style>
 
@@ -1276,40 +1276,40 @@ export default function App() {
           );
         })()}
 
-        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL ESTRICTO (USO DE TABLAS HTML TRADICIONALES PARA CERO ERRORES DE IMPRESIÓN) */}
+        {/* INFORME PROFESIONAL MAESTRO A4 VERTICAL ESTRICTO (USO DE TABLAS HTML TABULARES PARA CERO DESNIVELES Y CERO LÍNEAS) */}
         {pantalla === 'INFORME' && (
-          <div className="print-portrait-page bg-white rounded-xl shadow-xl border border-slate-200 p-6 space-y-4">
+          <div className="print-portrait-page bg-white rounded-none shadow-none border-0 p-4 space-y-3">
             
             {/* Cabecera A4 Real */}
-            <div className="border-b-2 border-slate-900 pb-3 flex justify-between items-center w-full">
-              <div className="flex items-center space-x-3.5">
-                <div className="w-12 h-12 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-extrabold text-base shadow shrink-0">
+            <div className="border-b-2 border-slate-900 pb-2.5 flex justify-between items-center w-full">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-slate-900 text-emerald-400 flex items-center justify-center font-extrabold text-sm shadow shrink-0">
                   {siglasClub}
                 </div>
                 <div>
-                  <h2 className="text-lg font-extrabold text-slate-900 leading-tight">
+                  <h2 className="text-base font-extrabold text-slate-900 leading-tight">
                     {tipoEvaluacion === 'JUGADORES' ? jugadorSeleccionado.nombre : coachSeleccionado?.nombre}
                   </h2>
-                  <p className="text-[11px] text-slate-600 font-medium">
+                  <p className="text-[10px] text-slate-600 font-medium">
                     {clubActivo.nombre} • Dossier Técnico 360° ({periodo}) • Equipo: {equipoSeleccionado.nombre} {tipoEvaluacion === 'JUGADORES' ? `• Dorsal #${jugadorSeleccionado.dorsal}` : ''}
                   </p>
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <span className="text-xs font-bold bg-slate-100 text-slate-800 px-3.5 py-1.5 rounded-md border border-slate-200">
+                <span className="text-[11px] font-bold bg-slate-100 text-slate-800 px-3 py-1 rounded-md border border-slate-200">
                   Asistencia: {asistActual.pct}%
                 </span>
-                <p className="text-[10px] text-slate-400 mt-1">Temporada {clubActivo.temporada}</p>
+                <p className="text-[9px] text-slate-400 mt-0.5">Temporada {clubActivo.temporada}</p>
               </div>
             </div>
 
-            {/* Resumen Ejecutivo Superior con Rombo Ampliado y Ejes Corregidos */}
-            <div className="grid grid-cols-12 gap-4 items-center bg-slate-50 p-4 rounded-2xl border border-slate-200 w-full">
-              <div className="col-span-5 flex flex-col items-center justify-center border-r border-slate-200 pr-4">
-                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-2">
+            {/* Resumen Ejecutivo Superior con Rombo y Bloques */}
+            <div className="grid grid-cols-12 gap-3 items-center bg-slate-50 p-3 rounded-xl border border-slate-200 w-full">
+              <div className="col-span-5 flex flex-col items-center justify-center border-r border-slate-200 pr-3">
+                <span className="text-[9px] font-bold text-slate-700 uppercase tracking-wider mb-1">
                   Perfil de Rendimiento
                 </span>
-                <svg width="140" height="140" viewBox="0 0 190 190" className="overflow-visible">
+                <svg width="125" height="125" viewBox="0 0 190 190" className="overflow-visible">
                   <polygon points="95,20 170,95 95,170 20,95" fill="none" stroke="#E2E8F0" strokeWidth="1.5" />
                   <polygon points="95,55 135,95 95,135 55,95" fill="none" stroke="#E2E8F0" strokeWidth="1" />
                   <line x1="95" y1="20" x2="95" y2="170" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="2,2" />
@@ -1317,43 +1317,45 @@ export default function App() {
 
                   <polygon points={radarPoints} fill="rgba(5, 150, 105, 0.2)" stroke="#059669" strokeWidth="2.5" />
 
-                  <text x="95" y="12" textAnchor="middle" className="text-[9px] font-bold fill-slate-700">MOTOR</text>
-                  <text x="177" y="98" textAnchor="start" className="text-[9px] font-bold fill-slate-700">TÉCNICA</text>
-                  <text x="95" y="183" textAnchor="middle" className="text-[9px] font-bold fill-slate-700">TÁCTICA</text>
-                  <text x="13" y="98" textAnchor="end" className="text-[9px] font-bold fill-slate-700">DEFENSA</text>
+                  <text x="95" y="12" textAnchor="middle" className="text-[8.5px] font-bold fill-slate-700">MOTOR</text>
+                  <text x="177" y="98" textAnchor="start" className="text-[8.5px] font-bold fill-slate-700">TÉCNICA</text>
+                  <text x="95" y="183" textAnchor="middle" className="text-[8.5px] font-bold fill-slate-700">TÁCTICA</text>
+                  <text x="13" y="98" textAnchor="end" className="text-[8.5px] font-bold fill-slate-700">DEFENSA</text>
                 </svg>
               </div>
 
-              <div className="col-span-7 grid grid-cols-1 gap-2.5 text-[11px]">
-                <div className="bg-white p-3 rounded-xl border border-emerald-200 shadow-2xs">
-                  <strong className="block font-bold text-emerald-950 uppercase text-[10px] tracking-wider mb-1">Fortalezas:</strong>
-                  <p className="text-emerald-900 leading-relaxed">{fortalezas}</p>
+              <div className="col-span-7 grid grid-cols-1 gap-2 text-[10px]">
+                <div className="bg-white p-2.5 rounded-lg border border-emerald-200 shadow-2xs">
+                  <strong className="block font-bold text-emerald-950 uppercase text-[9px] tracking-wider mb-0.5">Fortalezas:</strong>
+                  <p className="text-emerald-900 leading-normal">{fortalezas}</p>
                 </div>
-                <div className="bg-white p-3 rounded-xl border border-amber-200 shadow-2xs">
-                  <strong className="block font-bold text-amber-950 uppercase text-[10px] tracking-wider mb-1">Objetivos de Mejora:</strong>
-                  <p className="text-amber-900 leading-relaxed">{objetivos}</p>
+                <div className="bg-white p-2.5 rounded-lg border border-amber-200 shadow-2xs">
+                  <strong className="block font-bold text-amber-950 uppercase text-[9px] tracking-wider mb-0.5">Objetivos de Mejora:</strong>
+                  <p className="text-amber-900 leading-normal">{objetivos}</p>
                 </div>
               </div>
             </div>
 
-            {/* Secciones de Rúbricas Técnicas construidas con tablas HTML tradicionales (Sin fallos de renderizado de cabecera) */}
-            <table className="w-full border-collapse text-[10px]">
+            {/* SECCIÓN DE RÚBRICAS CON TABLA HTML PURA DE ANCHO COMPLETO PARA CERO DESNIVELES */}
+            <table className="w-full border-collapse text-[9.5px]">
               <tbody>
                 <tr>
-                  <td className="w-1/2 pr-2 align-top">
-                    {/* Tabla 1: Técnica Individual (Ordenada en 1er lugar) */}
-                    <div className="bg-slate-50/85 p-3 rounded-2xl border border-slate-200 space-y-1.5 mb-2.5">
-                      <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded-lg text-[10px] uppercase tracking-wider">
+                  {/* Columna Izquierda: Técnica Individual (8 ítems) y Defensa (5 ítems) sumados equilibran alturas */}
+                  <td className="w-1/2 pr-2 align-top space-y-2.5">
+                    
+                    {/* 1. Técnica Individual */}
+                    <div className="bg-slate-50/85 p-2.5 rounded-xl border border-slate-200 space-y-1">
+                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9.5px] uppercase tracking-wider">
                         {rubricasActivas[0].nombre}
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-0.5">
                         {rubricasActivas[0].items.map(item => {
                           const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
                           const lvlObj = nivelesActuales.find(l => l.key === selKey);
                           return (
-                            <div key={item} className="flex justify-between items-center py-1.5 px-2.5 bg-white rounded-lg border border-slate-200/90 shadow-2xs">
+                            <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/90 shadow-2xs">
                               <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                              <span className="font-bold px-2 py-0.5 rounded text-[9.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                              <span className="font-bold px-1.5 py-0.2 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
                                 {lvlObj ? lvlObj.label : 'Consolidado'}
                               </span>
                             </div>
@@ -1362,63 +1364,19 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Tabla 3: Comprensión del juego */}
-                    <div className="bg-slate-50/85 p-3 rounded-2xl border border-slate-200 space-y-1.5">
-                      <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded-lg text-[10px] uppercase tracking-wider">
-                        {rubricasActivas[2].nombre}
-                      </div>
-                      <div className="space-y-1">
-                        {rubricasActivas[2].items.map(item => {
-                          const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
-                          const lvlObj = nivelesActuales.find(l => l.key === selKey);
-                          return (
-                            <div key={item} className="flex justify-between items-center py-1.5 px-2.5 bg-white rounded-lg border border-slate-200/90 shadow-2xs">
-                              <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                              <span className="font-bold px-2 py-0.5 rounded text-[9.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
-                                {lvlObj ? lvlObj.label : 'Consolidado'}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="w-1/2 pl-2 align-top">
-                    {/* Tabla 2: Desarrollo Motor (Ordenado en 2º lugar) */}
-                    <div className="bg-slate-50/85 p-3 rounded-2xl border border-slate-200 space-y-1.5 mb-2.5">
-                      <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded-lg text-[10px] uppercase tracking-wider">
-                        {rubricasActivas[1].nombre}
-                      </div>
-                      <div className="space-y-1">
-                        {rubricasActivas[1].items.map(item => {
-                          const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
-                          const lvlObj = nivelesActuales.find(l => l.key === selKey);
-                          return (
-                            <div key={item} className="flex justify-between items-center py-1.5 px-2.5 bg-white rounded-lg border border-slate-200/90 shadow-2xs">
-                              <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                              <span className="font-bold px-2 py-0.5 rounded text-[9.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
-                                {lvlObj ? lvlObj.label : 'Consolidado'}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Tabla 4: Defensa */}
-                    <div className="bg-slate-50/85 p-3 rounded-2xl border border-slate-200 space-y-1.5">
-                      <div className="bg-slate-900 text-white font-bold px-3 py-1 rounded-lg text-[10px] uppercase tracking-wider">
+                    {/* 4. Defensa */}
+                    <div className="bg-slate-50/85 p-2.5 rounded-xl border border-slate-200 space-y-1">
+                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9.5px] uppercase tracking-wider">
                         {rubricasActivas[3].nombre}
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-0.5">
                         {rubricasActivas[3].items.map(item => {
                           const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
                           const lvlObj = nivelesActuales.find(l => l.key === selKey);
                           return (
-                            <div key={item} className="flex justify-between items-center py-1.5 px-2.5 bg-white rounded-lg border border-slate-200/90 shadow-2xs">
+                            <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/90 shadow-2xs">
                               <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
-                              <span className="font-bold px-2 py-0.5 rounded text-[9.5px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                              <span className="font-bold px-1.5 py-0.2 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
                                 {lvlObj ? lvlObj.label : 'Consolidado'}
                               </span>
                             </div>
@@ -1426,13 +1384,61 @@ export default function App() {
                         })}
                       </div>
                     </div>
+
+                  </td>
+
+                  {/* Columna Derecha: Desarrollo Motor (5 ítems) y Comprensión del juego (6 ítems) */}
+                  <td className="w-1/2 pl-2 align-top space-y-2.5">
+                    
+                    {/* 2. Desarrollo Motor */}
+                    <div className="bg-slate-50/85 p-2.5 rounded-xl border border-slate-200 space-y-1">
+                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9.5px] uppercase tracking-wider">
+                        {rubricasActivas[1].nombre}
+                      </div>
+                      <div className="space-y-0.5">
+                        {rubricasActivas[1].items.map(item => {
+                          const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
+                          const lvlObj = nivelesActuales.find(l => l.key === selKey);
+                          return (
+                            <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/90 shadow-2xs">
+                              <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
+                              <span className="font-bold px-1.5 py-0.2 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                                {lvlObj ? lvlObj.label : 'Consolidado'}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* 3. Comprensión del juego */}
+                    <div className="bg-slate-50/85 p-2.5 rounded-xl border border-slate-200 space-y-1">
+                      <div className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg text-[9.5px] uppercase tracking-wider">
+                        {rubricasActivas[2].nombre}
+                      </div>
+                      <div className="space-y-0.5">
+                        {rubricasActivas[2].items.map(item => {
+                          const selKey = respuestas[item]?.nivel || 'CONSOLIDADO';
+                          const lvlObj = nivelesActuales.find(l => l.key === selKey);
+                          return (
+                            <div key={item} className="flex justify-between items-center py-1 px-2 bg-white rounded border border-slate-200/90 shadow-2xs">
+                              <span className="font-medium text-slate-800 truncate pr-2">{item}</span>
+                              <span className="font-bold px-1.5 py-0.2 rounded text-[9px] shrink-0" style={{ color: lvlObj?.color || '#059669', backgroundColor: `${lvlObj?.color || '#059669'}15` }}>
+                                {lvlObj ? lvlObj.label : 'Consolidado'}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                   </td>
                 </tr>
               </tbody>
             </table>
 
             {/* Pie Institucional con Firma, Sello de Marca y Cero Líneas en Diagonal */}
-            <div className="pt-3 border-t-2 border-slate-200 flex justify-between items-center text-[10px] text-slate-600 w-full">
+            <div className="pt-2.5 border-t-2 border-slate-200 flex justify-between items-center text-[9.5px] text-slate-600 w-full">
               <div className="flex items-center gap-6">
                 <span>Director Técnico / Entrenador: _____________________</span>
                 <span>Firma: _______________</span>
@@ -1443,7 +1449,7 @@ export default function App() {
                 </span>
                 <div className="no-print space-x-2">
                   <button onClick={() => setPantalla('FORMULARIO')} className="text-slate-600 font-semibold hover:underline">← Editar</button>
-                  <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl font-semibold shadow transition text-xs">
+                  <button onClick={handlePrintPDF} className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 rounded-xl font-semibold shadow transition text-xs">
                     🖨️ Guardar PDF
                   </button>
                 </div>
